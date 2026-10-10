@@ -6,3 +6,5 @@ Thumbs.db
 *.sqlite
 *.sqlite3
 scratch/
+database/seed.sql
+*seed*.sql
