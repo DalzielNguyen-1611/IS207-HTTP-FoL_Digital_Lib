@@ -73,7 +73,7 @@ Repository này được xây dựng nhằm phục vụ cho đồ án môn học
 
 ```text
 IS207-HTTP-mini-project/
-├── mini-project-techCare-platform/   # Thư mục Mini Project (Hệ thống TechCare Platform 3-Tier)
+├── mini-project-techcare-platform/   # Thư mục Mini Project (Hệ thống TechCare Platform 3-Tier)
 │   ├── frontend/                     # Tier 1: Presentation Tier (Giao diện Web Client)
 │   │   ├── index.html                # Cổng điều hướng toàn bộ 17 màn hình chức năng
 │   │   ├── dat_lich.html             # Đặt lịch sửa chữa & cứu hộ IT (TechCare Desk & Home)
@@ -122,10 +122,10 @@ IS207-HTTP-mini-project/
    C:\xampp\htdocs\mini_project\
    ```
 3. Mở trình duyệt và truy cập các cổng:
-   * **Cổng điều hướng Frontend:** [http://localhost/mini_project/mini-project-techCare-platform/frontend/index.html](http://localhost/mini_project/mini-project-techCare-platform/frontend/index.html)
-   * **Cổng kiểm tra Backend PHP:** [http://localhost/mini_project/mini-project-techCare-platform/backend/index.php](http://localhost/mini_project/mini-project-techCare-platform/backend/index.php)
-   * **API Lấy danh sách phiếu:** [http://localhost/mini_project/mini-project-techCare-platform/backend/api/bookings.php](http://localhost/mini_project/mini-project-techCare-platform/backend/api/bookings.php)
-4. *(Tùy chọn)* Nạp CSDL: Mở [phpMyAdmin](http://localhost/phpmyadmin), tạo CSDL tên `techcare_db` và Import file [mini-project-techCare-platform/database/schema.sql](mini-project-techCare-platform/database/schema.sql). *(Lưu ý: Nếu chưa bật MySQL, hệ thống vẫn có cơ chế Mock Data tự động để demo mượt mà không bị gián đoạn).*
+   * **Cổng điều hướng Frontend:** [http://localhost/mini_project/mini-project-techcare-platform/frontend/index.html](http://localhost/mini_project/mini-project-techcare-platform/frontend/index.html)
+   * **Cổng kiểm tra Backend PHP:** [http://localhost/mini_project/mini-project-techcare-platform/backend/index.php](http://localhost/mini_project/mini-project-techcare-platform/backend/index.php)
+   * **API Lấy danh sách phiếu:** [http://localhost/mini_project/mini-project-techcare-platform/backend/api/bookings.php](http://localhost/mini_project/mini-project-techcare-platform/backend/api/bookings.php)
+4. *(Tùy chọn)* Nạp CSDL: Mở [phpMyAdmin](http://localhost/phpmyadmin), tạo CSDL tên `techcare_db` và Import file [mini-project-techcare-platform/database/schema.sql](mini-project-techcare-platform/database/schema.sql). *(Lưu ý: Nếu chưa bật MySQL, hệ thống vẫn có cơ chế Mock Data tự động để demo mượt mà không bị gián đoạn).*
 
 ### Cách 2: Sử dụng PHP Built-in Server
 Nếu máy tính đã cài đặt môi trường PHP:
@@ -134,13 +134,13 @@ Nếu máy tính đã cài đặt môi trường PHP:
    php -S localhost:8000
    ```
 2. Truy cập qua trình duyệt:
-   * **Frontend:** [http://localhost:8000/mini-project-techCare-platform/frontend/index.html](http://localhost:8000/mini-project-techCare-platform/frontend/index.html)
-   * **Backend:** [http://localhost:8000/mini-project-techCare-platform/backend/index.php](http://localhost:8000/mini-project-techCare-platform/backend/index.php)
+   * **Frontend:** [http://localhost:8000/mini-project-techcare-platform/frontend/index.html](http://localhost:8000/mini-project-techcare-platform/frontend/index.html)
+   * **Backend:** [http://localhost:8000/mini-project-techcare-platform/backend/index.php](http://localhost:8000/mini-project-techcare-platform/backend/index.php)
 
-*(Hoặc mở trực tiếp từ bên trong `mini-project-techCare-platform`: `cd mini-project-techCare-platform && php -S localhost:8000`, sau đó truy cập [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)).*
+*(Hoặc mở trực tiếp từ bên trong `mini-project-techcare-platform`: `cd mini-project-techcare-platform && php -S localhost:8000`, sau đó truy cập [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)).*
 
 ### Cách 3: Trình chiếu giao diện tĩnh (Static Presentation)
-Có thể mở trực tiếp file `mini-project-techCare-platform/frontend/index.html` trên bất kỳ trình duyệt nào để trải nghiệm và thuyết trình giao diện mà không cần thiết lập Web Server.
+Có thể mở trực tiếp file `mini-project-techcare-platform/frontend/index.html` trên bất kỳ trình duyệt nào để trải nghiệm và thuyết trình giao diện mà không cần thiết lập Web Server.
 
 ---
 
@@ -168,8 +168,8 @@ Có thể mở trực tiếp file `mini-project-techCare-platform/frontend/index
 
 ## 📑 8. TÀI LIỆU & BÁO CÁO MÔN HỌC
 
-* Thuyết minh chi tiết kiến trúc 3-Tier: [mini-project-techCare-platform/docs/architecture_3tier.md](mini-project-techCare-platform/docs/architecture_3tier.md)
-* Thiết kế phân hệ TechCare Desk (Doanh nghiệp): [mini-project-techCare-platform/docs/techcare_desk_DESIGN.md](mini-project-techCare-platform/docs/techcare_desk_DESIGN.md)
-* Thiết kế phân hệ TechCare Home (Gia đình): [mini-project-techCare-platform/docs/techcare_home_DESIGN.md](mini-project-techCare-platform/docs/techcare_home_DESIGN.md)
-* Hướng dẫn thiết lập Cơ sở dữ liệu: [mini-project-techCare-platform/database/README.md](mini-project-techCare-platform/database/README.md)
+* Thuyết minh chi tiết kiến trúc 3-Tier: [mini-project-techcare-platform/docs/architecture_3tier.md](mini-project-techcare-platform/docs/architecture_3tier.md)
+* Thiết kế phân hệ TechCare Desk (Doanh nghiệp): [mini-project-techcare-platform/docs/techcare_desk_DESIGN.md](mini-project-techcare-platform/docs/techcare_desk_DESIGN.md)
+* Thiết kế phân hệ TechCare Home (Gia đình): [mini-project-techcare-platform/docs/techcare_home_DESIGN.md](mini-project-techcare-platform/docs/techcare_home_DESIGN.md)
+* Hướng dẫn thiết lập Cơ sở dữ liệu: [mini-project-techcare-platform/database/README.md](mini-project-techcare-platform/database/README.md)
 

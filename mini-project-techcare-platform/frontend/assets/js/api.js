@@ -7,9 +7,9 @@ const API_BASE_URL = (() => {
   if (!window.location.origin.includes('localhost') && !window.location.origin.includes('127.0.0.1')) {
     return '../backend/api';
   }
-  if (window.location.pathname.includes('/mini-project-techCare-platform/')) {
+  if (window.location.pathname.toLowerCase().includes('/mini-project-techcare-platform/')) {
     const prefix = window.location.pathname.startsWith('/mini_project/') ? '/mini_project' : '';
-    return `${prefix}/mini-project-techCare-platform/backend/api`;
+    return `${prefix}/mini-project-techcare-platform/backend/api`;
   }
   return window.location.port === '8000' || window.location.port === '5000' 
     ? '/backend/api' 
