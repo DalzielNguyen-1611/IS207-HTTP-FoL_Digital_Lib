@@ -6,7 +6,7 @@ Tầng Dữ Liệu (Data Tier) của đồ án TechCare Platform được thiế
 
 ## 1. Cấu Trúc Các File CSDL
 - `schema.sql`: Chứa mã DDL tạo toàn bộ 8 bảng quan hệ (Users, Technicians, Services, Bookings, Booking Parts, Wallets, Transactions, Reviews) cùng các ràng buộc khóa chính, khóa ngoại.
-- `seed.sql`: Chứa dữ liệu mẫu hoàn chỉnh khớp 100% với giao diện (tài khoản demo, ca trực `#TC-HOME-3895`, ví KTV 3.450.000đ,...).
+- `seed.sql` *(dữ liệu mẫu nội bộ)*: Chứa dữ liệu mẫu mô phỏng ca trực thực tế, tài khoản demo khớp với giao diện (file này được loại trừ khỏi repository chính thức).
 
 ---
 
