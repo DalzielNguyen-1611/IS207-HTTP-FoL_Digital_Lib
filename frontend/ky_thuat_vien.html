@@ -1,0 +1,1949 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Tác Nghiệp Kỹ Thuật Viên Hiện Trường | TechCare</title>
+  
+  <!-- Blocking Auth Guard (RBAC & Session Expiry) -->
+  <script src="assets/js/auth.js"></script>
+  <script>
+    Auth.checkGuard(['technician', 'admin']);
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body, button, input, select, textarea {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined' !important;
+      font-weight: normal;
+      font-style: normal;
+      line-height: 1;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col justify-between">
+
+  <!-- 1. HEADER KTV (STICKY TOP) -->
+  <header class="w-full bg-slate-900 text-white py-3 px-4 sm:px-6 sticky top-0 z-40 shadow-md border-b border-slate-800">
+    <div class="max-w-6xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Brand & KTV Profile -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center font-bold shadow-sm shrink-0">
+          <span class="material-symbols-outlined text-xl">engineering</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="tech-header-name" class="text-sm sm:text-base font-bold tracking-tight text-white">KTV Nguyễn Văn Minh</span>
+            <span id="tech-header-code" class="text-[10px] font-bold bg-emerald-950 text-emerald-400 border border-emerald-800 px-2 py-0.5 rounded-full uppercase">MÃ: NV-204</span>
+            <span id="tech-shift-badge" class="text-[10px] font-bold bg-blue-950 text-blue-300 border border-blue-800 px-2 py-0.5 rounded-full">CA #A1</span>
+          </div>
+          <p id="tech-header-specialty" class="text-[11px] text-slate-400 leading-tight mt-0.5 hidden sm:block">
+            Phần Cứng &amp; Mạng Máy Tính &bull; Địa bàn: TP.HCM
+          </p>
+        </div>
+      </div>
+      
+      <!-- Header Actions -->
+      <div class="flex items-center gap-2 sm:gap-3 text-xs">
+        
+        <!-- Trạng thái KTV (Sẵn sàng / Đang bận) -->
+        <div class="relative">
+          <button id="btn-toggle-shift" onclick="toggleShiftStatus()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-xs font-semibold text-emerald-400 transition-colors" title="Bấm để đổi trạng thái">
+            <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span id="status-text">Sẵn sàng nhận ca</span>
+            <span class="material-symbols-outlined text-[14px]">expand_more</span>
+          </button>
+        </div>
+
+        <!-- Ví thu nhập -->
+        <button onclick="switchTab('wallet')" class="flex items-center gap-1.5 bg-emerald-950/70 hover:bg-emerald-900/80 border border-emerald-700/60 px-2.5 sm:px-3 py-1.5 rounded-lg text-emerald-300 transition-colors">
+          <span class="material-symbols-outlined text-[16px]">account_balance_wallet</span>
+          <span class="hidden sm:inline text-[11px] font-medium text-emerald-400">Ví:</span>
+          <span id="wallet-balance-text" class="font-bold">3.450.000 đ</span>
+        </button>
+
+
+        <a href="index.html" class="font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">home</span>
+          <span class="hidden md:inline">Trang Chủ</span>
+        </a>
+
+        <button onclick="Auth.logout()" class="font-medium text-red-300 hover:text-red-100 bg-red-950/60 hover:bg-red-900/60 border border-red-800/50 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">logout</span>
+          <span class="hidden sm:inline">Thoát</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- 2. MAIN WORKSPACE CONTAINER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-5">
+    
+    <!-- 2.1 THỐNG KÊ KPI HIỆU SUẤT TRONG NGÀY (5 CARDS TỔNG QUAN) -->
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+      
+      <!-- KPI 1: Ca của tôi đang xử lý -->
+      <div onclick="switchTab('my-jobs')" class="cursor-pointer bg-white border border-slate-200 hover:border-brand-400 hover:shadow-xs p-3.5 rounded-xl transition-all">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-[11px] font-semibold">Ca trực của tôi</span>
+          <span class="material-symbols-outlined text-brand-700 text-lg">engineering</span>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="kpi-my-jobs" class="text-xl font-bold text-slate-900">0</span>
+          <span class="text-[11px] text-slate-500 font-medium">ca trực</span>
+        </div>
+        <span id="kpi-my-jobs-sub" class="text-[10px] text-brand-700 font-semibold mt-1 block">Đang được phân công</span>
+      </div>
+
+      <!-- KPI 2: Ca chờ nhận mới trong khu vực -->
+      <div onclick="switchTab('pool-jobs')" class="cursor-pointer bg-white border border-slate-200 hover:border-amber-400 hover:shadow-xs p-3.5 rounded-xl transition-all relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-amber-500 text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-bl">MỚI</div>
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-[11px] font-semibold">Ca chờ nhận việc</span>
+          <span class="material-symbols-outlined text-amber-500 text-lg">notification_important</span>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="kpi-pending-jobs" class="text-xl font-bold text-amber-600">0</span>
+          <span class="text-[11px] text-slate-500 font-medium">yêu cầu</span>
+        </div>
+        <span class="text-[10px] text-amber-700 font-semibold mt-1 block">Sẵn sàng tiếp nhận</span>
+      </div>
+
+      <!-- KPI 3: Điểm đánh giá KTV -->
+      <div class="bg-white border border-slate-200 p-3.5 rounded-xl">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-[11px] font-semibold">Đánh giá khách hàng</span>
+          <span class="material-symbols-outlined text-amber-400 text-lg">star</span>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="kpi-rating" class="text-xl font-bold text-slate-900">4.90</span>
+          <span class="text-xs text-amber-500">★</span>
+        </div>
+        <span id="kpi-review-count" class="text-[10px] text-slate-500 mt-1 block">142 lượt phản hồi 5 sao</span>
+      </div>
+
+      <!-- KPI 4: Chuẩn SLA -->
+      <div class="bg-white border border-slate-200 p-3.5 rounded-xl">
+        <div class="flex items-center justify-between text-slate-500 mb-1">
+          <span class="text-[11px] font-semibold">Chuẩn SLA đúng hẹn</span>
+          <span class="material-symbols-outlined text-emerald-600 text-lg">verified</span>
+        </div>
+        <div class="flex items-baseline gap-1.5">
+          <span id="kpi-sla" class="text-xl font-bold text-emerald-700">98.4%</span>
+        </div>
+        <span class="text-[10px] text-emerald-700 font-semibold mt-1 block">Đạt chuẩn KTV Hạng A</span>
+      </div>
+
+      <!-- KPI 5: Số dư ví -->
+      <div onclick="switchTab('wallet')" class="cursor-pointer bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 hover:border-emerald-400 p-3.5 rounded-xl transition-all col-span-2 sm:col-span-1">
+        <div class="flex items-center justify-between text-emerald-800 mb-1">
+          <span class="text-[11px] font-bold">Ví thu nhập</span>
+          <span class="material-symbols-outlined text-emerald-700 text-lg">payments</span>
+        </div>
+        <div class="flex items-baseline gap-1">
+          <span id="kpi-wallet" class="text-lg sm:text-xl font-bold text-emerald-800">3.450.000 đ</span>
+        </div>
+        <span class="text-[10px] text-emerald-700 font-semibold mt-1 block flex items-center gap-0.5">
+          <span>Rút tiền về Vietcombank</span>
+          <span class="material-symbols-outlined text-[12px]">arrow_forward</span>
+        </span>
+      </div>
+
+    </div>
+
+    <!-- 2.2 THANH TAB ĐIỀU HƯỚNG TÁC NGHIỆP ĐA NĂNG -->
+    <div class="bg-white border border-slate-200 rounded-xl p-1.5 shadow-xs flex flex-wrap items-center justify-between gap-2">
+      
+      <!-- Danh sách tabs -->
+      <div class="flex flex-wrap items-center gap-1 text-xs">
+        
+        <button id="tab-btn-my-jobs" onclick="switchTab('my-jobs')" class="tab-btn px-3 py-2 rounded-lg font-bold bg-brand-700 text-white shadow-xs flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px]">list_alt</span>
+          <span>Ca Trực Của Tôi</span>
+          <span id="badge-my-jobs-count" class="bg-white/20 text-white text-[10px] px-1.5 py-0.2 rounded-full ml-0.5">1</span>
+        </button>
+
+        <button id="tab-btn-pool-jobs" onclick="switchTab('pool-jobs')" class="tab-btn px-3 py-2 rounded-lg font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-amber-500">flash_on</span>
+          <span>Chợ Ca Chờ Nhận</span>
+          <span id="badge-pool-jobs-count" class="bg-amber-100 text-amber-800 font-bold text-[10px] px-1.5 py-0.2 rounded-full ml-0.5">0</span>
+        </button>
+
+        <button id="tab-btn-schedule" onclick="switchTab('schedule')" class="tab-btn px-3 py-2 rounded-lg font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-blue-600">route</span>
+          <span>Lộ Trình &amp; Lịch Hẹn</span>
+        </button>
+
+        <button id="tab-btn-wallet" onclick="switchTab('wallet')" class="tab-btn px-3 py-2 rounded-lg font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-emerald-600">account_balance_wallet</span>
+          <span>Ví &amp; Lịch Sử Thu Nhập</span>
+        </button>
+
+        <button id="tab-btn-pricing" onclick="switchTab('pricing')" class="tab-btn px-3 py-2 rounded-lg font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 transition-all">
+          <span class="material-symbols-outlined text-[16px] text-purple-600">handyman</span>
+          <span>Báo Giá Vật Tư &amp; Đồ Nghề</span>
+        </button>
+
+      </div>
+
+      <!-- Nút làm mới dữ liệu -->
+      <button onclick="loadTechnicianSchedule()" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600 transition-colors flex items-center gap-1 text-xs font-semibold shrink-0" title="Tải lại danh sách ca trực">
+        <span class="material-symbols-outlined text-[16px]">refresh</span>
+        <span class="hidden sm:inline">Làm mới</span>
+      </button>
+
+    </div>
+
+    <!-- 2.3 NỘI DUNG TỪNG TAB -->
+
+    <!-- TAB 1: CA TRỰC CỦA TÔI -->
+    <section id="tab-content-my-jobs" class="tab-content space-y-4">
+      
+      <!-- Filter Sub-nav for My Jobs -->
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-brand-700 text-[18px]">assignment_turned_in</span>
+            <span>Các Ca Sửa Chữa Được Phân Công Cho Bạn</span>
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 text-xs">
+          <button onclick="filterMyJobs('all')" id="subfilter-all" class="px-2.5 py-1 rounded-md font-bold bg-slate-100 text-brand-700">Tất cả (<span id="count-sub-all">0</span>)</button>
+          <button onclick="filterMyJobs('active')" id="subfilter-active" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">Đang xử lý (<span id="count-sub-active">0</span>)</button>
+          <button onclick="filterMyJobs('completed')" id="subfilter-completed" class="px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900">Đã xong (<span id="count-sub-completed">0</span>)</button>
+        </div>
+      </div>
+
+      <!-- Danh sách ca trực -->
+      <div id="my-jobs-list" class="space-y-3">
+        <!-- Động nạp từ renderMyJobs() -->
+      </div>
+
+    </section>
+
+    <!-- TAB 2: CHỢ CA CHỜ NHẬN VIỆC (POOL JOBS) -->
+    <section id="tab-content-pool-jobs" class="tab-content hidden space-y-4">
+      
+      <div class="bg-gradient-to-r from-amber-500 to-orange-600 rounded-xl p-4 text-white shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+          <div class="inline-flex items-center gap-1 bg-white/20 px-2 py-0.5 rounded-full text-[11px] font-bold mb-1">
+            <span class="material-symbols-outlined text-[13px]">bolt</span>
+            <span>Ca trực mới trong khu vực</span>
+          </div>
+          <h2 class="text-base font-bold">Chợ Yêu Cầu Sửa Chữa Chờ Kỹ Thuật Viên Tiếp Nhận</h2>
+          <p class="text-xs text-amber-100">Các yêu cầu từ khách hàng chưa có KTV phụ trách. Bạn có thể chủ động nhận việc ngay để tăng thu nhập.</p>
+        </div>
+        <button onclick="loadTechnicianSchedule()" class="px-3 py-1.5 bg-white text-amber-800 font-bold text-xs rounded-lg shadow-xs hover:bg-amber-50 shrink-0 flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px]">refresh</span>
+          <span>Quét ca mới</span>
+        </button>
+      </div>
+
+      <div id="pool-jobs-list" class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+        <!-- Động nạp từ renderPoolJobs() -->
+      </div>
+
+    </section>
+
+    <!-- TAB 3: LỘ TRÌNH & LỊCH TRÌNH CÔNG TÁC -->
+    <section id="tab-content-schedule" class="tab-content hidden space-y-4">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Timeline hôm nay (2 Cột) -->
+        <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-blue-600 text-lg">calendar_month</span>
+                <span>Lịch Trình Công Tác &amp; Thứ Tự Di Chuyển Hôm Nay</span>
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">Sắp xếp theo khung giờ tối ưu lộ trình xe máy tại TP.HCM</p>
+            </div>
+            <span class="text-xs font-bold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+              Ngày: <span id="current-schedule-date">14/09/2026</span>
+            </span>
+          </div>
+
+          <div id="schedule-timeline" class="space-y-4 text-xs">
+            <!-- Timeline items động -->
+          </div>
+        </div>
+
+        <!-- Thẻ thông tin trạm điều hành & Cứu hộ (1 Cột) -->
+        <div class="space-y-4">
+          
+          <div class="bg-white rounded-xl p-4 border border-slate-200 shadow-xs space-y-3">
+            <div class="flex items-center gap-2 text-brand-700">
+              <span class="material-symbols-outlined text-xl">hub</span>
+              <h3 class="font-bold text-xs">Trạm Điều Hành Phụ Trách</h3>
+            </div>
+            <div class="space-y-1.5 text-xs text-slate-600">
+              <p>• <strong>Trạm:</strong> Trạm Cứu Hộ &amp; Kỹ Thuật #A1 (Nam Sài Gòn)</p>
+              <p>• <strong>Địa bàn:</strong> Quận 7, Quận 4, Huyện Nhà Bè, Khu chế xuất Tân Thuận</p>
+              <p>• <strong>Bán kính nhận ca:</strong> 5 - 8 km quanh điểm trực</p>
+              <p>• <strong>Hotline điều phối nội bộ:</strong> <a href="tel:18006868" class="text-brand-700 font-bold hover:underline">1800 6868 (Nhánh 2)</a></p>
+            </div>
+            <div class="pt-2 border-t border-slate-100">
+              <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Tín hiệu GPS &amp; Bộ đàm hoạt động tốt
+              </span>
+            </div>
+          </div>
+
+          <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-4 text-xs text-slate-700 space-y-2">
+            <div class="font-bold text-brand-800 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[16px]">support_agent</span>
+              <span>Hỗ Trợ Kỹ Thuật Khi Gặp Ca Khó</span>
+            </div>
+            <p class="text-[11px] leading-relaxed text-slate-600">
+              Khi gặp bo mạch chuyên dụng hoặc máy công nghiệp cần sơ đồ mạch (schematic), vui lòng mở kênh Chat nội bộ với Trưởng nhóm kỹ thuật để nhận tài liệu hỗ trợ trong 5 phút.
+            </p>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- TAB 4: VÍ & THU NHẬP -->
+    <section id="tab-content-wallet" class="tab-content hidden space-y-4">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Thẻ ví & Thao tác rút tiền (1 Cột) -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-950 rounded-2xl p-5 text-white shadow-md space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-emerald-400 text-2xl">account_balance_wallet</span>
+              <span class="text-xs font-semibold text-slate-300">Ví Kỹ Thuật Viên TechCare</span>
+            </div>
+            <span class="text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full">Chính Thức</span>
+          </div>
+
+          <div>
+            <span class="text-xs text-slate-400 block mb-0.5">Số dư khả dụng để rút:</span>
+            <h2 id="wallet-card-balance" class="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight">3.450.000 đ</h2>
+            <p class="text-[11px] text-slate-400 mt-1">Đang chờ đối soát ca mới: <strong id="wallet-pending-balance" class="text-amber-300">950.000 đ</strong></p>
+          </div>
+
+          <div class="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10 text-xs space-y-1">
+            <span class="text-slate-400 block text-[10px]">Tài khoản ngân hàng thụ hưởng:</span>
+            <div class="font-bold flex items-center justify-between">
+              <span id="wallet-bank-name">Vietcombank</span>
+              <span id="wallet-acc-num">0071001234567</span>
+            </div>
+            <p id="wallet-acc-name" class="text-[11px] text-emerald-300 uppercase">NGUYEN VAN MINH</p>
+          </div>
+
+          <button onclick="openWithdrawModal()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px]">currency_exchange</span>
+            <span>Rút Tiền Về Ngân Hàng</span>
+          </button>
+        </div>
+
+        <!-- Bảng lịch sử giao dịch & Hoa hồng ca sửa (2 Cột) -->
+        <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Lịch Sử Biến Động Số Dư &amp; Thù Lao Ca Trực</h2>
+              <p class="text-xs text-slate-500">Ghi nhận hoa hồng từng ca sửa chữa và các lệnh rút tiền</p>
+            </div>
+            <button onclick="loadWalletData()" class="p-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-600">
+              <span class="material-symbols-outlined text-[15px]">refresh</span>
+            </button>
+          </div>
+
+          <div id="wallet-transactions-list" class="space-y-2 text-xs">
+            <!-- Giao dịch động -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- TAB 5: BÁO GIÁ VẬT TƯ & ĐỒ NGHỀ -->
+    <section id="tab-content-pricing" class="tab-content hidden space-y-4">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        
+        <!-- Bảng tra cứu linh kiện niêm yết (2 Cột) -->
+        <div class="lg:col-span-2 bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-200">
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">Bảng Tra Cứu Giá Linh Kiện &amp; Công Thay Thế Chuẩn</h2>
+              <p class="text-xs text-slate-500">KTV sử dụng để tư vấn báo giá chính xác cho khách hàng tại nhà</p>
+            </div>
+            <input type="text" id="filter-parts-input" onkeyup="filterPartsTable()" placeholder="Tìm linh kiện (vd: gas, bo mạch)..." class="px-2.5 py-1 text-xs border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-brand-700">
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
+                <tr>
+                  <th class="py-2 px-3">Thiết Bị</th>
+                  <th class="py-2 px-3">Hạng Mục / Linh Kiện</th>
+                  <th class="py-2 px-3 text-right">Đơn Giá Niêm Yết</th>
+                  <th class="py-2 px-3 text-center">Bảo Hành Tem</th>
+                </tr>
+              </thead>
+              <tbody id="parts-table-body" class="divide-y divide-slate-100">
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-brand-700">Laptop / PC</td>
+                  <td class="py-2.5 px-3">Nâng cấp RAM Kingston Fury Beast 16GB DDR4 (3200MHz)</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">850.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">36 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-brand-700">Laptop / PC</td>
+                  <td class="py-2.5 px-3">Ổ cứng SSD NVMe Kingston NV2 512GB PCIe Gen 4x4</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">950.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">36 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-brand-700">Laptop</td>
+                  <td class="py-2.5 px-3">Vệ sinh máy, tra keo tản nhiệt gốm Arctic MX-4 / MX-6</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">150.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">01 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-blue-700">Máy tính (PC)</td>
+                  <td class="py-2.5 px-3">Thay bộ nguồn Cooler Master Elite 500W V3 chuẩn 80 Plus</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">750.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">24 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-blue-700">PC / Laptop</td>
+                  <td class="py-2.5 px-3">Cài đặt lại Windows 11 Pro / macOS + Office &amp; Driver</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">150.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">03 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-teal-700">Mạng &amp; Wifi</td>
+                  <td class="py-2.5 px-3">Bấm đầu hạt mạng RJ45 + Rải cáp mạng UTP CAT6 (trọn gói)</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">250.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">12 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-teal-700">Mạng &amp; Wifi</td>
+                  <td class="py-2.5 px-3">Bộ phát Wifi Mesh TP-Link Deco M4 AC1200 Gigabit</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">890.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">24 Tháng</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 px-3 font-semibold text-purple-700">Thiết Bị Ngoại Vi</td>
+                  <td class="py-2.5 px-3">Thay trục từ / Drum gạt mực máy in Canon LBP 2900 / HP</td>
+                  <td class="py-2.5 px-3 text-right font-bold text-slate-900">320.000 đ</td>
+                  <td class="py-2.5 px-3 text-center"><span class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold text-[10px]">06 Tháng</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Checklist đồ nghề mang theo xe (1 Cột) -->
+        <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-xs space-y-3">
+          <div class="flex items-center gap-2 text-slate-900 font-bold text-xs pb-2 border-b border-slate-200">
+            <span class="material-symbols-outlined text-brand-700 text-lg">checklist</span>
+            <span>Checklist Dụng Cụ Khi Lên Đường</span>
+          </div>
+
+          <div class="space-y-2 text-xs text-slate-700">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>USB Cứu Hộ Anhdv Boot / Ventoy cứu dữ liệu &amp; Cài Win/Mac</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>Bộ tua-vít từ đa năng mở Laptop / PC &amp; Nhíp kẹp linh kiện</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>Kìm bấm mạng RJ45 &amp; Hộp hạt mạng CommScope CAT6</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>Máy test cáp mạng LAN RJ45 / RJ11</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>Keo tản nhiệt Arctic MX-4 &amp; Bình xịt khí nén làm sạch bụi</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" checked class="rounded text-brand-700 focus:ring-0">
+              <span>Tập biên bản nghiệm thu kỹ thuật &amp; Tem vỡ bảo hành TechCare</span>
+            </label>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 text-[11px] text-slate-500">
+            💡 Lưu ý: Luôn đeo thẻ KTV và mang đầy đủ dụng cụ test IT trước khi tới điểm hỗ trợ.
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- 3. MODAL CẬP NHẬT TIẾN ĐỘ CA TRỰC (3 BƯỚC) -->
+  <div id="modal-step-updater" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+        <div>
+          <span class="text-[10px] font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 uppercase" id="modal-job-code">#TC-DESK-3895</span>
+          <h3 class="text-base font-bold text-slate-900 mt-1" id="modal-job-device">Laptop Dell XPS 15 (9500)</h3>
+        </div>
+        <button onclick="closeStepModal()" class="text-slate-400 hover:text-slate-600">
+          <span class="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
+
+      <!-- Customer Summary in Modal -->
+      <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs space-y-1">
+        <div class="flex justify-between">
+          <span class="text-slate-500">Khách hàng:</span>
+          <span id="modal-job-customer" class="font-bold text-slate-800">Chị Minh Anh</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Điện thoại:</span>
+          <a id="modal-job-phone" href="#" class="font-bold text-brand-700 hover:underline">0912 345 678</a>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-slate-500">Địa chỉ:</span>
+          <span id="modal-job-address" class="font-medium text-slate-800 text-right max-w-[280px]">Sunrise City, Q.7</span>
+        </div>
+        <div class="flex justify-between pt-1 border-t border-slate-200">
+          <span class="text-slate-500">Hiện trạng sự cố:</span>
+          <span id="modal-job-issue" class="font-semibold text-slate-700 text-right max-w-[280px]">Màn hình sọc giật, pin chai tự tắt nguồn</span>
+        </div>
+      </div>
+
+      <!-- 3 TIẾN TRÌNH CẬP NHẬT CSDL -->
+      <div class="space-y-2.5 pt-1">
+        <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wide">Cập nhật trạng thái tác nghiệp (Lưu vào MySQL):</h4>
+
+        <!-- Bước 1 -->
+        <div id="step-box-1" class="p-3 rounded-xl border flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 text-xs">
+            <span id="step-num-1" class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">1</span>
+            <div>
+              <p class="font-bold text-slate-800">1. Tiếp nhận ca sửa</p>
+              <p class="text-[11px] text-slate-500">Xác nhận đơn và chuẩn bị đồ nghề</p>
+            </div>
+          </div>
+          <button id="btn-step-1" onclick="executeStep(1)" class="px-3 py-1.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs transition-colors">
+            Nhận ca
+          </button>
+        </div>
+
+        <!-- Bước 2 -->
+        <div id="step-box-2" class="p-3 rounded-xl border flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 text-xs">
+            <span id="step-num-2" class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">2</span>
+            <div>
+              <p class="font-bold text-slate-800">2. Di chuyển đến nhà khách</p>
+              <p class="text-[11px] text-slate-500">Thông báo cho khách KTV đang trên đường</p>
+            </div>
+          </div>
+          <button id="btn-step-2" onclick="executeStep(2)" class="px-3 py-1.5 rounded-lg bg-brand-700 hover:bg-brand-800 text-white font-bold text-xs transition-colors">
+            Đang đi
+          </button>
+        </div>
+
+        <!-- Bước 3 -->
+        <div id="step-box-3" class="p-3 rounded-xl border flex flex-col gap-2.5">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2.5 text-xs">
+              <span id="step-num-3" class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 font-bold flex items-center justify-center text-xs">3</span>
+              <div>
+                <p class="font-bold text-slate-800">3. Khắc phục &amp; Nghiệm thu tại nhà</p>
+                <p class="text-[11px] text-slate-500">Chạy thử ổn định và ký biên bản</p>
+              </div>
+            </div>
+            <button id="btn-step-3" onclick="executeStep(3)" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-colors">
+              Hoàn tất ca
+            </button>
+          </div>
+
+          <!-- Chi phí & Ghi chú (Hiện khi bước 3 khả dụng) -->
+          <div id="step-3-extra" class="hidden pt-2 border-t border-slate-100 space-y-2 text-xs">
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Chi phí thanh toán thực tế (VNĐ):</label>
+              <input type="number" id="step-actual-cost" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-bold text-brand-700 focus:outline-none focus:ring-1 focus:ring-brand-700">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-slate-700 mb-0.5">Ghi chú kỹ thuật &amp; Linh kiện thay thế:</label>
+              <input type="text" id="step-tech-note" value="Đã kiểm tra, xử lý sự cố thiết bị tại chỗ, bàn giao khách chạy thử êm." class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs focus:outline-none focus:ring-1 focus:ring-brand-700">
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Footer -->
+      <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs">
+        <a id="btn-view-invoice" href="#" class="font-bold text-brand-700 hover:underline flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">receipt</span>
+          <span>Xem biên bản / bảo hành</span>
+        </a>
+        <button onclick="closeStepModal()" class="px-4 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold">
+          Đóng
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 4. MODAL RÚT TIỀN VỀ NGÂN HÀNG -->
+  <div id="modal-withdraw" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between pb-2 border-b border-slate-200">
+        <h3 class="text-base font-bold text-slate-900 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-emerald-600">currency_exchange</span>
+          <span>Rút Tiền Về Tài Khoản Ngân Hàng</span>
+        </h3>
+        <button onclick="closeWithdrawModal()" class="text-slate-400 hover:text-slate-600">
+          <span class="material-symbols-outlined text-xl">close</span>
+        </button>
+      </div>
+
+      <div class="bg-emerald-50 p-3 rounded-xl border border-emerald-200 text-xs text-emerald-900 space-y-1">
+        <div class="flex justify-between">
+          <span>Số dư khả dụng:</span>
+          <strong id="withdraw-max-balance" class="text-emerald-700 font-extrabold text-sm">3.450.000 đ</strong>
+        </div>
+        <div class="flex justify-between text-[11px] text-slate-600">
+          <span>Ngân hàng:</span>
+          <span id="withdraw-bank-info">Vietcombank - ****4567</span>
+        </div>
+      </div>
+
+      <form onsubmit="submitWithdraw(event)" class="space-y-3 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Nhập số tiền muốn rút (VNĐ): <span class="text-red-500">*</span></label>
+          <input type="number" id="withdraw-amount-input" required min="50000" step="10000" placeholder="Ví dụ: 1000000" class="w-full px-3 py-2 text-sm font-bold rounded-lg border border-slate-300 text-slate-900 focus:outline-none focus:ring-1 focus:ring-emerald-600">
+          <p class="text-[10px] text-slate-400 mt-0.5">Tối thiểu: 50.000 VNĐ &bull; Miễn phí chuyển khoản 24/7</p>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2">
+          <button type="button" onclick="setQuickWithdraw(500000)" class="flex-1 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">500.000</button>
+          <button type="button" onclick="setQuickWithdraw(1000000)" class="flex-1 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">1.000.000</button>
+          <button type="button" onclick="setQuickWithdraw('max')" class="flex-1 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">Tất cả</button>
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeWithdrawModal()" class="px-3.5 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs">Hủy</button>
+          <button type="submit" id="btn-submit-withdraw" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs transition-colors flex items-center gap-1">
+            <span>Tạo Lệnh Rút</span>
+            <span class="material-symbols-outlined text-[15px]">send</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== 5. FOOTER (MULTI-COLUMN DARK SLATE) ==================== -->
+  <footer class="w-full bg-[#0F172A] text-slate-400 pt-12 pb-8 text-xs shrink-0 border-t border-slate-800 mt-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6">
+      
+      <!-- 4 Cột Thông Tin Thương Mại Dịch Vụ -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-slate-800">
+        
+        <!-- Cột 1: Thông tin đơn vị & Nhận diện (Chiếm ~35% / 4 cols) -->
+        <div class="sm:col-span-2 lg:col-span-4 space-y-3.5">
+          <!-- Logo đồng bộ Header -->
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <span class="material-symbols-outlined text-[19px]">desktop_windows</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="text-base font-bold text-white tracking-tight leading-none">TechCare</span>
+              <span class="text-[9px] font-semibold text-slate-400 uppercase tracking-wider mt-1">IT Support &amp; Sửa Máy Tính</span>
+            </div>
+          </div>
+
+          <p class="text-slate-400 text-xs leading-relaxed">
+            Nền tảng đặt lịch IT Support &amp; cứu hộ máy tính tận nơi tại TP.HCM. Đội ngũ kỹ thuật viên chuyên nghiệp, xử lý dứt điểm sự cố phần cứng, phần mềm và hạ tầng mạng văn phòng.
+          </p>
+
+          <!-- Trụ sở & Giờ làm việc -->
+          <div class="space-y-2 pt-1 text-slate-300">
+            <div class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-slate-400 text-[18px] shrink-0 mt-0.5">location_on</span>
+              <span class="leading-snug"><strong>Trụ sở:</strong> 123 Nguyễn Thị Minh Khai, Phường Bến Thành, Quận 1, TP.HCM</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-slate-400 text-[18px] shrink-0">schedule</span>
+              <span><strong>Giờ làm việc:</strong> 08:00 – 21:00 (Thứ 2 – Chủ Nhật)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cột 2: Dịch vụ trọng tâm (3 cols) -->
+        <div class="lg:col-span-3 space-y-3">
+          <h3 class="text-white font-bold text-xs uppercase tracking-wider">Dịch vụ trọng tâm</h3>
+          <ul class="space-y-2 text-slate-400">
+            <li>
+              <a href="dat_lich.html?device=Máy tính để bàn (PC)" class="hover:text-white transition-colors block">Sửa chữa PC tận nơi</a>
+            </li>
+            <li>
+              <a href="dat_lich.html?device=Laptop / MacBook" class="hover:text-white transition-colors block">Cứu hộ Laptop / MacBook</a>
+            </li>
+            <li>
+              <a href="dat_lich.html?device=Mạng & Wifi" class="hover:text-white transition-colors block">Khắc phục sự cố Mạng &amp; Wifi</a>
+            </li>
+            <li>
+              <a href="dat_lich.html?device=Máy in & Thiết bị ngoại vi" class="hover:text-white transition-colors block">Nạp mực &amp; Sửa máy in</a>
+            </li>
+            <li>
+              <a href="dat_lich.html?device=Laptop / MacBook" class="hover:text-white transition-colors block">Vệ sinh &amp; Tra keo tản nhiệt</a>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Cột 3: Dịch vụ & Tra cứu (2 cols) -->
+        <div class="lg:col-span-2 space-y-3">
+          <h3 class="text-white font-bold text-xs uppercase tracking-wider">Dịch vụ &amp; Tra cứu</h3>
+          <ul class="space-y-2 text-slate-400">
+            <li>
+              <button type="button" onclick="openPricingModal()" class="hover:text-white transition-colors block text-left cursor-pointer">Bảng giá tham khảo</button>
+            </li>
+            <li>
+              <button type="button" onclick="openProcessModal()" class="hover:text-white transition-colors block text-left cursor-pointer">Quy trình 5 bước</button>
+            </li>
+            <li>
+              <a href="danh_gia.html" class="hover:text-white transition-colors block">Tra cứu đơn hàng</a>
+            </li>
+            <li>
+              <button type="button" onclick="openProcessModal()" class="hover:text-white transition-colors block text-left cursor-pointer">Chính sách bảo hành tận nơi</button>
+            </li>
+            <li>
+              <button type="button" onclick="openProcessModal()" class="hover:text-white transition-colors block text-left cursor-pointer">Cam kết bảo mật dữ liệu</button>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Cột 4: Tổng đài cứu hộ IT (3 cols) -->
+        <div class="lg:col-span-3 space-y-3">
+          <h3 class="text-white font-bold text-xs uppercase tracking-wider">Tổng đài cứu hộ IT</h3>
+          
+          <div>
+            <a href="tel:18006868" class="text-2xl font-extrabold text-blue-400 hover:text-blue-300 transition-colors tracking-tight flex items-center gap-1.5 leading-none">
+              <span class="material-symbols-outlined text-[26px]">call</span>
+              <span>1800 6868</span>
+            </a>
+            <p class="text-[11px] text-slate-400 mt-1.5 leading-snug">Hỗ trợ kỹ thuật khẩn cấp (Miễn phí cước)</p>
+          </div>
+
+          <div class="flex items-center gap-2 text-slate-300 pt-1">
+            <span class="material-symbols-outlined text-slate-400 text-[16px]">mail</span>
+            <span>Email: <a href="mailto:hotro@techcare.vn" class="hover:text-white font-medium transition-colors">hotro@techcare.vn</a></span>
+          </div>
+
+          <!-- Nút Zalo Hỗ Trợ Nhanh -->
+          <div class="pt-1">
+            <a href="https://zalo.me" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/30 text-blue-300 hover:text-white text-xs font-semibold transition-all shadow-2xs">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center">Z</span>
+              <span>Chat Zalo Hỗ Trợ Nhanh</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Bar (Bản quyền & Chính sách hai bên cân đối) -->
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-slate-500 text-center sm:text-left">
+        <div>
+          © 2026 TechCare Platform — Mini Project Phát Triển Ứng Dụng Web.
+        </div>
+        <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-slate-400">
+          <a href="#" onclick="openProcessModal(); return false;" class="hover:text-white transition-colors">Điều khoản dịch vụ</a>
+          <span class="text-slate-700">•</span>
+          <a href="#" onclick="openProcessModal(); return false;" class="hover:text-white transition-colors">Chính sách bảo mật</a>
+          <span class="text-slate-700">•</span>
+          <span class="text-emerald-400 font-medium inline-flex items-center gap-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Khu vực hoạt động: TP.HCM
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL BẢNG GIÁ THAM KHẢO ==================== -->
+  <div id="modal-pricing" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0" onclick="closePricingModal()"></div>
+    <div class="relative bg-white rounded-2xl max-w-4xl lg:max-w-5xl w-full p-5 sm:p-7 shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col z-10 my-8">
+      
+      <!-- Modal Header -->
+      <div class="flex items-start justify-between pb-4 mb-4 border-b border-slate-200">
+        <div>
+          <span class="text-xs font-bold text-brand-700 uppercase tracking-wider">Chi phí minh bạch</span>
+          <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 mt-0.5">Bảng giá dịch vụ sửa chữa IT Support</h3>
+          <p class="text-xs text-slate-500 mt-1">Đơn vị: Nghìn đồng (VNĐ). Tiền công dịch vụ tại nhà, kiểm tra tình trạng ban đầu miễn phí.</p>
+        </div>
+        <button type="button" onclick="closePricingModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer shrink-0 ml-3">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Tab Navigation Bar: 3 Tabs danh mục ngang -->
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-3 mb-4 overflow-x-auto no-scrollbar">
+        <button type="button" id="pricing-tab-btn-pc" onclick="switchPricingModalTab('pc')" class="flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-brand-700 text-white shadow-xs transition-all cursor-pointer shrink-0">
+          <span class="material-symbols-outlined text-[18px]">laptop_mac</span>
+          <span>Máy Tính &amp; Laptop</span>
+        </button>
+        <button type="button" id="pricing-tab-btn-network" onclick="switchPricingModalTab('network')" class="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer shrink-0">
+          <span class="material-symbols-outlined text-[18px]">router</span>
+          <span>Hạ Tầng Mạng &amp; Wi-Fi</span>
+        </button>
+        <button type="button" id="pricing-tab-btn-software" onclick="switchPricingModalTab('software')" class="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer shrink-0">
+          <span class="material-symbols-outlined text-[18px]">print</span>
+          <span>Phần Mềm &amp; Ngoại Vi</span>
+        </button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="overflow-y-auto flex-1 pr-1 -mr-1">
+        
+        <!-- TAB 1: PC & LAPTOP -->
+        <div id="pricing-tab-content-pc" class="space-y-1">
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">search_check</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Chẩn đoán lỗi &amp; kiểm tra tình trạng tận nơi</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Kỹ thuật viên mang thiết bị đo kiểm đến tận nhà, thông báo phương án và chi phí</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-emerald-700">Miễn phí</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">mode_fan</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Vệ sinh PC / Laptop, tra keo tản nhiệt Arctic MX-4</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Làm sạch bụi cánh quạt, tản nhiệt, tra keo tản nhiệt cao cấp giảm 10–15°C</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 200k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">terminal</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cài đặt Windows 10/11, macOS &amp; bộ Office cơ bản</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Bản quyền số, cài full driver chuẩn, tối ưu khởi động và tắt update ngầm</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 200k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">healing</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Khắc phục màn hình xanh (BSOD), treo đơ máy</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Phân tích file crash dump, quét sửa lỗi ổ cứng và xử lý triệt để xung đột driver</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 250k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">memory</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Nâng cấp RAM, lắp đặt ổ cứng SSD NVMe tốc độ cao</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Tiền công lắp đặt, sao chép nguyên vẹn dữ liệu hệ điều hành sang ổ cứng mới</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 250k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">hard_drive</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cứu dữ liệu ổ cứng xóa nhầm, format phân vùng</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Khôi phục file kế toán, hình ảnh, tài liệu văn phòng lưu trên SSD/HDD/USB</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">từ 350k</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: MẠNG & WIFI -->
+        <div id="pricing-tab-content-network" class="hidden space-y-1">
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">search_check</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Khảo sát &amp; đo kiểm tín hiệu cáp mạng LAN</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Kiểm tra thông lượng và suy hao tín hiệu bằng máy đo chuyên dụng</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-emerald-700">Miễn phí</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">cable</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Bấm đầu cáp mạng CAT6 / CAT6A âm tường</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Hạt mạng chống nhiễu mạ vàng, kiểm tra thông mạng tốc độ chuẩn 1Gbps</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">50k – 100k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">wifi_off</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Xử lý mất mạng nội bộ, xung đột dải IP (chấm than vàng)</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Tìm thiết bị gây loop mạng, cấu hình cấp phát dải DHCP server chuẩn xác</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 250k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">router</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cấu hình Router, Wifi Mesh cân bằng tải xuyên tầng</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Roaming sóng mượt mà không rớt mạng, phân tách mạng nội bộ và mạng khách</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">200k – 400k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">lan</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Thi công kéo dây mạng LAN nổi / nẹp tường thẩm mỹ</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Bố trí đường dây gọn gàng cho văn phòng, phòng làm việc cá nhân</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">100k – 200k</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 3: PHẦN MỀM & NGOẠI VI -->
+        <div id="pricing-tab-content-software" class="hidden space-y-1">
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">print</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cài đặt &amp; chia sẻ máy in qua mạng LAN / Wi-Fi</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">In ấn ổn định từ nhiều máy tính, laptop và điện thoại thông minh cùng mạng</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 250k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">build</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Xử lý kẹt giấy máy in, mờ mực, sọc bản in</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Vệ sinh hộp mực cartridge, trục sấy, gạt mực và cân chỉnh bộ cơ kéo giấy</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 300k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">security</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Diệt virus, quét mã độc đào coin &amp; gỡ adware</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Dọn dẹp trình duyệt bị chèn popup quảng cáo, phục hồi tốc độ ban đầu của máy</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 200k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">layers</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cài phần mềm đồ họa, kỹ thuật (Photoshop, CAD...)</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Phiên bản ổn định cao, kích hoạt tính năng tăng tốc render bằng card đồ họa</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">150k – 250k</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between py-2.5 px-3 rounded-xl hover:bg-slate-50 transition-colors group">
+            <div class="flex items-center gap-3 min-w-0 pr-2">
+              <div class="w-8 h-8 rounded-lg bg-blue-50 text-brand-700 flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[18px]">videocam</span>
+              </div>
+              <div class="min-w-0">
+                <div class="font-bold text-slate-900 text-xs sm:text-sm group-hover:text-brand-700 transition-colors">Cấu hình đầu ghi camera quan sát qua điện thoại</div>
+                <div class="text-[11px] sm:text-xs text-slate-500 mt-0.5">Cài app theo dõi từ xa bằng 4G/5G, mở port NAT xem hình ảnh mượt mà</div>
+              </div>
+            </div>
+            <div class="flex-1 border-b border-dashed border-slate-200 mx-3 sm:mx-4 hidden sm:block"></div>
+            <div class="text-right shrink-0 whitespace-nowrap pl-2">
+              <span class="text-xs sm:text-sm font-extrabold text-slate-900">200k – 350k</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer Chung -->
+      <div class="mt-5 pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-50 -mx-5 -mb-5 sm:-mx-7 sm:-mb-7 p-4 sm:p-5 rounded-b-2xl">
+        <div class="flex items-start sm:items-center gap-2 text-xs text-slate-600">
+          <span class="text-base shrink-0">💡</span>
+          <span>Giá trên là <strong>tiền công kỹ thuật tận nơi</strong>, cam kết kiểm tra báo giá trước khi làm. Chưa bao gồm linh kiện thay thế nếu có.</span>
+        </div>
+        <a href="dat_lich.html" onclick="closePricingModal()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-brand-700 hover:bg-brand-800 text-white text-xs sm:text-sm font-bold shadow-xs hover:shadow-md transition-all shrink-0 cursor-pointer">
+          <span>Đặt lịch sửa chữa ngay</span>
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ==================== MODAL QUY TRÌNH DỊCH VỤ ==================== -->
+  <div id="modal-process" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
+    <div class="fixed inset-0" onclick="closeProcessModal()"></div>
+    <div class="relative bg-white rounded-2xl max-w-3xl w-full p-5 sm:p-6 shadow-2xl border border-slate-200 z-10 my-8">
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-slate-200">
+        <div>
+          <span class="text-xs font-bold text-brand-700 uppercase tracking-wider">Chuẩn mực dịch vụ</span>
+          <h3 class="text-base sm:text-lg font-bold text-slate-900">Quy Trình Tiếp Nhận &amp; Xử Lý</h3>
+          <p class="text-xs text-slate-500 mt-0.5">Minh bạch từng công đoạn, khách hàng trực tiếp giám sát quá trình sửa chữa.</p>
+        </div>
+        <button type="button" onclick="closeProcessModal()" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center transition-colors cursor-pointer">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+          <div class="w-7 h-7 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center mb-2 shadow-xs">1</div>
+          <h4 class="text-xs font-bold text-slate-900 mb-1">Đặt lịch hẹn</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">Chọn thiết bị, địa chỉ và thời gian thợ đến tận nhà.</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+          <div class="w-7 h-7 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center mb-2 shadow-xs">2</div>
+          <h4 class="text-xs font-bold text-slate-900 mb-1">Kiểm tra &amp; Báo giá</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">KTV đến sau 30-45 phút, chẩn đoán lỗi và báo giá trước khi làm.</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+          <div class="w-7 h-7 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center mb-2 shadow-xs">3</div>
+          <h4 class="text-xs font-bold text-slate-900 mb-1">Sửa chữa tại chỗ</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">Khắc phục trực tiếp tại nhà dưới sự chứng kiến của khách hàng.</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-3.5">
+          <div class="w-7 h-7 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center mb-2 shadow-xs">4</div>
+          <h4 class="text-xs font-bold text-slate-900 mb-1">Nghiệm thu &amp; Bảo hành</h4>
+          <p class="text-[11px] text-slate-600 leading-relaxed">Test máy, thanh toán đúng giá và lưu phiếu bảo hành điện tử.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. JAVASCRIPT LOGIC -->
+  <script>
+    let loggedInUser = null;
+    let currentTech = null;
+    let myJobs = [];
+    let poolJobs = [];
+    let walletData = null;
+    let activeModalJob = null;
+    let currentSubFilter = 'all';
+
+    function showToast(message, type = 'success') {
+      let toast = document.getElementById('app-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'app-toast';
+        document.body.appendChild(toast);
+      }
+      const isSuccess = type === 'success';
+      const isError = type === 'error';
+      const icon = isSuccess ? 'check_circle' : (isError ? 'error' : 'info');
+      const bg = isSuccess ? 'bg-emerald-800 text-white border border-emerald-600' : (isError ? 'bg-red-800 text-white border border-red-600' : 'bg-slate-900 text-white border border-slate-700');
+      
+      toast.className = `fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-xl text-xs font-bold transition-all duration-300 transform translate-y-0 opacity-100 ${bg}`;
+      toast.innerHTML = `<span class="material-symbols-outlined text-[18px]">${icon}</span><span>${message}</span>`;
+      
+      setTimeout(() => {
+        toast.className = 'fixed bottom-5 right-5 z-50 flex items-center gap-2 px-4 py-3 rounded-xl shadow-lg text-xs font-bold transition-all duration-300 transform translate-y-10 opacity-0 pointer-events-none';
+      }, 3500);
+    }
+
+    // 1. Khởi động & tải thông tin
+    async function loadTechnicianSchedule() {
+      const userStr = localStorage.getItem('techcare_user');
+      if (!userStr) {
+        window.location.replace('index.html');
+        return;
+      }
+
+      loggedInUser = Auth.getUser();
+      if (!loggedInUser) {
+        Auth.logout();
+        return;
+      }
+
+      const techId = loggedInUser.technician_id || loggedInUser.id || 'TECH-204';
+
+      try {
+        const response = await Auth.fetch(`../backend/api/technicians.php?action=schedule&tech_id=${encodeURIComponent(techId)}`);
+        const res = await response.json();
+
+        if (response.ok && res.success && res.data) {
+          currentTech = res.data.technician;
+          myJobs = res.data.jobs || [];
+          poolJobs = res.data.pending_jobs || [];
+
+          renderHeaderProfile();
+          renderKPIs();
+          renderMyJobs();
+          renderPoolJobs();
+          renderScheduleTimeline();
+          loadWalletData();
+        } else {
+          showToast(res.message || 'Không thể tải ca trực.', 'error');
+        }
+      } catch (err) {
+        console.error('Lỗi tải dữ liệu KTV:', err);
+      }
+    }
+
+    // 2. Render Header & Hồ sơ
+    function renderHeaderProfile() {
+      if (!currentTech) return;
+      document.getElementById('tech-header-name').textContent = `KTV ${currentTech.full_name}`;
+      document.getElementById('tech-header-code').textContent = `MÃ: ${currentTech.code}`;
+      document.getElementById('tech-shift-badge').textContent = `CA ${currentTech.shift_code || '#A1'}`;
+      document.getElementById('tech-header-specialty').innerHTML = `
+        ${currentTech.specialty || 'Kỹ thuật viên hiện trường'} &bull; Địa bàn: <strong>${currentTech.current_address || 'Quận 7, TP.HCM'}</strong>
+      `;
+
+      // Status indicator
+      const dot = document.getElementById('status-dot');
+      const text = document.getElementById('status-text');
+      const isReady = currentTech.shift_status === 'ready';
+
+      if (isReady) {
+        dot.className = "w-2 h-2 rounded-full bg-emerald-500 animate-pulse";
+        text.textContent = "Sẵn sàng nhận ca";
+        text.className = "text-emerald-400";
+      } else {
+        dot.className = "w-2 h-2 rounded-full bg-amber-500";
+        text.textContent = "Đang bận / Có ca";
+        text.className = "text-amber-400";
+      }
+    }
+
+    // 3. Render KPIs
+    function renderKPIs() {
+      const activeCount = myJobs.filter(j => j.status === 'assigned' || j.status === 'in_progress').length;
+      const completedCount = myJobs.filter(j => j.status === 'completed').length;
+
+      document.getElementById('kpi-my-jobs').textContent = myJobs.length;
+      document.getElementById('kpi-my-jobs-sub').textContent = `${activeCount} ca đang làm &bull; ${completedCount} ca xong`;
+      document.getElementById('kpi-pending-jobs').textContent = poolJobs.length;
+
+      if (currentTech) {
+        document.getElementById('kpi-rating').textContent = Number(currentTech.rating || 4.9).toFixed(2);
+        document.getElementById('kpi-review-count').textContent = `${currentTech.review_count || 142} lượt đánh giá 5 sao`;
+        document.getElementById('kpi-sla').textContent = `${currentTech.sla_success_rate || 98.4}%`;
+      }
+
+      document.getElementById('badge-my-jobs-count').textContent = myJobs.length;
+      document.getElementById('badge-pool-jobs-count').textContent = poolJobs.length;
+    }
+
+    // 4. Render Tab 1: Ca Trực Của Tôi
+    function renderMyJobs() {
+      const container = document.getElementById('my-jobs-list');
+      
+      const allCount = myJobs.length;
+      const activeCount = myJobs.filter(j => j.status === 'assigned' || j.status === 'in_progress').length;
+      const compCount = myJobs.filter(j => j.status === 'completed').length;
+
+      document.getElementById('count-sub-all').textContent = allCount;
+      document.getElementById('count-sub-active').textContent = activeCount;
+      document.getElementById('count-sub-completed').textContent = compCount;
+
+      let list = myJobs;
+      if (currentSubFilter === 'active') {
+        list = myJobs.filter(j => j.status === 'assigned' || j.status === 'in_progress');
+      } else if (currentSubFilter === 'completed') {
+        list = myJobs.filter(j => j.status === 'completed');
+      }
+
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl p-8 border border-dashed border-slate-300 text-center space-y-2">
+            <span class="material-symbols-outlined text-3xl text-slate-400">task_alt</span>
+            <p class="text-xs font-semibold text-slate-700">Chưa có ca trực nào trong mục này</p>
+            <p class="text-[11px] text-slate-400">Bạn có thể chuyển sang tab "Chợ Ca Chờ Nhận" để tiếp nhận các yêu cầu mới trong khu vực.</p>
+            <button onclick="switchTab('pool-jobs')" class="mt-2 inline-flex items-center gap-1 text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-lg hover:bg-amber-100 transition-colors">
+              <span class="material-symbols-outlined text-[15px]">flash_on</span>
+              <span>Xem Ca Chờ Nhận Việc (${poolJobs.length})</span>
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      list.forEach(job => {
+        const isAssigned = job.status === 'assigned';
+        const isInProgress = job.status === 'in_progress';
+        const isCompleted = job.status === 'completed';
+
+        let statusBadge = '';
+        if (isAssigned) {
+          statusBadge = `<span class="bg-amber-50 text-amber-800 border border-amber-200 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+            Chờ KTV Tiếp Nhận
+          </span>`;
+        } else if (isInProgress) {
+          statusBadge = `<span class="bg-blue-50 text-brand-700 border border-blue-200 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse"></span>
+            Đang Xử Lý Hiện Trường
+          </span>`;
+        } else {
+          statusBadge = `<span class="bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[10px] font-bold inline-flex items-center gap-1">
+            <span class="material-symbols-outlined text-[12px]">check</span>
+            Đã Hoàn Tất Nghiệm Thu
+          </span>`;
+        }
+
+        const icon = getDeviceIcon(job.device_type);
+
+        html += `
+          <div class="bg-white rounded-xl p-4 sm:p-5 border border-slate-200 hover:border-brand-300 shadow-xs transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
+            
+            <div class="space-y-2 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-extrabold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded">
+                  #${job.code || job.id}
+                </span>
+                <span class="text-xs font-bold text-slate-900 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-brand-700 text-[18px]">${icon}</span>
+                  <span>${job.device_type}</span>
+                </span>
+                ${statusBadge}
+                ${job.priority === 'urgent' ? '<span class="bg-red-50 text-red-700 border border-red-200 px-1.5 py-0.5 rounded text-[9px] font-bold">GẤP</span>' : ''}
+              </div>
+
+              <!-- Customer Details -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-slate-600 bg-slate-50/70 p-2.5 rounded-lg border border-slate-100">
+                <div>
+                  <span class="text-slate-400">Khách:</span> <strong>${job.customer_name}</strong>
+                  <span class="text-slate-400 mx-1">&bull;</span>
+                  <a href="tel:${job.customer_phone}" class="text-brand-700 font-bold hover:underline">📞 ${job.customer_phone}</a>
+                </div>
+                <div>
+                  <span class="text-slate-400">Giờ hẹn:</span> <strong class="text-emerald-700">${job.scheduled_time || 'Hôm nay'}</strong>
+                </div>
+                <div class="sm:col-span-2">
+                  <span class="text-slate-400">Địa chỉ:</span> <span class="font-medium text-slate-800">${job.address}</span>
+                  <a href="https://maps.google.com/?q=${encodeURIComponent(job.address)}" target="_blank" class="text-blue-600 hover:underline inline-flex items-center gap-0.5 ml-1 font-semibold text-[11px]">
+                    <span class="material-symbols-outlined text-[13px]">near_me</span> Chỉ đường
+                  </a>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between text-xs text-slate-500">
+                <span class="truncate max-w-md">Sự cố: <strong class="text-slate-700">${job.issue_description || 'Không có mô tả'}</strong></span>
+                <span class="text-brand-700 font-bold shrink-0">Dự toán: ${Number(job.estimated_cost || 0).toLocaleString('vi-VN')} đ</span>
+              </div>
+            </div>
+
+            <!-- Actions Right -->
+            <div class="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-2 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100 shrink-0">
+              <button onclick="openStepModal('${job.id}')" class="px-4 py-2 rounded-lg ${isCompleted ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-brand-700 hover:bg-brand-800 text-white shadow-xs'} font-bold text-xs transition-colors flex items-center gap-1.5">
+                <span class="material-symbols-outlined text-[16px]">${isCompleted ? 'visibility' : 'play_circle'}</span>
+                <span>${isCompleted ? 'Xem Tiến Trình' : 'Cập Nhật Tiến Độ (3 Bước)'}</span>
+              </button>
+
+              <a href="danh_gia.html?code=${job.code || job.id}" class="text-[11px] font-semibold text-slate-600 hover:text-brand-700 underline flex items-center gap-0.5">
+                <span>Biên bản nghiệm thu &rarr;</span>
+              </a>
+            </div>
+
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 5. Render Tab 2: Chợ Ca Chờ Nhận Việc
+    function renderPoolJobs() {
+      const container = document.getElementById('pool-jobs-list');
+      
+      if (poolJobs.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-2 bg-white rounded-xl p-8 border border-dashed border-slate-300 text-center space-y-2">
+            <span class="material-symbols-outlined text-3xl text-emerald-500">check_circle</span>
+            <p class="text-xs font-bold text-slate-800">Hiện không có ca chờ nào trong khu vực!</p>
+            <p class="text-[11px] text-slate-500">Tất cả yêu cầu sửa chữa đã được điều phối. Khi có khách đặt lịch mới, danh sách sẽ tự động xuất hiện tại đây.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      poolJobs.forEach(job => {
+        const icon = getDeviceIcon(job.device_type);
+
+        html += `
+          <div class="bg-white rounded-xl p-4 border border-slate-200 hover:border-amber-400 shadow-xs transition-all space-y-3 flex flex-col justify-between">
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">#${job.code || job.id}</span>
+                <span class="bg-amber-50 text-amber-700 border border-amber-200 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                  Chờ KTV nhận
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-lg">${icon}</span>
+                </div>
+                <div>
+                  <h3 class="text-xs font-bold text-slate-900">${job.device_type}</h3>
+                  <p class="text-[11px] text-slate-500">Khách: <strong>${job.customer_name}</strong> &bull; SĐT: ${job.customer_phone}</p>
+                </div>
+              </div>
+
+              <div class="text-xs text-slate-600 space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                <p><span class="text-slate-400">Địa chỉ:</span> <strong>${job.address}</strong></p>
+                <p><span class="text-slate-400">Giờ hẹn:</span> <strong class="text-brand-700">${job.scheduled_time || 'Càng sớm càng tốt'}</strong></p>
+                <p class="text-slate-500 italic"><span class="text-slate-400 not-italic">Sự cố:</span> ${job.issue_description || 'Kiểm tra lỗi tại nhà'}</p>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-800">
+                Dự toán: <span class="text-emerald-700 font-extrabold">${Number(job.estimated_cost || 350000).toLocaleString('vi-VN')} đ</span>
+              </span>
+
+              <button onclick="acceptPoolJob('${job.id}')" class="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold text-xs shadow-xs transition-all flex items-center gap-1">
+                <span class="material-symbols-outlined text-[16px]">how_to_reg</span>
+                <span>Tiếp Nhận Ca Này</span>
+              </button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 6. Nhận ca từ Chợ ca chờ
+    async function acceptPoolJob(bookingId) {
+      if (!currentTech) return;
+
+      try {
+        const res = await Auth.fetch(`../backend/api/technicians.php?action=accept&booking_id=${encodeURIComponent(bookingId)}&tech_id=${encodeURIComponent(currentTech.id)}`, {
+          method: 'POST'
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showToast('Tiếp nhận ca thành công! Ca trực đã chuyển vào danh sách công tác của bạn.', 'success');
+          await loadTechnicianSchedule();
+          switchTab('my-jobs');
+          openStepModal(bookingId);
+        } else {
+          showToast(data.message || 'Không thể nhận ca lúc này.', 'error');
+        }
+      } catch (e) {
+        showToast('Lỗi kết nối máy chủ CSDL.', 'error');
+      }
+    }
+
+    // 7. Render Tab 3: Lộ Trình & Timeline Hôm Nay
+    function renderScheduleTimeline() {
+      const container = document.getElementById('schedule-timeline');
+      document.getElementById('current-schedule-date').textContent = new Date().toLocaleDateString('vi-VN');
+
+      if (myJobs.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-6 text-slate-400">
+            <span class="material-symbols-outlined text-3xl mb-1">map</span>
+            <p>Hôm nay chưa có lịch di chuyển nào.</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      myJobs.forEach((job, idx) => {
+        const isDone = job.status === 'completed';
+        html += `
+          <div class="relative pl-6 pb-4 border-l-2 ${isDone ? 'border-emerald-500' : 'border-brand-500'} last:border-transparent">
+            <span class="absolute -left-[9px] top-0 w-4 h-4 rounded-full ${isDone ? 'bg-emerald-500' : 'bg-brand-600'} text-white text-[10px] flex items-center justify-center font-bold">
+              ${isDone ? '✓' : idx + 1}
+            </span>
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 hover:bg-white transition-colors">
+              <div class="flex items-center justify-between gap-2 flex-wrap mb-1">
+                <span class="font-bold text-slate-900 text-xs">Ca #${job.code || job.id}: ${job.device_type}</span>
+                <span class="text-[11px] font-semibold ${isDone ? 'text-emerald-700' : 'text-brand-700'}">${job.scheduled_time || 'Trong ngày'}</span>
+              </div>
+              <p class="text-slate-600 font-medium">${job.address}</p>
+              <div class="mt-2 flex items-center gap-2">
+                <a href="tel:${job.customer_phone}" class="inline-flex items-center gap-1 text-[11px] font-bold text-brand-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                  <span>Gọi: ${job.customer_phone}</span>
+                </a>
+                <a href="https://maps.google.com/?q=${encodeURIComponent(job.address)}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 bg-white px-2 py-0.5 rounded border border-slate-200 hover:bg-slate-50">
+                  <span class="material-symbols-outlined text-[13px] text-blue-600">near_me</span>
+                  <span>Mở bản đồ</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 8. Render Tab 4: Ví & Giao Dịch
+    async function loadWalletData() {
+      if (!currentTech) return;
+      try {
+        const res = await Auth.fetch(`../backend/api/technicians.php?action=wallet&tech_id=${encodeURIComponent(currentTech.id)}`);
+        const data = await res.json();
+        if (res.ok && data.success && data.data) {
+          walletData = data.data;
+          const balance = Number(walletData.balance || 0);
+          const pending = Number(walletData.pending_balance || 0);
+
+          document.getElementById('wallet-balance-text').textContent = `${balance.toLocaleString('vi-VN')} đ`;
+          document.getElementById('kpi-wallet').textContent = `${balance.toLocaleString('vi-VN')} đ`;
+          document.getElementById('wallet-card-balance').textContent = `${balance.toLocaleString('vi-VN')} đ`;
+          document.getElementById('wallet-pending-balance').textContent = `${pending.toLocaleString('vi-VN')} đ`;
+          document.getElementById('withdraw-max-balance').textContent = `${balance.toLocaleString('vi-VN')} đ`;
+
+          document.getElementById('wallet-bank-name').textContent = walletData.bank_name || 'Vietcombank';
+          document.getElementById('wallet-acc-num').textContent = walletData.bank_account_number || '0071001234567';
+          document.getElementById('wallet-acc-name').textContent = walletData.bank_account_name || 'NGUYEN VAN MINH';
+          document.getElementById('withdraw-bank-info').textContent = `${walletData.bank_name} - ${walletData.bank_account_number}`;
+
+          renderTransactions(walletData.transactions || []);
+        }
+      } catch (e) {
+        console.error('Lỗi tải ví:', e);
+      }
+    }
+
+    function renderTransactions(txns) {
+      const container = document.getElementById('wallet-transactions-list');
+      if (!txns || txns.length === 0) {
+        container.innerHTML = `<p class="text-slate-400 py-4 text-center">Chưa có biến động số dư nào.</p>`;
+        return;
+      }
+
+      let html = '';
+      txns.forEach(t => {
+        const isWithdraw = t.type === 'withdraw' || Number(t.amount) < 0;
+        const amt = Math.abs(Number(t.amount));
+        const sign = isWithdraw ? '-' : '+';
+        const color = isWithdraw ? 'text-red-600' : 'text-emerald-700';
+
+        html += `
+          <div class="p-3 rounded-xl bg-slate-50 hover:bg-white border border-slate-100 flex items-center justify-between gap-3 transition-colors">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg ${isWithdraw ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'} flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[16px]">${isWithdraw ? 'call_made' : 'call_received'}</span>
+              </span>
+              <div>
+                <p class="font-bold text-slate-800">${t.title}</p>
+                <p class="text-[10px] text-slate-400">${t.created_at || 'Vừa xong'}</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <span class="font-extrabold ${color} text-sm">${sign}${amt.toLocaleString('vi-VN')} đ</span>
+              <span class="block text-[10px] font-semibold text-emerald-600">Thành công</span>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    // 9. Điều khiển Modal Cập nhật tiến độ 3 bước
+    function openStepModal(jobId) {
+      const job = myJobs.find(j => j.id === jobId) || poolJobs.find(j => j.id === jobId);
+      if (!job) return;
+      activeModalJob = job;
+
+      document.getElementById('modal-job-code').textContent = '#' + (job.code || job.id);
+      document.getElementById('modal-job-device').textContent = job.device_type;
+      document.getElementById('modal-job-customer').textContent = job.customer_name;
+      document.getElementById('modal-job-phone').textContent = job.customer_phone;
+      document.getElementById('modal-job-phone').href = `tel:${job.customer_phone}`;
+      document.getElementById('modal-job-address').textContent = job.address;
+      document.getElementById('modal-job-issue').textContent = job.issue_description || 'Không có mô tả';
+      document.getElementById('btn-view-invoice').href = `danh_gia.html?code=${job.code || job.id}`;
+
+      // Reset Step UI based on status
+      const status = job.status;
+      const isAssigned = status === 'assigned';
+      const isInProgress = status === 'in_progress';
+      const isCompleted = status === 'completed';
+
+      const box1 = document.getElementById('step-box-1');
+      const box2 = document.getElementById('step-box-2');
+      const box3 = document.getElementById('step-box-3');
+      const btn1 = document.getElementById('btn-step-1');
+      const btn2 = document.getElementById('btn-step-2');
+      const btn3 = document.getElementById('btn-step-3');
+      const extra3 = document.getElementById('step-3-extra');
+
+      // Step 1:
+      if (isAssigned) {
+        box1.className = "p-3 rounded-xl border-2 border-brand-700 bg-blue-50/40 flex items-center justify-between gap-3";
+        btn1.disabled = false;
+        btn1.className = "px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold text-xs shadow-xs";
+        btn1.innerHTML = "Xác nhận nhận ca";
+      } else {
+        box1.className = "p-3 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between gap-3";
+        btn1.disabled = true;
+        btn1.className = "px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs";
+        btn1.innerHTML = "✓ Đã nhận ca";
+      }
+
+      // Step 2:
+      if (isInProgress) {
+        box2.className = "p-3 rounded-xl border-2 border-brand-700 bg-blue-50/40 flex items-center justify-between gap-3";
+        btn2.disabled = false;
+        btn2.className = "px-3 py-1.5 rounded-lg bg-brand-700 text-white font-bold text-xs shadow-xs";
+        btn2.innerHTML = "Đang di chuyển đến nơi";
+      } else if (isCompleted) {
+        box2.className = "p-3 rounded-xl border border-emerald-200 bg-emerald-50/40 flex items-center justify-between gap-3";
+        btn2.disabled = true;
+        btn2.className = "px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs";
+        btn2.innerHTML = "✓ Đã đến nơi";
+      } else {
+        box2.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 opacity-60 flex items-center justify-between gap-3";
+        btn2.disabled = true;
+        btn2.className = "px-3 py-1.5 rounded-lg bg-slate-200 text-slate-400 font-bold text-xs";
+        btn2.innerHTML = "Chờ bước 1";
+      }
+
+      // Step 3:
+      if (isInProgress) {
+        box3.className = "p-3 rounded-xl border-2 border-emerald-600 bg-white flex flex-col gap-2.5";
+        btn3.disabled = false;
+        btn3.className = "px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-xs";
+        btn3.innerHTML = "Nghiệm thu ca";
+        extra3.classList.remove('hidden');
+        document.getElementById('step-actual-cost').value = job.estimated_cost || 350000;
+      } else if (isCompleted) {
+        box3.className = "p-3 rounded-xl border border-emerald-200 bg-emerald-50/40 flex flex-col gap-2.5";
+        btn3.disabled = true;
+        btn3.className = "px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-700 font-bold text-xs";
+        btn3.innerHTML = "✓ Đã hoàn tất 100%";
+        extra3.classList.add('hidden');
+      } else {
+        box3.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 opacity-60 flex flex-col gap-2.5";
+        btn3.disabled = true;
+        btn3.className = "px-3 py-1.5 rounded-lg bg-slate-200 text-slate-400 font-bold text-xs";
+        btn3.innerHTML = "Chờ bước 2";
+        extra3.classList.add('hidden');
+      }
+
+      document.getElementById('modal-step-updater').classList.remove('hidden');
+    }
+
+    function closeStepModal() {
+      document.getElementById('modal-step-updater').classList.add('hidden');
+      activeModalJob = null;
+    }
+
+    async function executeStep(step) {
+      if (!activeModalJob) return;
+
+      try {
+        if (step === 1) {
+          const res = await Auth.fetch(`../backend/api/technicians.php?action=update-status&booking_id=${activeModalJob.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'in_progress', technical_note: 'KTV đã tiếp nhận đơn và chuẩn bị dụng cụ' })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Đã xác nhận tiếp nhận ca thành công!', 'success');
+            await loadTechnicianSchedule();
+            openStepModal(activeModalJob.id);
+          } else {
+            showToast(data.message || 'Lỗi cập nhật CSDL.', 'error');
+          }
+        } else if (step === 2) {
+          const res = await Auth.fetch(`../backend/api/technicians.php?action=update-status&booking_id=${activeModalJob.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'in_progress', technical_note: 'KTV đang di chuyển xe máy đến địa chỉ khách hàng' })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Đã cập nhật: Bạn đang di chuyển đến nhà khách!', 'success');
+            await loadTechnicianSchedule();
+            openStepModal(activeModalJob.id);
+          } else {
+            showToast(data.message || 'Lỗi cập nhật CSDL.', 'error');
+          }
+        } else if (step === 3) {
+          const actualCost = document.getElementById('step-actual-cost').value || activeModalJob.estimated_cost || 350000;
+          const techNote = document.getElementById('step-tech-note').value.trim();
+
+          const res = await Auth.fetch(`../backend/api/technicians.php?action=complete&booking_id=${activeModalJob.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              actual_cost: actualCost,
+              technical_note: techNote
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            showToast('Chúc mừng bạn đã hoàn tất ca! Doanh thu đã được cộng vào ví.', 'success');
+            await loadTechnicianSchedule();
+            closeStepModal();
+          } else {
+            showToast(data.message || 'Lỗi nghiệm thu ca trực.', 'error');
+          }
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối CSDL MySQL: ' + err.message, 'error');
+      }
+    }
+
+    // 10. Switch Main Tabs
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.className = "tab-btn px-3 py-2 rounded-lg font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 flex items-center gap-1.5 transition-all";
+      });
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+
+      const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+      const activeContent = document.getElementById(`tab-content-${tabId}`);
+      if (activeBtn) {
+        activeBtn.className = "tab-btn px-3 py-2 rounded-lg font-bold bg-brand-700 text-white shadow-xs flex items-center gap-1.5 transition-all";
+      }
+      if (activeContent) {
+        activeContent.classList.remove('hidden');
+      }
+    }
+
+    // 11. Subfilter for My Jobs
+    function filterMyJobs(sub) {
+      currentSubFilter = sub;
+      ['all', 'active', 'completed'].forEach(k => {
+        const btn = document.getElementById(`subfilter-${k}`);
+        if (k === sub) {
+          btn.className = "px-2.5 py-1 rounded-md font-bold bg-slate-100 text-brand-700";
+        } else {
+          btn.className = "px-2.5 py-1 rounded-md text-slate-600 hover:text-slate-900";
+        }
+      });
+      renderMyJobs();
+    }
+
+    // 12. Toggle Shift Status
+    async function toggleShiftStatus() {
+      if (!currentTech) return;
+      const nextStatus = currentTech.shift_status === 'ready' ? 'busy' : 'ready';
+
+      try {
+        const res = await Auth.fetch(`../backend/api/technicians.php?action=shift-status&tech_id=${encodeURIComponent(currentTech.id)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ shift_status: nextStatus })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          currentTech.shift_status = nextStatus;
+          renderHeaderProfile();
+          showToast(`Đã chuyển trạng thái: ${nextStatus === 'ready' ? 'Sẵn sàng nhận ca' : 'Đang bận'}`, 'info');
+        }
+      } catch (e) {
+        showToast('Lỗi cập nhật trạng thái trực.', 'error');
+      }
+    }
+
+    // 13. Rút tiền Modal
+    function openWithdrawModal() {
+      document.getElementById('modal-withdraw').classList.remove('hidden');
+    }
+    function closeWithdrawModal() {
+      document.getElementById('modal-withdraw').classList.add('hidden');
+    }
+    function setQuickWithdraw(val) {
+      const input = document.getElementById('withdraw-amount-input');
+      if (val === 'max') {
+        input.value = walletData ? walletData.balance : 1000000;
+      } else {
+        input.value = val;
+      }
+    }
+    async function submitWithdraw(e) {
+      e.preventDefault();
+      const amount = Number(document.getElementById('withdraw-amount-input').value);
+      const btn = document.getElementById('btn-submit-withdraw');
+
+      if (!amount || amount < 50000) {
+        showToast('Số tiền rút tối thiểu là 50.000 VNĐ.', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = `Đang xử lý...`;
+
+      try {
+        const res = await Auth.fetch(`../backend/api/technicians.php?action=withdraw&tech_id=${encodeURIComponent(currentTech.id)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          showToast(data.message || 'Tạo lệnh rút tiền thành công!', 'success');
+          closeWithdrawModal();
+          await loadWalletData();
+        } else {
+          showToast(data.message || 'Không thể rút tiền.', 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi kết nối CSDL.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>Tạo Lệnh Rút</span><span class="material-symbols-outlined text-[15px]">send</span>`;
+      }
+    }
+
+    // 14. Filter Parts Table
+    function filterPartsTable() {
+      const query = document.getElementById('filter-parts-input').value.toLowerCase();
+      const rows = document.querySelectorAll('#parts-table-body tr');
+      rows.forEach(r => {
+        const text = r.textContent.toLowerCase();
+        r.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    function getDeviceIcon(deviceType) {
+      const text = (deviceType || '').toLowerCase();
+      if (text.includes('laptop') || text.includes('macbook')) return 'laptop_mac';
+      if (text.includes('pc') || text.includes('máy tính') || text.includes('desktop') || text.includes('máy bàn')) return 'desktop_windows';
+      if (text.includes('mạng') || text.includes('wifi') || text.includes('router') || text.includes('lan') || text.includes('switch')) return 'router';
+      if (text.includes('in') || text.includes('printer') || text.includes('scan') || text.includes('ngoại vi')) return 'print';
+      return 'devices';
+    }
+
+    // Đăng xuất
+    function handleLogout() {
+      localStorage.removeItem('techcare_user');
+      localStorage.removeItem('techcare_token');
+      window.location.replace('index.html');
+    }
+
+    // 15. Modals Bảng giá & Quy trình
+    function switchPricingModalTab(tabName) {
+      const tabs = ['pc', 'network', 'software'];
+      tabs.forEach(t => {
+        const btn = document.getElementById('pricing-tab-btn-' + t);
+        const content = document.getElementById('pricing-tab-content-' + t);
+        if (t === tabName) {
+          if (btn) btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-xs sm:text-sm bg-brand-700 text-white shadow-xs transition-all cursor-pointer shrink-0";
+          if (content) content.classList.remove('hidden');
+        } else {
+          if (btn) btn.className = "flex items-center gap-2 px-4 py-2 rounded-xl font-semibold text-xs sm:text-sm text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-all cursor-pointer shrink-0";
+          if (content) content.classList.add('hidden');
+        }
+      });
+    }
+
+    function openPricingModal() {
+      const modal = document.getElementById('modal-pricing');
+      if (modal) {
+        switchPricingModalTab('pc');
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+    function closePricingModal() {
+      const modal = document.getElementById('modal-pricing');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    function openProcessModal() {
+      const modal = document.getElementById('modal-process');
+      if (modal) {
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+    }
+    function closeProcessModal() {
+      const modal = document.getElementById('modal-process');
+      if (modal) {
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closePricingModal();
+        closeProcessModal();
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      Auth.initSessionTimer();
+      loadTechnicianSchedule();
+    });
+  </script>
+
+</body>
+</html>

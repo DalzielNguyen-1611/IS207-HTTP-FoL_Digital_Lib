@@ -1,0 +1,15 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Chuyển tiếp Header Authorization đến PHP trong môi trường Apache XAMPP
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Cho phép truy cập trực tiếp file và thư mục thực tế
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Điều hướng clean URLs /api/* về api/index.php
+    RewriteRule ^api/(.*)$ api/index.php?route=$1 [QSA,L]
+</IfModule>
