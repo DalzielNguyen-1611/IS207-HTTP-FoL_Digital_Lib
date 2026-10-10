@@ -48,10 +48,11 @@
 | STT | Họ và Tên | MSSV | Lớp | Vai trò | GitHub | Email |
 | :---: | :--- | :---: | :---: | :---: | :---: | :--- |
 | 1 | **Nguyễn Đoàn Đức Hiếu** | 24520500 | IS207.R11 | **Leader** | [@DalzielNguyen-1611](https://github.com/DalzielNguyen-1611) | [24520500@gm.uit.edu.vn](mailto:24520500@gm.uit.edu.vn) |
-| 2 | **Nguyễn Thị Phương Hoa** | 23520506 | IS207.R11 | Member | — | [23520506@gm.uit.edu.vn](mailto:23520506@gm.uit.edu.vn) |
-| 3 | **Nguyễn Văn Phát** | 24521314 | IS207.R11 | Member | — | [24521314@gm.uit.edu.vn](mailto:24521314@gm.uit.edu.vn) |
-| 4 | **Trần Anh Thư** | 24521732 | IS207.R11 | Member | — | [24521732@gm.uit.edu.vn](mailto:24521732@gm.uit.edu.vn) |
-| 5 | **Trần Ngọc Thảo** | 24521649 | IS207.R11 | Member | — | [24521649@gm.uit.edu.vn](mailto:24521649@gm.uit.edu.vn) |
+| 2 | **Nguyễn Văn Phát** | 24521314 | IS207.R11 | Member | — | [24521314@gm.uit.edu.vn](mailto:24521314@gm.uit.edu.vn) |
+| 3 | **Trần Hoàng Phúc** | 24521398 | IS207.R11 | Member | — | [24521398@gm.uit.edu.vn](mailto:24521398@gm.uit.edu.vn) |
+| 4 | **Dương Đình Thảo** | 24521645 | IS207.R11 | Member | — | [24521645@gm.uit.edu.vn](mailto:24521645@gm.uit.edu.vn) |
+| 5 | **Trần Thị Thanh Thảo** | 24521651 | IS207.R11 | Member | — | [24521651@gm.uit.edu.vn](mailto:24521651@gm.uit.edu.vn) |
+| 6 | **Hồ Thị Phương Thùy** | 24521751 | IS207.R11 | Member | — | [24521751@gm.uit.edu.vn](mailto:24521751@gm.uit.edu.vn) |
 
 ---
 
