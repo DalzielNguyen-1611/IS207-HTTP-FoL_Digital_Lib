@@ -5,19 +5,19 @@
   </a>
 </p>
 
-<h1 align="center"><b>PHÂN TÍCH DỮ LIỆU KINH DOANH - BUSINESS DATA ANALYSIS</b></h1>
+<h1 align="center"><b>PHÁT TRIỂN ỨNG DỤNG WEB - WEB APPLICATION DEVELOPMENT</b></h1>
 
-<h3 align="center">When Does Equity Return Predictability Decay? A Multi-Horizon and Regime-Dependent Out-of-Sample Analysis</h3>
+<h3 align="center">TechCare Platform — Hệ Thống Đặt Lịch & Điều Phối Kỹ Thuật Viên Sửa Chữa Thiết Bị IT (3-Tier Architecture)</h3>
 
 <p align="center">
-  <i>Kho lưu trữ toàn bộ mã nguồn, dữ liệu, tài liệu và báo cáo phục vụ cho đồ án môn học Phân tích dữ liệu kinh doanh</i>
+  <i>Kho lưu trữ toàn bộ mã nguồn, cơ sở dữ liệu, tài liệu thiết kế và kiến trúc 3-Tier phục vụ cho đồ án môn học Phát triển ứng dụng web</i>
 </p>
 
 <p align="center">
-  <a href="https://github.com/DalzielNguyen-1611/IS403.R12-equity-return-predictability"><img src="https://img.shields.io/badge/Course-IS402-0077b6?style=for-the-badge&logo=googlescholar&logoColor=white" alt="Course IS402"></a>
+  <a href="https://github.com/DalzielNguyen-1611/IS207-HTTP-mini-project"><img src="https://img.shields.io/badge/Course-IS207-0077b6?style=for-the-badge&logo=googlescholar&logoColor=white" alt="Course IS207"></a>
   <img src="https://img.shields.io/badge/Semester-HK1%20(2026--2027)-0096c7?style=for-the-badge&logo=clockify&logoColor=white" alt="Semester">
-  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python Version">
-  <img src="https://img.shields.io/badge/Jupyter-Project%20%2F%20Notebook-F37626?style=for-the-badge&logo=jupyter&logoColor=white" alt="Jupyter">
+  <img src="https://img.shields.io/badge/PHP-8.x%20OOP-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP Version">
+  <img src="https://img.shields.io/badge/MySQL-8.0%20(3NF)-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
 </p>
 
 ---
@@ -26,10 +26,12 @@
 
 | Thuộc tính | Chi tiết |
 | :--- | :--- |
-| **Tên môn học** | Phân tích dữ liệu kinh doanh - Business Data Analysis |
-| **Mã môn học** | IS402 |
-| **Lớp học phần** | IS402.R12 |
-| **Đề tài đồ án** | **When Does Equity Return Predictability Decay? A Multi-Horizon and Regime-Dependent Out-of-Sample Analysis** |
+| **Tên môn học** | Phát triển ứng dụng web — Web Application Development |
+| **Mã môn học** | IS207 |
+| **Lớp học phần** | IS207.R11 |
+| **Số tín chỉ** | 4 (3 lý thuyết + 1 thực hành) |
+| **Đề tài đồ án** | **TechCare Platform — Hệ thống đặt lịch, phân công và điều phối kỹ thuật viên sửa chữa thiết bị IT** |
+| **Mô hình kiến trúc** | 3-Tier Architecture (Presentation – Application – Data Tier) |
 | **Học kỳ / Năm học** | Học kì 1 — Năm học 2026 - 2027 |
 | **Khoa / Trường** | Khoa Hệ thống Thông tin — Trường ĐH Công nghệ Thông tin (UIT - ĐHQG-HCM) |
 
@@ -37,7 +39,7 @@
 
 ## 👨‍🏫 2. GIẢNG VIÊN HƯỚNG DẪN
 
-- **Giảng viên lý thuyết:** ThS. Dương Phi Long
+- **Giảng viên phụ trách:** ThS. Tạ Việt Phương — [phuongtv@uit.edu.vn](mailto:phuongtv@uit.edu.vn)
 
 ---
 
@@ -45,33 +47,125 @@
 
 | STT | Họ và Tên | MSSV | Lớp | Vai trò | GitHub | Email |
 | :---: | :--- | :---: | :---: | :---: | :---: | :--- |
-| 1 | **Nguyễn Đoàn Đức Hiếu** | 24520500 | IS402.R12 | **Leader** | [@DalzielNguyen-1611](https://github.com/DalzielNguyen-1611) | [24520500@gm.uit.edu.vn](mailto:24520500@gm.uit.edu.vn) |
-| 2 | **Nguyễn Thị Phương Hoa** | 23520506 | IS402.R12 | Member | — | [23520506@gm.uit.edu.vn](mailto:23520506@gm.uit.edu.vn) |
-| 3 | **Nguyễn Văn Phát** | 24521314 | IS402.R12 | Member | — | [24521314@gm.uit.edu.vn](mailto:24521314@gm.uit.edu.vn) |
-| 4 | **Trần Anh Thư** | 24521732 | IS402.R12 | Member | — | [24521732@gm.uit.edu.vn](mailto:24521732@gm.uit.edu.vn) |
-| 5 | **Trần Ngọc Thảo** | 24521649 | IS402.R12 | Member | — | [24521649@gm.uit.edu.vn](mailto:24521649@gm.uit.edu.vn) |
+| 1 | **Nguyễn Đoàn Đức Hiếu** | 24520500 | IS207.R11 | **Leader** | [@DalzielNguyen-1611](https://github.com/DalzielNguyen-1611) | [24520500@gm.uit.edu.vn](mailto:24520500@gm.uit.edu.vn) |
+| 2 | **Nguyễn Thị Phương Hoa** | 23520506 | IS207.R11 | Member | — | [23520506@gm.uit.edu.vn](mailto:23520506@gm.uit.edu.vn) |
+| 3 | **Nguyễn Văn Phát** | 24521314 | IS207.R11 | Member | — | [24521314@gm.uit.edu.vn](mailto:24521314@gm.uit.edu.vn) |
+| 4 | **Trần Anh Thư** | 24521732 | IS207.R11 | Member | — | [24521732@gm.uit.edu.vn](mailto:24521732@gm.uit.edu.vn) |
+| 5 | **Trần Ngọc Thảo** | 24521649 | IS207.R11 | Member | — | [24521649@gm.uit.edu.vn](mailto:24521649@gm.uit.edu.vn) |
 
 ---
 
 ## 🎯 4. MỤC TIÊU CỦA ĐỒ ÁN
 
-Repository này được tạo ra nhằm phục vụ riêng cho đồ án môn học với các mục tiêu chính:
-- **Lưu trữ & Quản lý đồ án:** Quản lý tập trung toàn bộ mã nguồn, tập dữ liệu (dataset), tài liệu nghiên cứu và báo cáo của đồ án.
-- **Khám phá & Xử lý dữ liệu tài chính:** Thu thập, làm sạch và thực hiện phân tích khám phá (EDA) dữ liệu chuỗi thời gian, các chỉ số tài chính và kinh tế vĩ mô liên quan đến khả năng sinh lời của cổ phiếu.
-- **Xây dựng & Đánh giá mô hình dự báo:** Áp dụng và so sánh các mô hình thống kê, kinh tế lượng và học máy (Machine Learning / Deep Learning) trong bài toán dự đoán tỷ suất sinh lợi (Equity Return Predictability).
-- **Tổng kết & Đưa ra hàm ý kinh doanh:** Trực quan hóa kết quả phân tích (Data Visualization), xây dựng báo cáo chi tiết và đề xuất các chiến lược đầu tư / quản trị rủi ro khả thi.
+Repository này được xây dựng nhằm phục vụ cho đồ án môn học với các mục tiêu chính:
+- **Tổ chức kiến trúc 3-Tier chuẩn mực**: Tách bạch hoàn toàn giữa Giao diện (Presentation Tier), Xử lý nghiệp vụ & RESTful API (Application Tier với 100% PHP thuần OOP), và Lưu trữ dữ liệu (Data Tier với MySQL chuẩn hóa 3NF).
+- **Số hóa nghiệp vụ IT Support & cứu hộ thiết bị thực tế**:
+  - **Khách hàng**: Đặt lịch cứu hộ thiết bị (PC, Laptop, Mạng), chọn khung giờ và theo dõi tiến độ ca trực realtime.
+  - **Điều phối viên (Dispatch)**: Giám sát toàn bộ phiếu yêu cầu chờ xử lý, trạng thái trực ca của kỹ thuật viên và phân công tức thời.
+  - **Kỹ thuật viên (Technician)**: Tiếp nhận ca làm việc, nghiệm thu hoàn tất dịch vụ, xuất hóa đơn linh kiện và quản lý ví thu nhập.
+- **Xây dựng Backend RESTful API độc lập**: 100% PHP thuần OOP, PDO Prepared Statements phòng chống SQL Injection, chuẩn hóa JSON response và CORS.
+- **Tối ưu trải nghiệm người dùng**: Thiết kế giao diện Dashboard và Portal hiện đại, responsive, trực quan, hỗ trợ mô phỏng hoạt động kể cả khi chưa kết nối Database.
 
 ---
 
 ## 📂 5. CẤU TRÚC THƯ MỤC
 
 ```text
-IS403.R12-equity-return-predictability/
-├── btth/               # Thư mục lưu trữ các bài tập thực hành (Lab)
-├── dataset/            # Thư mục lưu trữ dữ liệu nghiên cứu đồ án
-├── docs/               # Tài liệu hướng dẫn, kiểm soát chất lượng và checklist
-├── src/                # Thư mục lưu trữ toàn bộ mã nguồn và notebook
-│   ├── preprocessing/  # Notebooks xử lý, làm sạch và chuẩn bị dữ liệu
-│   └── training/       # Mã nguồn và notebook huấn luyện, đánh giá mô hình
-└── README.md           # Tài liệu giới thiệu học phần và đồ án
+IS207-HTTP-mini-project/
+├── frontend/                     # Tier 1: Presentation Tier (Giao diện Web Client)
+│   ├── index.html                # Cổng điều hướng toàn bộ 17 màn hình chức năng
+│   ├── dat_lich.html             # Đặt lịch sửa chữa & cứu hộ IT (TechCare Desk & Home)
+│   ├── khach_hang.html           # Theo dõi tiến độ & đánh giá ca sửa chữa phía khách hàng
+│   ├── ky_thuat_vien.html        # Portal Kỹ thuật viên: Lịch trực, nghiệm thu & ví thu nhập
+│   ├── quan_ly.html              # Dashboard Điều phối viên: Phân công đơn & giám sát thợ
+│   ├── dang_nhap.html            # Đăng nhập / Chuyển đổi vai trò người dùng
+│   ├── danh_gia.html             # Khảo sát & xếp hạng chất lượng dịch vụ
+│   ├── assets/                   # Vector logo SVG, hình ảnh thiết bị & icons
+│   │   ├── js/                   # Modules JavaScript phía Client (api.js, auth.js)
+│   │   └── *.jpg / *.svg         # Banner, hình minh họa sự cố máy tính
+│   └── archive_old_pages/        # Các màn hình thành phần chi tiết độc lập
+│
+├── backend/                      # Tier 2: Application / Logic Tier (100% PHP THUẦN OOP)
+│   ├── config/
+│   │   └── database.php          # Quản lý kết nối PDO Singleton (hỗ trợ fallback mock data)
+│   ├── helpers/
+│   │   ├── Response.php          # Chuẩn hóa JSON Response, HTTP status code & CORS
+│   │   └── AuthHelper.php        # Hỗ trợ xác thực người dùng và kiểm tra quyền
+│   ├── models/                   # Tầng mô hình dữ liệu (User, Booking, Technician, Wallet, Review)
+│   ├── controllers/              # Tầng điều khiển nghiệp vụ (Auth, Booking, Dispatch, Technician, Review)
+│   ├── api/                      # Tầng Endpoint RESTful API (auth.php, bookings.php, dispatch.php,...)
+│   ├── .htaccess                 # Cấu hình URL Rewrite sạch cho Web Server Apache
+│   └── index.php                 # Trang kiểm tra môi trường PHP & trạng thái hệ thống
+│
+├── database/                     # Tier 3: Data Tier (Cơ sở dữ liệu quan hệ RDBMS)
+│   ├── schema.sql                # DDL khởi tạo 8 bảng quan hệ chuẩn hóa 3NF
+│   └── README.md                 # Hướng dẫn chi tiết nạp CSDL vào MySQL qua phpMyAdmin / CLI
+│
+├── docs/                         # Tài liệu kỹ thuật & kiến trúc đồ án
+│   ├── architecture_3tier.md     # Thuyết minh chi tiết kiến trúc 3-Tier phục vụ báo cáo/slide
+│   ├── techcare_desk_DESIGN.md   # Design tokens & UX Flow phân hệ IT doanh nghiệp
+│   └── techcare_home_DESIGN.md   # Design tokens & UX Flow phân hệ sửa chữa gia đình
+│
+├── .gitignore                    # Loại trừ file rác, dữ liệu nhạy cảm và file thử nghiệm
+└── README.md                     # Tài liệu giới thiệu tổng quan đồ án môn học
 ```
+
+---
+
+## 🚀 6. HƯỚNG DẪN CÀI ĐẶT & KHỞI CHẠY
+
+### Cách 1: Sử dụng XAMPP (Khuyên dùng)
+1. Bật **Apache** và **MySQL** trong bảng điều khiển **XAMPP Control Panel**.
+2. Sao chép thư mục dự án vào thư mục web root của XAMPP:
+   ```text
+   C:\xampp\htdocs\mini_project\
+   ```
+3. Mở trình duyệt và truy cập các cổng:
+   * **Cổng điều hướng Frontend:** [http://localhost/mini_project/frontend/index.html](http://localhost/mini_project/frontend/index.html)
+   * **Cổng kiểm tra Backend PHP:** [http://localhost/mini_project/backend/index.php](http://localhost/mini_project/backend/index.php)
+   * **API Lấy danh sách phiếu:** [http://localhost/mini_project/backend/api/bookings.php](http://localhost/mini_project/backend/api/bookings.php)
+4. *(Tùy chọn)* Nạp CSDL: Mở [phpMyAdmin](http://localhost/phpmyadmin), tạo CSDL tên `techcare_db` và Import file [database/schema.sql](database/schema.sql). *(Lưu ý: Nếu chưa bật MySQL, hệ thống vẫn có cơ chế Mock Data tự động để demo mượt mà không bị gián đoạn).*
+
+### Cách 2: Sử dụng PHP Built-in Server
+Nếu máy tính đã cài đặt môi trường PHP:
+1. Mở Terminal / PowerShell tại thư mục gốc của dự án:
+   ```bash
+   php -S localhost:8000
+   ```
+2. Truy cập qua trình duyệt:
+   * **Frontend:** [http://localhost:8000/frontend/index.html](http://localhost:8000/frontend/index.html)
+   * **Backend:** [http://localhost:8000/backend/index.php](http://localhost:8000/backend/index.php)
+
+### Cách 3: Trình chiếu giao diện tĩnh (Static Presentation)
+Có thể mở trực tiếp file `frontend/index.html` trên bất kỳ trình duyệt nào để trải nghiệm và thuyết trình giao diện mà không cần thiết lập Web Server.
+
+---
+
+## 📡 7. DANH MỤC RESTFUL API PHP (APPLICATION TIER)
+
+| Endpoint PHP | Phương thức | Mô tả chức năng |
+| :--- | :---: | :--- |
+| `api/auth.php?action=login` | `POST` | Đăng nhập tài khoản (Khách hàng, KTV, Điều phối) |
+| `api/auth.php?action=register` | `POST` | Đăng ký tài khoản người dùng mới |
+| `api/auth.php?action=profile` | `GET` | Lấy thông tin tài khoản đang đăng nhập |
+| `api/bookings.php` | `GET` | Lấy danh sách toàn bộ phiếu yêu cầu / tickets |
+| `api/bookings.php?id={id}` | `GET` | Xem chi tiết ca trực (ví dụ: `BK-3895` hoặc `TC-HOME-3895`) |
+| `api/bookings.php` | `POST` | Tạo phiếu đặt lịch sửa chữa / cứu hộ IT mới |
+| `api/bookings.php?id={id}&action=status` | `POST` / `PUT` | Cập nhật tiến độ ca sửa chữa (`assigned`, `in_progress`, `completed`) |
+| `api/dispatch.php?action=dashboard` | `GET` | Thống kê số liệu, hàng đợi pending, KTV trực ca cho điều phối |
+| `api/dispatch.php?action=assign` | `POST` | Phân công KTV cho ca cứu hộ |
+| `api/dispatch.php?action=technicians-live` | `GET` | Danh sách trạng thái realtime của tất cả kỹ thuật viên |
+| `api/technicians.php?action=schedule` | `GET` | Xem lịch trực ca & phân công nhiệm vụ của KTV (`#NV-204`) |
+| `api/technicians.php?action=complete&booking_id={id}` | `POST` | Nghiệm thu hoàn tất ca & xuất hóa đơn linh kiện |
+| `api/technicians.php?action=wallet` | `GET` | Xem số dư ví thu nhập & lịch sử nhận tiền |
+| `api/technicians.php?action=withdraw` | `POST` | Tạo yêu cầu rút tiền về tài khoản ngân hàng |
+| `api/reviews.php` | `POST` | Khách hàng gửi đánh giá sao & nhận xét sau sửa chữa |
+
+---
+
+## 📑 8. TÀI LIỆU & BÁO CÁO MÔN HỌC
+
+* Thuyết minh chi tiết kiến trúc 3-Tier: [docs/architecture_3tier.md](docs/architecture_3tier.md)
+* Thiết kế phân hệ TechCare Desk (Doanh nghiệp): [docs/techcare_desk_DESIGN.md](docs/techcare_desk_DESIGN.md)
+* Thiết kế phân hệ TechCare Home (Gia đình): [docs/techcare_home_DESIGN.md](docs/techcare_home_DESIGN.md)
+* Hướng dẫn thiết lập Cơ sở dữ liệu: [database/README.md](database/README.md)
