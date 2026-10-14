@@ -108,21 +108,23 @@ Khi nhận nhiệm vụ xây dựng hoặc bổ sung một trang giao diện m�
   2. Ánh xạ an toàn tới file view tương ứng trong `resources/views/`.
   3. Trả về mã HTTP `404 Not Found` kèm trang thông báo thân thiện nếu route hoặc view không tồn tại.
 
-### 4. Quy chuẩn Design System & Nhận diện thương hiệu Khoa Văn học
-Mọi trang UI mới phải kế thừa chuẩn nhận diện thương hiệu đã thống nhất:
-- **Typography**: Bắt buộc nạp Google Fonts `Roboto, sans-serif` với các trọng số `300, 400, 500, 700`.
-- **Bảng mã màu chuẩn (Brand Color Palette)**:
-  - Màu xanh lá chủ đạo (Brand Primary Green): `#1b8846` (hover: `#156f38`).
-  - Màu xanh ĐHQG (VNU Blue): `#005baa` (navy đậm: `#003e7e`, top bar: `#0b2240`).
-  - Màu vàng điểm xuyết (Accent Gold): `#c59b27`.
-  - Màu chữ: Chữ chính `#212529`, chữ phụ/mô tả `#555555` hoặc `#6c757d`.
-  - Màu nền & viền: Nền body `#f8f9fa`, nền thẻ card `#ffffff`, đường kẻ viền `#dee2e6`.
-- **Logo hệ thống**: Bắt buộc dùng logo tròn chính thức nền trong suốt tại `public/assets/images/logo.png`. Kích thước hiển thị chuẩn trong Header là `68px x 68px`.
-- **Kế thừa Layout**:
-  - **Top bar**: Chiều cao chuẩn 40px (màu xanh navy đậm `#003e7e` hoặc `#0b2240`, chữ trắng, chứa chọn ngôn ngữ & liên kết tiện ích).
-  - **Header**: Chiều cao chuẩn 110px, chứa logo và khối chữ 3 cấp: ĐẠI HỌC QUỐC GIA TP.HCM - TRƯỜNG ĐH KHXH&NV - KHOA VĂN HỌC.
-  - **Container**: Độ rộng tối đa chuẩn `1200px` - `1280px` căn giữa màn hình (`margin: 0 auto;`).
-  - **Footer**: Chứa đầy đủ thông tin bản quyền và liên hệ của Khoa Văn học.
+### 4. Quy định chú thích (Comment) rõ ràng cho từng khối tính năng & thành phần
+- **Yêu cầu bắt buộc**: Mọi khối giao diện HTML/PHP template phải có comment chú thích rõ ràng ở đầu đoạn code để người đọc dễ dàng nhận biết đoạn code bên dưới hiển thị cái gì hoặc đảm nhận tính năng nào.
+- **Cách ghi ngắn gọn, rõ nghĩa**: Chỉ cần ghi tên tính năng hoặc thành phần hiển thị, không cần diễn giải rườm rà.
+  - Ví dụ trong HTML/PHP:
+    ```html
+    <!-- Header: Thanh điều hướng & chọn ngôn ngữ -->
+    ...
+    <!-- Banner chính & khung tìm kiếm tài liệu -->
+    ...
+    <!-- Danh sách bộ sưu tập nổi bật -->
+    ...
+    <!-- Khối thông tin liên hệ & bản đồ -->
+    ...
+    <!-- Phân trang danh sách -->
+    ```
+- **Đối với CSS và JavaScript**: Phân tách và ghi chú rõ các phần (ví dụ `/* ===== Banner & Search Bar ===== */`, `// Xử lý sự kiện chuyển tab danh mục`).
+- **Quyền tự chủ về thẩm mỹ**: Người code được tự quyết định chi tiết về màu sắc, kích thước, font chữ và phong cách hiển thị sao cho phù hợp và thẩm mỹ, không bị gò bó bởi bộ thông số cứng nhắc.
 
 ### 5. Dữ liệu mẫu (Mock Data) & Tiêu chuẩn an toàn tầng View
 - Khai báo Mock Data rõ ràng bằng mảng PHP thuần (`array`) ở đầu file view hoặc file data mẫu dùng chung để giả lập cấu trúc dữ liệu thực tế.
@@ -148,11 +150,10 @@ Trước khi gửi Pull Request hoặc báo cáo hoàn thành nhiệm vụ UI, A
 
 - [ ] **Vị trí file đúng chuẩn**: View nằm trong `resources/views/<module>/index.php`; không có bất kỳ file `.html` nào trong `public/`.
 - [ ] **Định tuyến Clean URL hoạt động**: Truy cập được trang qua URL sạch (ví dụ: `http://localhost:8000/<route>`) mà không cần gõ `.php` hay `.html`.
-- [ ] **Chuẩn Typography & Font**: Đã nhúng và hiển thị đúng font chữ `Roboto, sans-serif`.
-- [ ] **Chuẩn Màu sắc & Logo**: Sử dụng đúng logo `public/assets/images/logo.png` và các mã màu trong Brand Palette.
-- [ ] **Đồng bộ Header/Footer**: Kích thước Top bar (40px) và Header (110px, logo 68px) khớp với toàn bộ hệ sinh thái website.
-- [ ] **Mock Data an toàn**: Dữ liệu mẫu hiển thị đầy đủ các trạng thái, có thoát mã ký tự đặc biệt qua `htmlspecialchars()`, không gọi DB.
-- [ ] **Responsive & Thẩm mỹ**: Giao diện không vỡ layout khi co dãn màn hình, khoảng cách (padding/margin) hài hòa, chuyên nghiệp.
+- [ ] **Chú thích code đầy đủ (Comments)**: Đã để lại comment ngắn gọn, rõ nghĩa trước mỗi khối tính năng/hiển thị (đoạn code dưới hiển thị cái gì thì ghi tên cái đó ra).
+- [ ] **Tài nguyên tĩnh đúng vị trí**: Toàn bộ CSS, JS, hình ảnh đặt đúng trong thư mục `public/assets/`.
+- [ ] **Mock Data an toàn**: Dữ liệu mẫu hiển thị đầy đủ các trạng thái, có thoát mã ký tự đặc biệt qua `htmlspecialchars()`, không gọi DB trực tiếp.
+- [ ] **Responsive & Thẩm mỹ**: Giao diện hiển thị tốt, không vỡ layout khi co dãn màn hình, bố cục trực quan hài hòa.
 - [ ] **Tuân thủ Git Workflow**: Commit đúng định dạng `feat(ui): ...`, push lên nhánh `feature/...` và tạo PR chờ Leader duyệt (Rule 2).
 
 ---
