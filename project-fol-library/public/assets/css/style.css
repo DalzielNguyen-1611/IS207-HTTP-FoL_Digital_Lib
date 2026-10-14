@@ -1,0 +1,950 @@
+/* ==============================================================================
+   THƯ VIỆN TRUNG TÂM - ĐẠI HỌC QUỐC GIA TP.HCM (CENTRAL LIBRARY VNU-HCM)
+   UI Stylesheet - Hệ thống Thư viện số / Bộ sưu tập số
+   ============================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700&display=swap');
+
+:root {
+  --primary-green: #1b8846;
+  --primary-green-dark: #137036;
+  --primary-green-light: #e8f5e9;
+  --banner-green-title: #066033;
+  --vnu-blue: #005baa;
+  --vnu-blue-dark: #004582;
+  --search-orange: #ea580c;
+  --search-orange-hover: #c2410c;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --text-author: #0284c7;
+  --card-border: #e2e8f0;
+  --bg-light-section: #f1f5f9;
+  --font-family: 'Roboto', sans-serif;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--text-dark);
+  background-color: #ffffff;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+}
+
+input, select {
+  font-family: inherit;
+  outline: none;
+}
+
+/* ==============================================================================
+   1. TOP BAR
+   ============================================================================== */
+.top-bar {
+  background-color: var(--primary-green);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 3.5rem;
+  font-size: 0.86rem;
+  color: #ffffff;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.login-link {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #ffffff;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.login-link:hover {
+  opacity: 0.85;
+}
+
+.flag-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flag-icon {
+  width: 22px;
+  height: 15px;
+  border-radius: 2px;
+  cursor: pointer;
+  display: inline-block;
+  object-fit: cover;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  transition: transform 0.2s;
+}
+
+.flag-icon:hover {
+  transform: scale(1.1);
+}
+
+/* ==============================================================================
+   2. MAIN NAVIGATION (HEADER)
+   ============================================================================== */
+.main-header {
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  padding: 1.15rem 3.5rem;
+  min-height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 1.15rem;
+  text-decoration: none;
+}
+
+.brand-logo-svg {
+  width: 52px;
+  height: 52px;
+  flex-shrink: 0;
+}
+
+.brand-logo-img {
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s;
+}
+
+.brand-wrapper:hover .brand-logo-img {
+  transform: scale(1.04);
+}
+
+.brand-text-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title-sub {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--vnu-blue);
+  letter-spacing: 0.35px;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.brand-title-main {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--vnu-blue);
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  line-height: 1.25;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  list-style: none;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-link {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: color 0.2s;
+  padding: 0.5rem 0;
+}
+
+.nav-link:hover {
+  color: var(--primary-green);
+}
+
+.nav-link.active {
+  color: var(--vnu-blue);
+  border-bottom: 2px solid var(--vnu-blue);
+  padding-bottom: calc(0.5rem - 2px);
+}
+
+.nav-search-btn {
+  background: none;
+  border: none;
+  color: #1e3a8a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  cursor: pointer;
+  transition: color 0.2s;
+  border-radius: 4px;
+}
+
+.nav-search-btn:hover {
+  color: var(--primary-green);
+  background-color: #f8fafc;
+}
+
+.caret-icon {
+  font-size: 0.7rem;
+  color: #64748b;
+  transition: transform 0.2s;
+}
+
+/* ==============================================================================
+   3. HERO BANNER & DIGITAL COLLECTION SEARCH
+   ============================================================================== */
+.hero-banner {
+  position: relative;
+  background: linear-gradient(90deg, #7be8d1 0%, #88efdb 35%, #88efdb 65%, #7ee5cd 100%);
+  height: 200px;
+  min-height: 200px;
+  max-height: 200px;
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+.banner-side-art {
+  position: absolute;
+  top: 0;
+  height: 200px;
+  width: auto;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.banner-art-left {
+  left: 0;
+}
+
+.banner-art-right {
+  right: 0;
+}
+
+.hero-container {
+  position: relative;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 2;
+}
+
+/* Center Content: Title & Search */
+.hero-center-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  z-index: 2;
+}
+
+.hero-sub-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 2px;
+}
+
+.hero-vnu-logo-mini {
+  width: 22px;
+  height: 18px;
+  color: #005baa;
+}
+
+.hero-sub-text {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #065f46;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.hero-main-title {
+  font-size: 2.15rem;
+  font-weight: 900;
+  color: #066033;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.7);
+  line-height: 1.1;
+}
+
+/* Search Bar Component - Chuẩn viền xanh đậm 3.5px, cao 42px */
+.search-box-wrapper {
+  width: 100%;
+  max-width: 680px;
+  height: 42px;
+  background: #ffffff;
+  border-radius: 4px;
+  display: flex;
+  align-items: stretch;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  border: 3.5px solid #148041;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0 1rem;
+  font-size: 0.88rem;
+  border: none;
+  outline: none;
+  color: var(--text-dark);
+}
+
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+.search-dropdown {
+  padding: 0 1.25rem 0 0.85rem;
+  font-size: 0.84rem;
+  color: #475569;
+  border: none;
+  border-left: 1px solid #e2e8f0;
+  background: #ffffff;
+  cursor: pointer;
+  outline: none;
+  font-weight: 500;
+}
+
+.search-btn {
+  background: var(--search-orange);
+  color: #ffffff;
+  width: 52px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  flex-shrink: 0;
+}
+
+.search-btn:hover {
+  background: var(--search-orange-hover);
+}
+
+.search-icon-svg {
+  width: 18px;
+  height: 18px;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+}
+
+/* ==============================================================================
+   4. TÀI LIỆU NỔI BẬT (FEATURED DOCUMENTS SECTION)
+   ============================================================================== */
+.featured-section {
+  padding: 2.25rem 3.5rem 3.5rem 3.5rem;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 1.25rem;
+}
+
+.filter-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1.85rem;
+}
+
+.filter-tab {
+  padding: 0.5rem 1.15rem;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #ffffff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-tab:hover {
+  border-color: #94a3b8;
+  color: #1e293b;
+}
+
+.filter-tab.active {
+  background: var(--primary-green);
+  color: #ffffff;
+  border-color: var(--primary-green);
+  box-shadow: 0 2px 6px rgba(27, 136, 70, 0.25);
+}
+
+/* Document Grid: 3 columns */
+.documents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+/* Document Card */
+.doc-card {
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 6px;
+  padding: 0.85rem;
+  display: flex;
+  gap: 0.85rem;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+}
+
+.doc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: #cbd5e1;
+}
+
+/* Card Left Thumbnail */
+.doc-thumbnail-wrap {
+  width: 95px;
+  height: 125px;
+  flex-shrink: 0;
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.doc-cover-art {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Card Right Content */
+.doc-content-wrap {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.doc-badge {
+  align-self: flex-start;
+  background: var(--primary-green);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.18rem 0.55rem;
+  border-radius: 3px;
+  margin-bottom: 0.45rem;
+  text-transform: capitalize;
+}
+
+.doc-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  margin-bottom: 0.35rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.2s;
+}
+
+.doc-card:hover .doc-title {
+  color: var(--vnu-blue);
+}
+
+.doc-meta {
+  font-size: 0.82rem;
+  margin-bottom: 0.45rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.doc-year {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.doc-author {
+  color: var(--text-author);
+  font-weight: 500;
+  margin-left: 0.25rem;
+}
+
+.doc-author:hover {
+  text-decoration: underline;
+}
+
+.doc-excerpt {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ==============================================================================
+   5. DANH SÁCH BỘ SƯU TẬP (COLLECTION CAROUSEL)
+   ============================================================================== */
+.collection-section {
+  background: var(--bg-light-section);
+  padding: 3.5rem 2rem 4rem 2rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.collection-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.collection-title {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2.25rem;
+}
+
+.collection-carousel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.collection-card {
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  padding: 1.75rem 1.5rem;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+}
+
+.collection-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.collection-card-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.collection-logo-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 0.75rem 0;
+}
+
+.collection-logo-img {
+  max-width: 100px;
+  max-height: 80px;
+  object-fit: contain;
+}
+
+/* Carousel Pagination Dots */
+.carousel-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.carousel-dot.active {
+  background: var(--primary-green);
+  width: 11px;
+  height: 11px;
+}
+
+/* ==============================================================================
+   6. FOOTER
+   ============================================================================== */
+.main-footer {
+  background: var(--primary-green);
+  color: #ffffff;
+  padding: 2.75rem 3.5rem 3rem 3.5rem;
+}
+
+.footer-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.footer-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.footer-org-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+
+.footer-line {
+  font-size: 0.88rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.5;
+}
+
+.footer-line strong {
+  font-weight: 600;
+}
+
+.footer-right-logo {
+  flex-shrink: 0;
+}
+
+.footer-logo-svg {
+  width: 140px;
+  height: 90px;
+  opacity: 0.9;
+}
+
+/* ==============================================================================
+   7. RESPONSIVE DESIGN
+   ============================================================================== */
+@media (max-width: 1150px) {
+  .hero-container {
+    grid-template-columns: 200px 1fr 200px;
+  }
+  .documents-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .collection-carousel {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .collection-card:nth-child(4) {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .top-bar {
+    padding: 0 1.5rem;
+  }
+  .main-header {
+    padding: 0.75rem 1.5rem;
+  }
+  .nav-links {
+    gap: 1.15rem;
+  }
+  .hero-container {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .hero-left-art, .hero-right-art {
+    display: none;
+  }
+  .hero-main-title {
+    font-size: 2.2rem;
+  }
+  .collection-carousel {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .footer-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ==============================================================================
+   8. COMMUNITY LIST / DANH SÁCH BỘ SƯU TẬP
+   ============================================================================== */
+.header-green-bar {
+  height: 4px;
+  background-color: var(--primary-green);
+  width: 100%;
+}
+
+.breadcrumb-section {
+  background: #ffffff;
+  padding: 0.85rem 3.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.breadcrumb-container {
+  max-width: 1320px;
+  margin: 0 auto;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.breadcrumb-link {
+  color: var(--primary-green);
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.breadcrumb-link:hover {
+  text-decoration: underline;
+  opacity: 0.85;
+}
+
+.breadcrumb-separator {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.breadcrumb-current {
+  color: #64748b;
+  font-weight: 400;
+}
+
+.community-list-section {
+  padding: 3rem 3.5rem 6rem 3.5rem;
+  min-height: calc(100vh - 360px);
+  background-color: #ffffff;
+}
+
+.community-list-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.community-title {
+  font-size: 1.85rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 2rem;
+}
+
+.community-tree {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.community-item {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.community-item-header {
+  padding: 1.15rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s;
+}
+
+.community-item-header:hover {
+  background-color: #f8fafc;
+}
+
+.community-chevron {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e3a8a;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+  line-height: 1;
+}
+
+.community-item.open .community-chevron {
+  transform: rotate(90deg);
+}
+
+.community-name {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--vnu-blue);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.community-name:hover {
+  color: var(--vnu-blue-dark);
+  text-decoration: underline;
+}
+
+.sub-community-list {
+  display: none;
+  list-style: none;
+  padding: 0.5rem 0 1.25rem 2.5rem;
+  background-color: #f8fafc;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.community-item.open .sub-community-list {
+  display: block;
+}
+
+.sub-community-item {
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.sub-community-item:last-child {
+  border-bottom: none;
+}
+
+.sub-community-name {
+  font-size: 0.92rem;
+  color: #334155;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.15s;
+}
+
+.sub-community-name:hover {
+  color: var(--primary-green);
+  text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .breadcrumb-section {
+    padding: 0.75rem 1.5rem;
+  }
+  .community-list-section {
+    padding: 2rem 1.5rem 4rem 1.5rem;
+  }
+  .contact-section {
+    padding: 2rem 1.5rem 5rem 1.5rem;
+  }
+}
+
+/* ==============================================================================
+   9. CONTACT STATEMENT / TRANG THÔNG TIN LIÊN HỆ
+   ============================================================================== */
+.contact-section {
+  padding: 3.5rem 3.5rem 8rem 3.5rem;
+  min-height: calc(100vh - 360px);
+  background-color: #ffffff;
+}
+
+.contact-container {
+  max-width: 1320px;
+  margin: 0 auto;
+}
+
+.contact-org-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  line-height: 1.35;
+}
+
+.contact-list {
+  list-style: disc;
+  padding-left: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  font-size: 1rem;
+  color: #334155;
+}
+
+.contact-list li {
+  line-height: 1.6;
+}
+
+.contact-email-link {
+  color: var(--vnu-blue);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-email-link:hover {
+  text-decoration: underline;
+  color: var(--vnu-blue-dark);
+}
+
+

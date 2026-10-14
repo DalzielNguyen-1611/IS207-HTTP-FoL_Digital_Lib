@@ -1,0 +1,34 @@
+{
+    "name": "fol/library-system",
+    "description": "Faculty of Literature (FoL) Digital Library Management System - Khoa Văn học (IS207)",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Nhóm Đồ Án IS207.R11",
+            "email": "24520500@gm.uit.edu.vn"
+        }
+    ],
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "Tests\\": "tests/"
+    },
+    "scripts": {
+        "serve": "php -S localhost:8000 -t public",
+        "test": "phpunit"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}
