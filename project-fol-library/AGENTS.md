@@ -169,3 +169,87 @@ Thực hiện nghiêm ngặt theo trình tự 8 bước:
   5. Các lỗi phát hiện, mức độ ảnh hưởng và cách tái hiện.
   6. Các test chưa chạy hoặc bị chặn kèm lý do cụ thể.
   7. Kết luận tổng thể: **PASS**, **FAIL** hoặc **BLOCKED** (dựa trên số liệu và log thực tế, không tự tạo kết quả).
+
+---
+
+# PHẦN IV: QUY ĐỊNH PHÁT TRIỂN GIAO DIỆN & THÊM MỚI TRANG UI (UI CODING RULES)
+
+## 📌 Rule 14: Quy chuẩn thêm mới một trang giao diện (UI Page Implementation Standard)
+
+Khi nhận nhiệm vụ xây dựng hoặc bổ sung một trang giao diện mới (chỉ tính UI/Frontend mock), Agent bắt buộc phải tuân thủ nghiêm ngặt 6 quy chuẩn sau:
+
+### 1. Phạm vi công việc: Chỉ xử lý tầng giao diện (UI-Only Scope)
+- **Giới hạn trách nhiệm**: Chỉ viết mã giao diện hiển thị (HTML/PHP template, CSS, JS tĩnh, mock data và điều hướng Front Controller).
+- **Tuyệt đối cấm**: Không tự ý viết mã nghiệp vụ Backend (không viết Service, Repository, Model, không tự tạo bảng CSDL hoặc chạy migration) trừ khi có task Backend riêng được giao.
+- **Tính độc lập của UI**: Màn hình phải tự vận hành và hiển thị đầy đủ trạng thái dữ liệu (đang tải, có dữ liệu, danh sách rỗng, phân trang) bằng Mock Data mà không phụ thuộc vào kết nối cơ sở dữ liệu thật.
+
+### 2. Cấu trúc thư mục & Nguyên tắc Single Source of Truth
+- **Vị trí lưu trữ View**: Mọi file giao diện bắt buộc phải đặt trong thư mục:
+  ```text
+  project-fol-library/resources/views/<tên-module>/index.php
+  ```
+  *(Ví dụ: `resources/views/home/index.php`, `resources/views/collections/index.php`, `resources/views/contact/index.php`)*.
+- **CẤM TUYỆT ĐỐI**: Không bao giờ tạo các file `.html` tĩnh rải rác bên trong thư mục `public/` (ví dụ cấm tạo `public/index.html`, `public/contact.html`, `public/collections.html`,...). Mọi file `.html` tĩnh rải rác trong `public/` được coi là vi phạm cấu trúc dự án và phải bị xóa bỏ ngay lập tức.
+- **Quản lý tài nguyên tĩnh**: Toàn bộ CSS, JavaScript, hình ảnh phải đặt tập trung trong `public/assets/`:
+  - `public/assets/css/`: Bảng kiểu mẫu CSS dùng chung hoặc riêng cho module.
+  - `public/assets/js/`: Script tương tác phía trình duyệt.
+  - `public/assets/images/`: Hình ảnh, biểu tượng, logo, banner hệ thống.
+
+### 3. Cơ chế định tuyến Clean URL qua Front Controller (`public/index.php`)
+- Mọi trang UI mới phải được đăng ký route trong Front Controller duy nhất tại `public/index.php`.
+- **Định dạng URL chuẩn**: Bắt buộc dùng Clean URL thân thiện người dùng, không để lộ phần mở rộng `.php` hoặc `.html`:
+  - Trang chủ: `/` $\rightarrow$ `resources/views/home/index.php`
+  - Bộ sưu tập: `/collections` $\rightarrow$ `resources/views/collections/index.php`
+  - Liên hệ: `/contact` $\rightarrow$ `resources/views/contact/index.php`
+- Front Controller chịu trách nhiệm:
+  1. Chuẩn hóa đường dẫn (tự động loại bỏ dấu gạch chéo cuối URL).
+  2. Ánh xạ an toàn tới file view tương ứng trong `resources/views/`.
+  3. Trả về mã HTTP `404 Not Found` kèm trang thông báo thân thiện nếu route hoặc view không tồn tại.
+
+### 4. Quy chuẩn Design System & Nhận diện thương hiệu Khoa Văn học
+Mọi trang UI mới phải kế thừa chuẩn nhận diện thương hiệu đã thống nhất:
+- **Typography**: Bắt buộc nạp Google Fonts `Roboto, sans-serif` với các trọng số `300, 400, 500, 700`.
+- **Bảng mã màu chuẩn (Brand Color Palette)**:
+  - Màu xanh lá chủ đạo (Brand Primary Green): `#1b8846` (hover: `#156f38`).
+  - Màu xanh ĐHQG (VNU Blue): `#005baa` (navy đậm: `#003e7e`, top bar: `#0b2240`).
+  - Màu vàng điểm xuyết (Accent Gold): `#c59b27`.
+  - Màu chữ: Chữ chính `#212529`, chữ phụ/mô tả `#555555` hoặc `#6c757d`.
+  - Màu nền & viền: Nền body `#f8f9fa`, nền thẻ card `#ffffff`, đường kẻ viền `#dee2e6`.
+- **Logo hệ thống**: Bắt buộc dùng logo tròn chính thức nền trong suốt tại `public/assets/images/logo.png`. Kích thước hiển thị chuẩn trong Header là `68px x 68px`.
+- **Kế thừa Layout**:
+  - **Top bar**: Chiều cao chuẩn 40px (màu xanh navy đậm `#003e7e` hoặc `#0b2240`, chữ trắng, chứa chọn ngôn ngữ & liên kết tiện ích).
+  - **Header**: Chiều cao chuẩn 110px, chứa logo và khối chữ 3 cấp: ĐẠI HỌC QUỐC GIA TP.HCM - TRƯỜNG ĐH KHXH&NV - KHOA VĂN HỌC.
+  - **Container**: Độ rộng tối đa chuẩn `1200px` - `1280px` căn giữa màn hình (`margin: 0 auto;`).
+  - **Footer**: Chứa đầy đủ thông tin bản quyền và liên hệ của Khoa Văn học.
+
+### 5. Dữ liệu mẫu (Mock Data) & Tiêu chuẩn an toàn tầng View
+- Khai báo Mock Data rõ ràng bằng mảng PHP thuần (`array`) ở đầu file view hoặc file data mẫu dùng chung để giả lập cấu trúc dữ liệu thực tế.
+- **Bảo mật XSS**: Bắt buộc dùng `htmlspecialchars($value, ENT_QUOTES, 'UTF-8')` cho mọi biến mock data khi in ra HTML.
+- **Tuyệt đối cấm**: Không mở kết nối cơ sở dữ liệu (`PDO`, `mysqli`), không thực hiện truy vấn SQL (`SELECT`, `INSERT`,...) trực tiếp trong file view.
+
+### 6. Quy trình 5 bước triển khai một trang UI mới
+Khi thực hiện tạo một trang mới, thực hiện tuần tự theo 5 bước:
+
+| Bước | Hành động cụ thể |
+|---|---|
+| **1. Tạo nhánh Git** | Từ nhánh cập nhật mới nhất, tạo nhánh theo Rule 2: `git checkout -b feature/<tên-trang>-ui`. |
+| **2. Tạo View File** | Tạo thư mục và file view tại `resources/views/<module>/index.php`. |
+| **3. Bổ sung Assets** | Đặt file CSS/JS hoặc hình ảnh riêng vào `public/assets/css/`, `public/assets/js/`, `public/assets/images/`. |
+| **4. Đăng ký Route** | Mở `public/index.php` và thêm route Clean URL tương ứng trỏ tới file view vừa tạo. |
+| **5. Kiểm thử & Đẩy mã** | Chạy PHP Server (`php -S localhost:8000 -t public`), kiểm tra trực quan trên trình duyệt (desktop & mobile), commit theo chuẩn Conventional Commits `feat(ui): ...` và tạo PR tới Leader. |
+
+---
+
+## 📌 Rule 15: Bảng tiêu chí nghiệm thu giao diện (UI Acceptance Checklist)
+
+Trước khi gửi Pull Request hoặc báo cáo hoàn thành nhiệm vụ UI, Agent bắt buộc phải kiểm tra đạt 100% các tiêu chí sau:
+
+- [ ] **Vị trí file đúng chuẩn**: View nằm trong `resources/views/<module>/index.php`; không có bất kỳ file `.html` nào trong `public/`.
+- [ ] **Định tuyến Clean URL hoạt động**: Truy cập được trang qua URL sạch (ví dụ: `http://localhost:8000/<route>`) mà không cần gõ `.php` hay `.html`.
+- [ ] **Chuẩn Typography & Font**: Đã nhúng và hiển thị đúng font chữ `Roboto, sans-serif`.
+- [ ] **Chuẩn Màu sắc & Logo**: Sử dụng đúng logo `public/assets/images/logo.png` và các mã màu trong Brand Palette.
+- [ ] **Đồng bộ Header/Footer**: Kích thước Top bar (40px) và Header (110px, logo 68px) khớp với toàn bộ hệ sinh thái website.
+- [ ] **Mock Data an toàn**: Dữ liệu mẫu hiển thị đầy đủ các trạng thái, có thoát mã ký tự đặc biệt qua `htmlspecialchars()`, không gọi DB.
+- [ ] **Responsive & Thẩm mỹ**: Giao diện không vỡ layout khi co dãn màn hình, khoảng cách (padding/margin) hài hòa, chuyên nghiệp.
+- [ ] **Tuân thủ Git Workflow**: Commit đúng định dạng `feat(ui): ...`, push lên nhánh `feature/...` và tạo PR chờ Leader duyệt (Rule 2).
+
