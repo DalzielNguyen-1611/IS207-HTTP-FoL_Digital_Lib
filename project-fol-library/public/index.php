@@ -31,10 +31,11 @@ if (PHP_SAPI === 'cli-server') {
     }
 }
 
-// Ánh xạ các route được cho phép tới View.
+// Các  route giao diện được phép truy cập
 $routes = [
     '/' => dirname(__DIR__) . '/resources/views/home/index.php',
     '/books' => dirname(__DIR__) . '/resources/views/books/index.php',
+    '/book-detail' => dirname(__DIR__) . '/resources/views/book-detail/index.php',
 ];
 
 $view = $routes[$path] ?? null;

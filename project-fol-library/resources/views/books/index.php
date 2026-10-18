@@ -2,42 +2,9 @@
 
 declare(strict_types=1);
 
-//Dữ liệu mẫu cho giao diện tra cứu, chưa kết nối CSDL
-$books = [
-    [
-        'title' => 'Dẫn luận ngôn ngữ học',
-        'author' => 'Nguyễn Thiện Giáp',
-        'category' => 'Ngôn ngữ học',
-        'major' => 'Ngôn ngữ học',
-        'genre' => 'Giáo trình',
-        'available' => 12,
-        'location' => 'Kệ 03 · Ô 02',
-    ],
-    [   'title' => 'Truyện Kiều',
-        'author' => 'Nguyễn Du',
-        'category' => 'Văn học Việt Nam',
-        'major' => 'Văn học',
-        'genre' => 'Truyện thơ',
-        'available' => 5,
-        'location' => 'Kệ 01 · Ô 03',
-    ],
-    ['title' => 'Lý luận văn học',
-        'author' => 'Trần Đình Sử',
-        'category' => 'Lý luận & Phê bình',
-        'major' => 'Văn học',
-        'genre' => 'Giáo trình',
-        'available' => 8,
-        'location' => 'Kệ 02 · Ô 04',
-    ],
-    ['title' => 'Thi nhân Việt Nam',
-        'author' => 'Hoài Thanh · Hoài Chân',
-        'category' => 'Văn học Việt Nam',
-        'major' => 'Văn học',
-        'genre' => 'Phê bình băn học',
-        'available' => 0,
-        'location' => 'Kệ 01 · Ô 01',
-    ],
-];
+//Đọc dữ liệu mẫu dùng chung, không kết nối CSDL
+$books = require dirname(__DIR__, 2) . '/mock/books.php';
+
 //Danh sách lựa chọn bộ lọc lấy từ dữ liệu mẫu
 $filterOptions = [
     'major' => array_values(array_unique(array_column($books, 'major'))),
@@ -193,12 +160,19 @@ $filterLabels = [
                                 ) ?> 
                             </p>
 
+                            <!-- Liên kết tới chi tiết tài liệu -->
                             <h2>
-                                <?= htmlspecialchars(
-                                    $book['title'],
+                                <a href="/book-detail?id=<?= htmlspecialchars(
+                                    (string) $book['id'],
                                     ENT_QUOTES,
                                     'UTF-8'
-                                ) ?> 
+                                ) ?>">
+                                    <?= htmlspecialchars(
+                                        $book['title'],
+                                        ENT_QUOTES,
+                                        'UTF-8'
+                                    ) ?> 
+                                </a> 
                             </h2>
 
                             <p class="book-author">
