@@ -70,14 +70,11 @@ $featureBooks = [
             <a href="/books">Tra cứu sách</a>
         </nav>
 
-        <button
-            class="login-button"
-            type="button"
-            disabled
-            title="Chức năng đang xây dựng"
-        >
-            Đăng nhập
-        </button>
+        <!-- Liên kết tới trang đăng nhập -->
+        <a class="login-button" href="/login">
+            Đăng nhập 
+        </a>
+        
     </header>
 
     <!-- Banner chính & tìm kiếm mẫu -->

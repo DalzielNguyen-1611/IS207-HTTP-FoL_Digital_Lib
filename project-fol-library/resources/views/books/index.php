@@ -53,9 +53,10 @@ $filterLabels = [
             </a>
         </nav>
 
-        <button class="login-button" type="button" disabled>
+        <!-- Liên kết tới trang đăng nhập -->
+        <a class="login-button" href="/login">
             Đăng nhập 
-        </button> 
+        </a> 
     </header>
 
     <main class="page">

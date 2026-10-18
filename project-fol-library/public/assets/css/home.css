@@ -520,3 +520,16 @@
 .featured {
   scroll-margin-top: 24px;
 }
+
+/* Đồng bộ cỡ chữ điều hướng */
+.navigation a,
+a.login-button {
+  font-size: 14px;
+}
+
+@media (max-width: 480px) {
+  .navigation a,
+  a.login-button {
+    font-size: 14px;
+  }
+}
