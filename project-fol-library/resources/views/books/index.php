@@ -30,6 +30,7 @@ $filterLabels = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/books.css">
+    <link rel="stylesheet" href="/assets/css/70years.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->

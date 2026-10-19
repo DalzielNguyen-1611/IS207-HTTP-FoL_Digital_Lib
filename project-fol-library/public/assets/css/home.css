@@ -527,6 +527,13 @@ a.login-button {
   font-size: 14px;
 }
 
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 3px 12px rgba(36, 68, 92, 0.06);
+}
+
 @media (max-width: 480px) {
   .navigation a,
   a.login-button {

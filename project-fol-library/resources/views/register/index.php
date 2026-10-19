@@ -19,6 +19,7 @@ $majors = [
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
+    <link rel="stylesheet" href="/assets/css/70years.css">
 </head>
 <body>
     <!-- Điều hướng về trang chủ -->

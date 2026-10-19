@@ -31,6 +31,7 @@ if ($book === null) {
         <title>Không tìm thấy sách</title>
         <link rel="stylesheet" href="/assets/css/base.css">
         <link rel="stylesheet" href="/assets/css/home.css">
+        <link rel="stylesheet" href="/assets/css/70years.css">
     </head>
     <body>
         <!-- Thông báo & Điều hướng về danh sách --> 
