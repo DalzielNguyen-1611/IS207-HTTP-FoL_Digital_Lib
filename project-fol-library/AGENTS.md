@@ -231,6 +231,21 @@ Thực hiện nghiêm ngặt theo trình tự 8 bước:
 
 8. **Yêu cầu chưa rõ ràng:** Không tự suy đoán để cấp quyền rộng hơn yêu cầu. Mặc định từ chối các thao tác cần bảo vệ khi chưa xác định được quyền; nêu rõ điểm chưa rõ và yêu cầu xác nhận khi cần thiết.
 
+9. **Quy ước đặt tên quyền:**
+   - Cấu trúc: `<resource>.<action>`
+   - Ví dụ:
+     - `book.view`
+     - `book.create`
+     - `book.update`
+     - `book.delete`
+     - `loan.view`
+     - `loan.confirm`
+     - `fine.manage`
+     - `user.manage`
+     - `role.manage`
+     - `permission.manage`
+   - Mã quyền phải ổn định và duy nhất. Không tạo mã quyền dựa trên tên tiếng Việt hiển thị trên giao diện.
+
 ---
 
 # PHẦN IV: QUY ĐỊNH KIỂM THỬ (TESTING RULES)
