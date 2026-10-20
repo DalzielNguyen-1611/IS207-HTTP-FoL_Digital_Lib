@@ -213,17 +213,35 @@ Thực hiện nghiêm ngặt theo trình tự 8 bước:
 - Không tự kết luận code đã vượt qua kiểm thử; phải thực hiện theo Testing Rules riêng.
 - Sau mỗi nhiệm vụ, báo cáo các file đã tạo/sửa và nội dung thay đổi.
 
+## 📌 Rule 12: Quy tắc bảo mật và phân quyền (Security & RBAC)
+
+1. **Phân quyền tại Backend:** Mọi route, API, AJAX và thao tác cần bảo vệ PHẢI kiểm tra xác thực và phân quyền tại Backend. Không xem việc ẩn nút hoặc giới hạn giao diện Frontend là biện pháp bảo mật.
+
+2. **RBAC và quyền tối thiểu:** Sử dụng cơ chế RBAC tập trung và tuân thủ ma trận vai trò - quyền đã thống nhất. Mặc định từ chối nếu chưa được cấp quyền. Không tự ý cấp thêm quyền hoặc nâng quyền để xử lý lỗi.
+
+3. **Quyền truy cập dữ liệu:** Ngoài quyền theo vai trò, PHẢI kiểm tra quyền sở hữu tài nguyên, phạm vi truy cập và điều kiện nghiệp vụ. Người dùng không được xem hoặc sửa dữ liệu của người khác nếu chưa được cho phép rõ ràng.
+
+4. **Triển khai an toàn:** Kiểm tra dữ liệu đầu vào tại Backend, sử dụng PDO Prepared Statements, bảo vệ các request thay đổi trạng thái khỏi CSRF khi phù hợp và bảo mật session. Không tin tưởng `user_id`, `role` hoặc quyền do Client gửi lên.
+
+5. **Nhật ký và dữ liệu nhạy cảm:** Ghi nhật ký các sự kiện bảo mật và quản trị quan trọng khi phù hợp. Không ghi mật khẩu, token, session cookie hoặc thông tin bí mật vào log. Không để lộ dữ liệu nhạy cảm, lỗi SQL hoặc stack trace cho người dùng.
+
+6. **Nhất quán kiến trúc:** Ưu tiên tái sử dụng Middleware, AuthorizationService, Policy và quy ước database hiện có. Trước khi thay đổi vai trò, quyền hoặc migration, PHẢI kiểm tra thiết kế hiện tại và đánh giá ảnh hưởng. Không làm suy yếu bảo mật để chức năng hoạt động.
+
+7. **Kiểm thử bảo mật:** Với mỗi chức năng có phân quyền được tạo mới hoặc chỉnh sửa, PHẢI kiểm thử cả trường hợp được phép và bị từ chối, bao gồm truy cập trực tiếp, sửa ID tài nguyên và vi phạm điều kiện nghiệp vụ. Chỉ báo cáo những bài kiểm thử thực sự đã chạy và nêu rõ rủi ro chưa được xử lý.
+
+8. **Yêu cầu chưa rõ ràng:** Không tự suy đoán để cấp quyền rộng hơn yêu cầu. Mặc định từ chối các thao tác cần bảo vệ khi chưa xác định được quyền; nêu rõ điểm chưa rõ và yêu cầu xác nhận khi cần thiết.
+
 ---
 
 # PHẦN IV: QUY ĐỊNH KIỂM THỬ (TESTING RULES)
 
-## 📌 Rule 12: Vai trò và nguyên tắc kiểm thử độc lập
+## 📌 Rule 13: Vai trò và nguyên tắc kiểm thử độc lập
 - Đóng vai trò Testing Agent độc lập sau khi Coding Agent hoàn thành nhiệm vụ.
 - Kiểm thử bám sát yêu cầu và tiêu chí chấp nhận đã duyệt; không tự ý thay đổi hoặc tự tạo tiêu chí nghiệp vụ mới.
 - Không mặc định code chạy được đồng nghĩa với tính năng đúng; tuyệt đối không báo PASS nếu chưa thực hiện phép kiểm tra thực tế.
 - Phân biệt minh bạch 4 trạng thái: **PASS**, **FAIL**, **BLOCKED**, **NOT RUN**.
 
-## 📌 Rule 13: Quy trình và các giai đoạn kiểm thử trọng yếu
+## 📌 Rule 14: Quy trình và các giai đoạn kiểm thử trọng yếu
 
 | Giai đoạn | Nhiệm vụ kiểm thử trọng tâm |
 |---|---|
@@ -234,12 +252,12 @@ Thực hiện nghiêm ngặt theo trình tự 8 bước:
 | **5. Functional test** | Kiểm tra trường hợp thành công, dữ liệu không hợp lệ, không tìm thấy, không đủ quyền và các ca biên (chuỗi rỗng, ký tự đặc biệt, phân trang). |
 | **6. Security test** | Kiểm tra SQL Injection, XSS, CSRF, bypass phân quyền endpoint, lộ token/lỗi nội bộ và bắt buộc validation phía server. |
 
-## 📌 Rule 14: Quy tắc xử lý khi phát hiện lỗi & Regression test
+## 📌 Rule 15: Quy tắc xử lý khi phát hiện lỗi & Regression test
 - **Khi phát hiện lỗi**: Ghi lại bước tái hiện, input, kết quả mong đợi vs thực tế, log lỗi (không lộ bí mật); xác định thành phần gây lỗi và báo Coding Agent sửa.
 - **Nguyên tắc test**: Tuyệt đối không sửa test case để biến lỗi implementation thành PASS (trừ khi nhóm xác nhận test sai yêu cầu).
 - **Regression test**: Sau khi sửa lỗi, bắt buộc chạy lại test thất bại, kiểm tra các module phụ thuộc liên quan và chạy bộ test tổng thể trước khi nghiệm thu.
 
-## 📌 Rule 15: Điều kiện kết luận & Chuẩn báo cáo kiểm thử
+## 📌 Rule 16: Điều kiện kết luận & Chuẩn báo cáo kiểm thử
 - **Điều kiện kết luận:**
   - **PASS**: 100% kiểm tra bắt buộc trong phạm vi đều đạt kết quả thực tế.
   - **FAIL**: Có ít nhất một kiểm tra bắt buộc thất bại.
