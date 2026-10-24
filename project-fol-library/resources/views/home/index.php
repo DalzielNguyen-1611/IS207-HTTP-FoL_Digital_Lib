@@ -59,7 +59,7 @@ $featureBooks = [
             >
 
             <span>
-                <span class="brand-label">USSH · VNU-HCM</span>
+                <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>
                     <?= htmlspecialchars($libraryName, ENT_QUOTES, 'UTF-8') ?>
                 </strong>
@@ -83,17 +83,12 @@ $featureBooks = [
         <section class="hero">
             <div class="hero-content">
                 <!-- Nhãn kỷ niệm khoa Văn -->
-                <div class="anniversary-label">
-                    <strong>70</strong>
-                    <span>
-                        NĂM KHOA VĂN HỌC<br>
-                        Tiếp nối truyền thống, mở rộng tri thức 
-                    </span>
+                <div class="faculty-brand">
+                    <img 
+                        src="/assets/images/overview.png"
+                        alt="Khoa Văn học - Trường Đại học Khoa học Xã hội và Nhân văn, VNH Hanoi. Hàn lâm - Liên ngành - Hội nhập."
+                    >
                 </div>
-
-                <span class="eyebrow">
-                    KHÁM PHÁ · HỌC TẬP · KẾT NỐI
-                </span>
 
                 <h1>
                     Mỗi trang sách,<br>

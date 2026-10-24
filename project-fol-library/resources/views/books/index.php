@@ -42,7 +42,7 @@ $filterLabels = [
                 alt="Logo Khoa Văn học"
             >
             <span>
-                <span class="brand-label">USSH · VNU-HCM</span>
+                <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>

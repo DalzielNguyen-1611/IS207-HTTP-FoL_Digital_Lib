@@ -37,7 +37,7 @@ $majors = [
                 alt="Logo Khoa Văn học"
             >
 
-            <p class="auth-eyebrow">USSH · VNU-HCM</p>
+            <p class="auth-eyebrow">USSH · VNU-HANOI</p>
 
             <h1 id="intro-title">
                 Mở cánh cửa<br>
