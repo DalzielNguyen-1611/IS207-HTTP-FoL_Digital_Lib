@@ -39,6 +39,7 @@ $routes = [
     '/login' => dirname(__DIR__) . '/resources/views/login/index.php',
     '/register' => dirname(__DIR__) . '/resources/views/register/index.php',
     '/reading-room' => dirname(__DIR__) . '/resources/views/reading-room/index.php',
+    '/profile' => dirname(__DIR__) . '/resources/views/profile/index.php',
 ];
 
 $view = $routes[$path] ?? null;

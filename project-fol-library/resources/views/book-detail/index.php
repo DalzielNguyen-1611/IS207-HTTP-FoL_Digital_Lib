@@ -72,7 +72,7 @@ $cells = range(1, 4);
                 alt="Logo Khoa Văn học"
             >
             <span>
-                <span class="brand-label">USSH · VNU-HCM</span>
+                <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
@@ -173,6 +173,11 @@ $cells = range(1, 4);
                         id="favorite-demo"
                         type="button"
                         aria-presses="false"
+                        data-book-id="<?= htmlspecialchars(
+                            (string) $book['id'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?>"
                     >
                         Thêm vào yêu thích 
                     </button>

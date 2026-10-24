@@ -1,4 +1,5 @@
-// Các thành phần của lịch và hộp xác nhận.
+// Lưu trữ đặt chỗ mẫu, chưa gắn với tài khoản.
+const roomStorageKey = 'fol-demo-bookings-v1'
 const slotButtons = document.querySelectorAll('.room-slot')
 const bookingDialog = document.querySelector('#booking-dialog')
 const bookingDescription = document.querySelector('#booking-description')
@@ -6,20 +7,79 @@ const roomFeedback = document.querySelector('#room-feedback')
 
 let selectedSlot = null
 
-if (bookingDialog && bookingDescription && roomFeedback) {
-  // Mở xác nhận cho ca còn chỗ.
-  slotButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      if (button.disabled) return
+// Đọc các lịch đã đặt.
+function readRoomBookings() {
+  const records = JSON.parse(
+    localStorage.getItem(roomStorageKey) ?? '[]'
+  )
 
-      selectedSlot = button
+  if (!Array.isArray(records)) {
+    throw new Error('Dữ liệu lịch không hợp lệ')
+  }
+
+  return records
+}
+
+// Khôi phục số ghế và trạng thái từ dữ liệu mẫu.
+function refreshRoomSlots() {
+  try {
+    const bookings = readRoomBookings()
+
+    slotButtons.forEach((slot) => {
+      const booked = bookings.some(
+        (booking) =>
+          booking.id === slot.dataset.slot &&
+          booking.status === 'active'
+      )
+
+      const free = Number(slot.dataset.free)
+      const expired = Date.parse(slot.dataset.start) <= Date.now()
+
+      slot.disabled = booked || free <= 0 || expired
+      slot.classList.toggle('is-booked', booked)
+
+      slot.querySelector('strong').textContent = booked
+        ? 'Đã đặt thử'
+        : expired
+          ? 'Đã qua giờ'
+          : free > 0
+            ? `${free} / 40 chỗ`
+            : 'Hết chỗ'
+
+      slot.querySelector('span').textContent = booked
+        ? `Còn ${Math.max(0, free - 1)} chỗ`
+        : expired || free <= 0
+          ? 'Chọn ca khác'
+          : 'Đặt chỗ +'
+
+      slot.setAttribute(
+        'aria-label',
+        `${slot.dataset.label} · ${slot.querySelector('strong').textContent}`
+      )
+    })
+  } catch {
+    roomFeedback.textContent =
+      'Không đọc được lịch mẫu. Chưa thể đặt thêm chỗ.'
+    slotButtons.forEach((slot) => {
+      slot.disabled = true
+    })
+  }
+}
+
+if (bookingDialog && bookingDescription && roomFeedback) {
+  // Mở hộp xác nhận.
+  slotButtons.forEach((slot) => {
+    slot.addEventListener('click', () => {
+      if (slot.disabled) return
+
+      selectedSlot = slot
       bookingDialog.returnValue = ''
-      bookingDescription.textContent = button.dataset.label
+      bookingDescription.textContent = slot.dataset.label
       bookingDialog.showModal()
     })
   })
 
-  // Chỉ cập nhật số ghế khi người dùng xác nhận.
+  // Lưu lịch khi xác nhận.
   bookingDialog.addEventListener('close', () => {
     const slot = selectedSlot
     selectedSlot = null
@@ -29,27 +89,57 @@ if (bookingDialog && bookingDescription && roomFeedback) {
       return
     }
 
-    const freeSeats = Number(slot.dataset.free)
+    try {
+      const bookings = readRoomBookings()
+      const alreadyBooked = bookings.some(
+        (booking) =>
+          booking.id === slot.dataset.slot &&
+          booking.status === 'active'
+      )
 
-    if (!Number.isInteger(freeSeats) || freeSeats <= 0 || slot.disabled) {
-      return
+      const startsAt = Date.parse(slot.dataset.start)
+
+      if (
+        alreadyBooked ||
+        !Number.isFinite(startsAt) ||
+        startsAt <= Date.now() ||
+        Number(slot.dataset.free) <= 0
+      ) {
+        roomFeedback.textContent =
+          'Ca này không còn đủ điều kiện đặt.'
+        refreshRoomSlots()
+        return
+      }
+
+      bookings.push({
+        id: slot.dataset.slot,
+        label: slot.dataset.label,
+        start: slot.dataset.start,
+        status: 'active',
+        createdAt: new Date().toISOString(),
+      })
+
+      localStorage.setItem(roomStorageKey, JSON.stringify(bookings))
+      refreshRoomSlots()
+
+      roomFeedback.textContent =
+        'Đã lưu lịch mẫu. Bạn có thể xem tại Cá nhân → Phòng đọc.'
+    } catch {
+      roomFeedback.textContent =
+        'Không lưu được lịch trên trình duyệt.'
     }
 
-    const remaining = freeSeats - 1
-
-    slot.dataset.free = String(remaining)
-    slot.classList.add('is-booked')
-    slot.disabled = true
-    slot.querySelector('strong').textContent = 'Đã đặt thử'
-    slot.querySelector('span').textContent = `Còn ${remaining} chỗ`
-    slot.setAttribute('aria-label', `${slot.dataset.label} · Đã đặt thử`)
-
-    roomFeedback.textContent =
-      `Đã mô phỏng đặt chỗ: ${slot.dataset.label}. ` +
-      'Tải lại trang sẽ đặt lại dữ liệu mẫu.'
-
-    // Chuyển tiêu điểm tới thông báo vì ca đã đặt bị vô hiệu hóa.
     roomFeedback.setAttribute('tabindex', '-1')
     roomFeedback.focus()
   })
+
+  // Khôi phục lịch khi mở trang hoặc quay lại từ profile.
+  window.addEventListener('pageshow', refreshRoomSlots)
+  window.addEventListener('storage', (event) => {
+    if (event.key === roomStorageKey || event.key === null) {
+      refreshRoomSlots()
+    }
+  })
+
+  refreshRoomSlots()
 }

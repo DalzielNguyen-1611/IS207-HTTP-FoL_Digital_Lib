@@ -18,12 +18,32 @@ for ($index = 0; $index < 5; $index++) {
     ];
 }
 
-// Ca đọc và số ghế trống mẫu theo từng ngày.
+// Ca đọc và số ghế trống mẫu.
 $shifts = [
-    ['label' => 'Ca 1', 'time' => '07:30 – 09:30', 'free' => [20, 12, 0, 18, 25]],
-    ['label' => 'Ca 2', 'time' => '09:45 – 11:45', 'free' => [15, 0, 22, 8, 16]],
-    ['label' => 'Ca 3', 'time' => '13:00 – 15:00', 'free' => [24, 18, 10, 0, 20]],
-    ['label' => 'Ca 4', 'time' => '15:15 – 17:15', 'free' => [10, 25, 16, 12, 30]],
+    [
+        'label' => 'Ca 1',
+        'time' => '07:30 – 09:30',
+        'start' => '07:30',
+        'free' => [20, 12, 0, 18, 25],
+    ],
+    [
+        'label' => 'Ca 2',
+        'time' => '09:45 – 11:45',
+        'start' => '09:45',
+        'free' => [15, 0, 22, 8, 16],
+    ],
+    [
+        'label' => 'Ca 3',
+        'time' => '13:00 – 15:00',
+        'start' => '13:00',
+        'free' => [24, 18, 10, 0, 20],
+    ],
+    [
+        'label' => 'Ca 4',
+        'time' => '15:15 – 17:15',
+        'start' => '15:15',
+        'free' => [10, 25, 16, 12, 30],
+    ],
 ];
 
 $capacity = 40;
@@ -51,7 +71,7 @@ $capacity = 40;
                 alt="Logo Khoa Văn học"
             >
             <span>
-                <span class="brand-label">USSH · VNU-HCM</span>
+                <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
@@ -157,6 +177,11 @@ $capacity = 40;
                                                 'UTF-8'
                                             ) ?>"
                                             <?= $free === 0 ? 'disabled' : '' ?>
+                                            data-start="<?= htmlspecialchars(
+                                                $day['date'] . 'T' . $shift['start'] . ':00+07:00',
+                                                ENT_QUOTES,
+                                                'UTF-8'
+                                            ) ?>"
                                         >
                                             <?php if ($free > 0): ?>
                                                 <strong>

@@ -11,18 +11,65 @@ borrowButton?.addEventListener('click', () => {
     'Bạn vừa thử thao tác đăng ký mượn. Chưa có phiếu mượn nào được tạo.'
 })
 
-// Minh họa bật/tắt yêu thích, chỉ giữ trong lần mở trang hiện tại.
-favoriteButton?.addEventListener('click', () => {
-  const selected = favoriteButton.getAttribute('aria-pressed') === 'true'
-  const nextSelected = !selected
+//Khóa lưu danh sách yêu thích mẫu trên trình duyệt
+const favoriteStorageKey = 'fol-demo-favorites-v1'
 
-  favoriteButton.setAttribute('aria-pressed', String(nextSelected))
-  favoriteButton.textContent = nextSelected
-    ? 'Đã chọn yêu thích'
+//Đọc danh sách mã sách đã lưu
+function readFavorite() {
+  const stored = JSON.parse(
+    localStorage.getItem(favoriteStorageKey) ?? '[]'
+  )
+
+  return Array.isArray(stored)
+    ? [...new Set(stored.filter(Number.isInteger))]
+    : []
+}
+
+//Đồng bộ trạng thái nút với danh sách đã lưu
+function updateFavoriteButton(selected) {
+  favoriteButton.setAttribute('aria-pressed', String(selected))
+  favoriteButton.textContent = selected
+    ? 'Đã thêm vào yêu thích'
     : 'Thêm vào yêu thích'
+}
 
-  if (feedback) {
-    feedback.textContent =
-      'Trạng thái yêu thích chỉ là bản thử và sẽ đặt lại khi tải lại trang.'
+//Lưu hoặc bỏ mã sách, không lưu thông tin cá nhân
+if (favoriteButton) {
+  const bookId = Number(favoriteButton.dataset.bookId)
+
+  if (Number.isInteger(bookId) && bookId > 0) {
+    try {
+      updateFavoriteButton(readFavorite().includes(bookId))
+    } catch {
+      if (feedback) {
+        feedback.textContent = 'Chưa đọc được danh sách yêu thích trên trình duyệt'
+      }
+    }
+
+    favoriteButton.addEventListener('click', () => {
+      try {
+        const favorites = readFavorite()
+        const selected = favorites.includes(bookId)
+
+        const nextFavorites = selected
+          ? favorites.filter((id) => id !== bookId)
+          : [...favorites, bookId]
+
+        localStorage.setItem(
+          favoriteStorageKey,
+          JSON.stringify(nextFavorites)
+        )
+
+        updateFavoriteButton(!selected)
+
+        if (feedback) {
+          feedback.textContent = 'Đã cập nhật yêu thích trên trình duyệt này'
+        }
+      } catch {
+        if (feedback) {
+          feedback.textContent = 'Không lưu được yêu thích. Hãy kiểm tra quyền lưu trữ của trình duyệt'
+        }
+      }
+    })
   }
-})
+}
