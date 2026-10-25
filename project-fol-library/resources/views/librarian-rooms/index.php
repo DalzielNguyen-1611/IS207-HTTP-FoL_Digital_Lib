@@ -86,7 +86,7 @@ $attendanceOptions = [
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang sinh viên ↗</a>
+        <a class="staff-public-link" href="/">Về trang sinh viên</a>
     </header>
 
     <main class="staff-layout">
@@ -99,7 +99,7 @@ $attendanceOptions = [
             <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms" aria-current="page">Phòng đọc</a>
 
-            <button type="button" disabled>Báo cáo · Sắp có</button>
+            <a href="/librarian/reports">Báo cáo</a>
         </nav>
 
         <div class="staff-content">

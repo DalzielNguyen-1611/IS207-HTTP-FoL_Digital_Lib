@@ -39,7 +39,7 @@ $today = new DateTimeImmutable(
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang sinh viên ↗</a>
+        <a class="staff-public-link" href="/">Về trang sinh viên</a>
     </header>
 
     <main class="staff-layout">
@@ -52,7 +52,7 @@ $today = new DateTimeImmutable(
             <a href="/librarian/counter" aria-current="page">Mượn / trả</a>
 
             <a href="/librarian/rooms">Phòng đọc</a>
-            <button type="button" disabled>Báo cáo · Sắp có</button>
+            <a href="/librarian/reports">Báo cáo</a>
         </nav>
 
         <div class="staff-content">

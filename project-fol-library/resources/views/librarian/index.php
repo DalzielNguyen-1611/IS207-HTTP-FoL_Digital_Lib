@@ -71,137 +71,156 @@ $attentionLoans = [
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian" aria-current="page">Tổng quan</a>
             <a href="/librarian/books">Quản lý sách</a>
-            <button type="button" disabled>Mượn / trả · Sắp có</button>
+            <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms">Phòng đọc</a>
-            <button type="button" disabled>Báo cáo · Sắp có</button>
+            <a href="/librarian/reports">Báo cáo</a>
         </nav>
 
-        <div class="staff-content">
-            <!-- Tiêu đề quản lý sách -->
+                <div class="staff-content">
+            <!-- Tiêu đề Dashboard -->
             <section class="staff-intro">
-                <span class="staff-eyebrow">QUẢN LÝ TÀI LIỆU</span>
-                <h1>Quản lý sách</h1>
-                <p>Tra cứu thông tin, số lượng và vị trí tài liệu mẫu.</p>
-            </section>
-
-            <section class="staff-panel" aria-labelledby="book-list-title">
-                <!-- Thanh tìm kiếm tài liệu -->
-                <h2 id="book-list-title">Danh sách sách</h2>
-
-                <form class="staff-search" id="staff-book-search">
-                    <input
-                        id="staff-book-keyword"
-                        type="search"
-                        aria-label="Tìm theo mã sách, tên sách hoặc tác giả"
-                        placeholder="Tìm mã sách, tên sách hoặc tác giả…"
-                    >
-                    <button type="submit">Tìm kiếm</button>
-                </form>
-
-                <!-- Số lượng kết quả -->
-                <p class="staff-note" id="staff-book-count" role="status">
-                    <?= htmlspecialchars(
-                        (string) count($books),
+                <span class="staff-eyebrow">KHÔNG GIAN LÀM VIỆC</span>
+                <h1>Tổng quan thư viện</h1>
+                <p>
+                    Ngày <?= htmlspecialchars(
+                        $today->format('d/m/Y'),
                         ENT_QUOTES,
                         'UTF-8'
-                    ) ?> tài liệu mẫu
+                    ) ?> · Số liệu minh họa
                 </p>
-
-                <!-- Trạng thái không có kết quả -->
-                <p class="staff-note" id="staff-book-empty" hidden>
-                    Không tìm thấy sách phù hợp.
-                </p>
-
-                <!-- Bảng thông tin sách -->
-                <div
-                    class="staff-table-wrap"
-                    tabindex="0"
-                    role="region"
-                    aria-label="Danh sách thông tin sách"
-                >
-                    <table class="staff-table">
-                        <thead>
-                            <tr>
-                                <th scope="col">Mã sách</th>
-                                <th scope="col">Tên sách</th>
-                                <th scope="col">Tác giả</th>
-                                <th scope="col">Có thể mượn</th>
-                                <th scope="col">Vị trí</th>
-                                <th scope="col">Chi tiết</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            <?php foreach ($books as $book): ?>
-                                <!-- Một tài liệu mẫu -->
-                                <tr
-                                    data-book-row
-                                    data-search="<?= htmlspecialchars(
-                                        'BK' . $book['id'] . ' ' .
-                                        $book['title'] . ' ' . $book['author'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>"
-                                >
-                                    <th scope="row">
-                                        BK<?= htmlspecialchars(
-                                            (string) $book['id'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-                                    </th>
-
-                                    <td><?= htmlspecialchars(
-                                        $book['title'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?></td>
-
-                                    <td><?= htmlspecialchars(
-                                        $book['author'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?></td>
-
-                                    <td><?= htmlspecialchars(
-                                        (string) $book['available'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?> bản</td>
-
-                                    <td><?= htmlspecialchars(
-                                        $book['location'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?></td>
-
-                                    <td>
-                                        <a
-                                            class="staff-book-link"
-                                            href="/book-detail?id=<?= htmlspecialchars(
-                                                (string) $book['id'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
-                                        >
-                                            Xem sách ↗
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
             </section>
 
-            <!-- Giới hạn bản thử -->
+            <!-- Thống kê nhanh từ dữ liệu mẫu -->
+            <section class="staff-stats" aria-label="Thống kê nhanh">
+                <?php foreach ($statistics as $statistic): ?>
+                    <article class="staff-stat">
+                        <h2><?= htmlspecialchars(
+                            $statistic['label'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?></h2>
+
+                        <strong><?= htmlspecialchars(
+                            $statistic['value'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?></strong>
+
+                        <p><?= htmlspecialchars(
+                            $statistic['note'],
+                            ENT_QUOTES,
+                            'UTF-8'
+                        ) ?></p>
+                    </article>
+                <?php endforeach; ?>
+            </section>
+
+            <!-- Các ca phòng đọc mẫu -->
+            <section class="staff-panel" aria-labelledby="shift-title">
+                <h2 id="shift-title">Phòng đọc hôm nay</h2>
+
+                <div class="staff-shifts">
+                    <?php foreach ($readingShifts as $shift): ?>
+                        <article class="staff-shift">
+                            <h3><?= htmlspecialchars(
+                                $shift['name'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></h3>
+
+                            <p><?= htmlspecialchars(
+                                $shift['time'],
+                                ENT_QUOTES,
+                                'UTF-8'
+                            ) ?></p>
+
+                            <strong>
+                                <?= htmlspecialchars(
+                                    (string) $shift['booked'],
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?> / 40 chỗ đã đặt
+                            </strong>
+                        </article>
+                    <?php endforeach; ?>
+                </div>
+
+                <p class="staff-note">
+                    Lịch minh họa, không xác nhận thư viện mở cửa
+                    vào ngày đang hiển thị.
+                </p>
+            </section>
+
+            <!-- Phiếu cần theo dõi -->
+            <section class="staff-panel" aria-labelledby="attention-title">
+                <h2 id="attention-title">Phiếu cần chú ý</h2>
+
+                <?php if ($attentionLoans === []): ?>
+                    <!-- Trạng thái danh sách rỗng -->
+                    <p class="staff-note">Không có phiếu cần xử lý.</p>
+                <?php else: ?>
+                    <!-- Bảng phiếu có thể cuộn ngang -->
+                    <div
+                        class="staff-table-wrap"
+                        tabindex="0"
+                        role="region"
+                        aria-label="Danh sách phiếu cần chú ý"
+                    >
+                        <table class="staff-table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Mã phiếu</th>
+                                    <th scope="col">Sinh viên</th>
+                                    <th scope="col">Sách</th>
+                                    <th scope="col">Trạng thái</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php foreach ($attentionLoans as $loan): ?>
+                                    <!-- Một phiếu mẫu -->
+                                    <tr>
+                                        <th scope="row"><?= htmlspecialchars(
+                                            $loan['code'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?></th>
+
+                                        <td><?= htmlspecialchars(
+                                            $loan['student'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?></td>
+
+                                        <td><?= htmlspecialchars(
+                                            $loan['book'],
+                                            ENT_QUOTES,
+                                            'UTF-8'
+                                        ) ?></td>
+
+                                        <td>
+                                            <span class="staff-badge">
+                                                <?= htmlspecialchars(
+                                                    $loan['status'],
+                                                    ENT_QUOTES,
+                                                    'UTF-8'
+                                                ) ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+            <!-- Phạm vi bản thử -->
             <p class="staff-note">
-                Số lượng hiển thị là số bản có thể mượn, không phải tổng
-                số bản thư viện sở hữu. Chưa kết nối dữ liệu quản lý thật.
+                Chưa xác thực vai trò cán bộ.
+                Số liệu minh họa độc lập với các trang nghiệp vụ.
             </p>
         </div>
     </main>
-    <!-- Tìm kiếm trong danh sách sách mẫu -->
-    <script src="/assets/js/librarian-books.js" defer></script>
 </body>
 </html>

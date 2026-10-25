@@ -44,7 +44,7 @@ $books = require dirname(__DIR__, 2) . '/mock/books.php';
 
             <button type="button" disabled>Mượn / trả · Sắp có</button>
             <a href="/librarian/rooms">Phòng đọc</a>
-            <button type="button" disabled>Báo cáo · Sắp có</button>
+            <a href="/librarian/reports">Báo cáo</a>
         </nav>
 
         <div class="staff-content">
