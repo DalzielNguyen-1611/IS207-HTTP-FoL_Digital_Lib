@@ -80,7 +80,7 @@ $statuses = [
             <span class="staff-menu-label">QUẢN TRỊ HỆ THỐNG</span>
 
             <a href="/admin/users" aria-current="page">Người dùng</a>
-            <button type="button" disabled>Nhật ký · Sắp có</button>
+            <a href="/admin/audit">Nhật ký</a>
             <button type="button" disabled>Cấu hình · Sắp có</button>
 
             <a href="/librarian">Giao diện cán bộ ↗</a>

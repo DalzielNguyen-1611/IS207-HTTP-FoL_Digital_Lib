@@ -46,6 +46,7 @@ $routes = [
     '/librarian/rooms' => dirname(__DIR__) . '/resources/views/librarian-rooms/index.php',
     '/librarian/reports' => dirname(__DIR__) . '/resources/views/librarian-reports/index.php',
     '/admin/users' => dirname(__DIR__) . '/resources/views/admin-users/index.php',
+    '/admin/audit' => dirname(__DIR__) . '/resources/views/admin-audit/index.php',
 ];
 
 $view = $routes[$path] ?? null;
