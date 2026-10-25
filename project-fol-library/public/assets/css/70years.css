@@ -156,7 +156,9 @@ body::before {
 }
 
 /* ===== Đồng bộ nền và tránh lộ nền khi kéo vượt mép ===== */
+/* ===== Nền kem phủ toàn bộ trang ===== */
 html {
+  min-height: 100%;
   background: #fffbef;
   overscroll-behavior-y: none;
 }

@@ -1,0 +1,460 @@
+/* ===== Header cán bộ ===== */
+.staff-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 32px;
+  border-bottom: 1px solid #e9dfbf;
+  background: #fffdf6;
+}
+
+.staff-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.staff-brand img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 50%;
+}
+
+.staff-brand strong,
+.staff-brand small {
+  display: block;
+}
+
+.staff-brand strong {
+  font-size: 15px;
+}
+
+.staff-brand small {
+  margin-top: 6px;
+  color: #718695;
+  font-size: 10px;
+}
+
+.staff-public-link {
+  color: #3476aa;
+  font-size: 12px;
+}
+
+/* ===== Bố cục khu vực cán bộ ===== */
+.staff-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 28px;
+  max-width: 1360px;
+  margin: auto;
+  padding: 28px;
+}
+
+.staff-content {
+  min-width: 0;
+}
+
+.staff-sidebar {
+  align-self: start;
+  padding: 16px;
+  border: 1px solid #e9dfbf;
+  border-radius: 12px;
+  background: #fffefa;
+}
+
+.staff-menu-label {
+  display: block;
+  margin: 8px 10px 20px;
+  color: #718695;
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.staff-sidebar a,
+.staff-sidebar button {
+  display: block;
+  width: 100%;
+  margin: 5px 0;
+  padding: 13px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #607888;
+  text-align: left;
+  font-size: 12px;
+}
+
+.staff-sidebar a[aria-current="page"] {
+  background: #eaf3f9;
+  color: #245d88;
+  font-weight: 600;
+}
+
+.staff-sidebar button:disabled {
+  color: #718695;
+  cursor: not-allowed;
+}
+
+/* ===== Tiêu đề trang ===== */
+.staff-eyebrow {
+  color: #3476aa;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+}
+
+.staff-intro h1 {
+  margin: 16px 0;
+  font-family: "Literata", serif;
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.staff-intro p,
+.staff-note {
+  color: #607888;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ===== Thống kê nhanh ===== */
+.staff-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.staff-stat {
+  padding: 22px;
+  border: 1px solid #e9dfbf;
+  border-radius: 12px;
+  background: #fffefa;
+}
+
+.staff-stat h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.staff-stat > strong {
+  display: block;
+  margin: 16px 0;
+  color: #245d88;
+  font-size: 34px;
+}
+
+.staff-stat:nth-child(2) > strong {
+  color: #974b26;
+}
+
+.staff-stat p {
+  margin: 0;
+  color: #718695;
+  font-size: 10px;
+}
+
+/* ===== Các khối nội dung ===== */
+.staff-panel {
+  margin-bottom: 22px;
+  padding: 24px;
+  border: 1px solid #e9dfbf;
+  border-radius: 12px;
+  background: rgba(255, 254, 250, 0.97);
+}
+
+.staff-panel > h2 {
+  margin: 0 0 22px;
+  font-family: "Literata", serif;
+  font-size: 23px;
+  font-weight: 500;
+}
+
+/* ===== Ca phòng đọc ===== */
+.staff-shifts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.staff-shift {
+  padding: 16px;
+  border-radius: 8px;
+  background: #f2f6f8;
+}
+
+.staff-shift h3 {
+  margin: 0;
+  font-size: 13px;
+}
+
+.staff-shift p {
+  color: #718695;
+  font-size: 10px;
+}
+
+.staff-shift strong {
+  font-size: 11px;
+  line-height: 1.7;
+}
+
+/* ===== Bảng phiếu ===== */
+.staff-table-wrap {
+  overflow-x: auto;
+}
+
+.staff-table {
+  width: 100%;
+  min-width: 560px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.staff-table th,
+.staff-table td {
+  padding: 15px 12px;
+  border-bottom: 1px solid #e9dfbf;
+  text-align: left;
+  line-height: 1.7;
+}
+
+.staff-table thead {
+  background: #f5f0e1;
+}
+
+.staff-table tbody th {
+  font-weight: 500;
+}
+
+.staff-badge {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #fff0e6;
+  color: #974b26;
+}
+
+/* ===== Tablet & điện thoại ===== */
+@media (max-width: 1000px) {
+  .staff-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-sidebar {
+    display: flex;
+    gap: 8px;
+    min-width: 0;
+    overflow-x: auto;
+  }
+
+  .staff-menu-label {
+    display: none;
+  }
+
+  .staff-sidebar a,
+  .staff-sidebar button {
+    width: auto;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .staff-header {
+    flex-wrap: wrap;
+    padding: 16px;
+  }
+
+  .staff-layout {
+    padding: 20px 16px;
+  }
+
+  .staff-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .staff-shifts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .staff-panel {
+    padding: 18px;
+  }
+
+  .staff-intro h1 {
+    font-size: 27px;
+  }
+}
+
+/* ===== Tìm kiếm sách trong khu vực cán bộ ===== */
+.staff-search {
+  display: flex;
+  gap: 10px;
+}
+
+.staff-search input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+}
+
+.staff-search button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #efd079;
+  color: #24445c;
+}
+
+.staff-book-link {
+  color: #3476aa;
+  white-space: nowrap;
+}
+
+.staff-book-link:hover {
+  text-decoration: underline;
+}
+
+/* ===== Ẩn các hàng không phù hợp ===== */
+[hidden] {
+  display: none !important;
+}
+
+/* ===== Thanh tìm kiếm trên điện thoại ===== */
+@media (max-width: 600px) {
+  .staff-search {
+    flex-direction: column;
+  }
+}
+
+/* ===== Nút chỉnh sửa sách ===== */
+.staff-edit-book {
+  margin-left: 10px;
+  padding: 6px 10px;
+  border: 1px solid #d4e2ec;
+  border-radius: 6px;
+  background: white;
+  color: #3476aa;
+  font-size: 12px;
+}
+
+/* ===== Hộp chỉnh sửa ===== */
+.staff-book-dialog {
+  width: min(480px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 28px;
+  border: none;
+  border-radius: 14px;
+  background: #fffefa;
+  color: #24445c;
+}
+
+.staff-book-dialog::backdrop {
+  background: #203f5966;
+}
+
+.staff-book-dialog h2 {
+  margin-top: 0;
+  font-family: "Literata", serif;
+  font-weight: 500;
+}
+
+.staff-edit-field {
+  margin-top: 16px;
+}
+
+.staff-edit-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.staff-edit-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+}
+
+.staff-edit-position {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.staff-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.staff-edit-actions button {
+  padding: 12px 16px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+}
+
+.staff-edit-actions .staff-edit-save {
+  border-color: #efd079;
+  background: #efd079;
+}
+
+/* ===== Đồng bộ hai nút thao tác sách ===== */
+.staff-book-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.staff-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 6px;
+  background: white;
+  color: #3476aa;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.staff-action-button:hover {
+  background: #eaf3f9;
+}
+
+/* ===== Khoảng cách nút thêm và tìm kiếm ===== */
+#add-book-button {
+  margin-bottom: 18px;
+  background: #efd079;
+  border-color: #dfbd62;
+  color: #24445c;
+}
+
+.staff-action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
