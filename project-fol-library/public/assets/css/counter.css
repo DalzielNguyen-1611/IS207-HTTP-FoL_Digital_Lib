@@ -1,0 +1,93 @@
+/* ===== Biểu mẫu tại quầy ===== */
+.counter-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.counter-field {
+  min-width: 0;
+}
+
+.counter-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.counter-field input,
+.counter-field select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+  font: inherit;
+  font-size: 13px;
+}
+
+/* ===== Thao tác biểu mẫu ===== */
+.counter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.counter-primary {
+  padding: 12px 18px;
+  border: 1px solid #dfbd62;
+  border-radius: 8px;
+  background: #efd079;
+  color: #24445c;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .counter-fields {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===== Hộp xử lý trả sách ===== */
+.counter-dialog {
+  width: min(520px, calc(100% - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  padding: 28px;
+  border: none;
+  border-radius: 14px;
+  background: #fffefa;
+  color: #24445c;
+}
+
+.counter-dialog::backdrop {
+  background: #203f5966;
+}
+
+.counter-dialog h2 {
+  margin-top: 0;
+  font-family: "Literata", serif;
+  font-weight: 500;
+}
+
+.counter-dialog .counter-field {
+  margin-top: 18px;
+}
+
+#return-description {
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.counter-fee {
+  margin-top: 20px;
+  padding: 14px;
+  border-radius: 8px;
+  background: #fff4d6;
+  color: #80611f;
+  font-size: 12px;
+  line-height: 1.9;
+}
