@@ -81,9 +81,9 @@ $statuses = [
 
             <a href="/admin/users" aria-current="page">Người dùng</a>
             <a href="/admin/audit">Nhật ký</a>
-            <button type="button" disabled>Cấu hình · Sắp có</button>
+            <a href="/admin/settings">Cấu hình</a>
 
-            <a href="/librarian">Giao diện cán bộ ↗</a>
+            <a href="/librarian">Giao diện cán bộ</a>
         </nav>
 
         <div class="staff-content">

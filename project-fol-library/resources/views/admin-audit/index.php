@@ -76,7 +76,7 @@ $logs = [
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang sinh viên ↗</a>
+        <a class="staff-public-link" href="/">Về trang sinh viên</a>
     </header>
 
     <main class="staff-layout">
@@ -86,8 +86,8 @@ $logs = [
 
             <a href="/admin/users">Người dùng</a>
             <a href="/admin/audit" aria-current="page">Nhật ký</a>
-            <button type="button" disabled>Cấu hình · Sắp có</button>
-            <a href="/librarian">Giao diện cán bộ ↗</a>
+            <a href="/admin/settings">Cấu hình</a>
+            <a href="/librarian">Giao diện cán bộ</a>
         </nav>
 
         <div class="staff-content">
