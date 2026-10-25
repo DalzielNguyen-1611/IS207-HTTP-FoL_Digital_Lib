@@ -51,7 +51,7 @@ $today = new DateTimeImmutable(
             <a href="/librarian/books">Quản lý sách</a>
             <a href="/librarian/counter" aria-current="page">Mượn / trả</a>
 
-            <button type="button" disabled>Phòng đọc · Sắp có</button>
+            <a href="/librarian/rooms">Phòng đọc</a>
             <button type="button" disabled>Báo cáo · Sắp có</button>
         </nav>
 

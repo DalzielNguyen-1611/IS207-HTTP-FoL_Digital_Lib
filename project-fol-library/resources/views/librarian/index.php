@@ -72,7 +72,7 @@ $attentionLoans = [
             <a href="/librarian" aria-current="page">Tổng quan</a>
             <a href="/librarian/books">Quản lý sách</a>
             <button type="button" disabled>Mượn / trả · Sắp có</button>
-            <button type="button" disabled>Phòng đọc · Sắp có</button>
+            <a href="/librarian/rooms">Phòng đọc</a>
             <button type="button" disabled>Báo cáo · Sắp có</button>
         </nav>
 
