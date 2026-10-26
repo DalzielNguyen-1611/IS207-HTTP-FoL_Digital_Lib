@@ -1,0 +1,98 @@
+/* ===== Bố cục các trường cấu hình ===== */
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.settings-field {
+  min-width: 0;
+}
+
+.settings-field label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.settings-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+  font: inherit;
+  font-size: 13px;
+}
+
+/* ===== Tùy chọn email ===== */
+.settings-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.settings-checkbox input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 4px;
+  accent-color: #3476aa;
+}
+
+#settings-email-fields {
+  min-width: 0;
+  margin: 24px 0 0;
+  padding: 20px;
+  border: 1px solid #e9dfbf;
+  border-radius: 10px;
+}
+
+#settings-email-fields legend {
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+#settings-email-fields:disabled {
+  opacity: 0.6;
+}
+
+.settings-email-types {
+  display: grid;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* ===== Thao tác biểu mẫu ===== */
+.settings-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.settings-save {
+  padding: 12px 18px;
+  border: 1px solid #dfbd62;
+  border-radius: 8px;
+  background: #efd079;
+  color: #24445c;
+}
+
+#settings-feedback {
+  color: #3476aa;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  #settings-email-fields {
+    padding: 16px;
+  }
+}

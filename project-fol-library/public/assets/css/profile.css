@@ -1,0 +1,338 @@
+/* Giới thiệu */
+.profile-intro h1 {
+    margin: 18px 0;
+    font-family: "Literata", serif;
+    font-size: 36px;
+    font-weight: 500;
+}
+
+.profile-intro p {
+    color: #607888;
+    line-height: 1.8;
+}
+
+/* Bố cục & Điều hướng */
+.profile-layout {
+    display: grid;
+    grid-template-columns: 210px minmax(0, 1fr);
+    gap: 24px;
+    margin-top: 28px;
+}
+
+.profile-menu {
+    align-self: start;
+    padding: 12px;
+    border: 1px solid #e9dfbf;
+    border-radius: 12px;
+    background: #fffefa;
+}
+
+.profile-menu button {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #24445c;
+    text-align: left;
+}
+
+.profile-menu button[aria-current="true"] {
+    background: #eaf3f9;
+    color: #245d88;
+    font-weight: 600;
+}
+
+/* Nội dung từng mục */
+.profile-panel {
+    padding: 28px;
+    border: 1px solid #e9dfbf;
+    border-radius: 14px;
+    background: rgba(255, 254, 250, 0.97);
+}
+
+.profile-panel h2 {
+    margin-top: 0;
+    font-family: "Literata", serif;
+    font-size: 25px;
+    font-weight: 500;
+}
+
+.profile-empty {
+    padding: 20px 0;
+    color: #718695;
+    line-height: 1.8;
+}
+
+.profile-panel a {
+    color: #3476aa;
+}
+
+/* Biểu mẫu */
+.profile-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+}
+
+.profile-fields label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+}
+
+.profile-fields input {
+    width: 100%;
+    min-width: 0;
+    padding: 12px;
+    border: 1px solid #d4e2ec;
+    border-radius: 8px;
+    background: white;
+    color: #24445c;
+}
+
+.profile-fields input[readonly] {
+    background: #f0f3f5;
+}
+
+/* Thao tác & Thông báo */
+.profile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.profile-actions button {
+    padding: 12px 18px;
+    border-radius: 8px;
+}
+
+.profile-save {
+    border: 1px solid #efd079;
+    background: #efd079;
+    color: #24445c;
+}
+
+.profile-reset {
+    border: 1px solid #d4e2ec;
+    background: white;
+    color: #3476aa;
+}
+
+#profile-feedback {
+    color: #3476aa;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* Tablet & Điện thoại */
+@media (max-width: 800px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-menu {
+        display: flex;
+        min-width: 0;
+        overflow-x: auto;
+    }
+
+    .profile-menu button {
+        flex-shrink: 0;
+        width: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .profile-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-panel {
+        padding: 20px;
+    }
+
+    .profile-intro h1 {
+        font-size: 28px;
+    }
+}
+
+/* ===== Bảng sách mượn & lịch sử ===== */
+.profile-layout > div {
+  min-width: 0;
+}
+
+.profile-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-bottom: 28px;
+  border: 1px solid #e9dfbf;
+  border-radius: 10px;
+}
+
+.profile-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.profile-table th,
+.profile-table td {
+  padding: 15px;
+  border-bottom: 1px solid #e9dfbf;
+  text-align: left;
+  line-height: 1.7;
+}
+
+.profile-table thead th {
+  background: #f5f0e1;
+  font-weight: 600;
+}
+
+.profile-table tbody th {
+  min-width: 160px;
+  font-weight: 500;
+}
+
+.profile-table tbody tr:last-child > * {
+  border-bottom: none;
+}
+
+/* ===== Trạng thái phiếu mượn ===== */
+.loan-status {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: #edf6f0;
+  color: #35674b;
+}
+
+.loan-status.is-overdue {
+  background: #fff0e6;
+  color: #974b26;
+}
+
+/* Danh sách yêu thích */
+.profile-favorites {
+    display: grid;
+    gap: 14px;
+}
+
+.profile-favorite {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+    border: 1px solid #e9dfbf;
+    border-radius: 10px;
+    background: #fffefa;
+}
+
+.profile-favorite h3 {
+    margin: 0 0 8px;
+    font-size: 15px;
+}
+
+.profile-favorite p {
+    margin: 0;
+    color: #718695;
+    font-size: 12px;
+}
+
+.profile-favorite button {
+    flex-shrink: 0;
+    padding: 10px, 14px;
+    border-radius: 8px;
+}
+
+#favorites-feedback {
+    color:#3476aa;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+/* Yêu thích trên điện thoại */
+@media (max-width: 600px) {
+    .profile-favorite {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
+
+/* Nút bỏ yêu thích */
+.profile-favorite button {
+    padding: 7px 12px;
+    font-size: 12px;
+    line-height: 1.4;
+    border-radius: 6px;
+}
+
+/* 2 cột bố cục */
+.profile-favorites {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.profile-favorite {
+    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.profile-favorite button {
+    margin-top: auto;
+}
+
+/* Điện thoại: một sách mỗi hàng */
+@media (max-width: 600px) {
+    .profile-favorites {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===== Lịch đặt phòng đọc ===== */
+.profile-bookings {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-booking {
+  padding: 20px;
+  border: 1px solid #e9dfbf;
+  border-radius: 10px;
+  background: #fffefa;
+}
+
+.profile-booking h3 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.profile-booking p,
+#bookings-feedback {
+  color: #607888;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+.profile-booking button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.profile-booking button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

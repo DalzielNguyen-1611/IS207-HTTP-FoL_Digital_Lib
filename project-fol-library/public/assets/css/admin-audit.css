@@ -1,0 +1,51 @@
+/* ===== Bộ lọc nhật ký ===== */
+.audit-filters {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: end;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.audit-filters > div {
+  min-width: 0;
+}
+
+.audit-filters label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.audit-filters input,
+.audit-filters select {
+  width: 100%;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 8px;
+  background: white;
+  color: #24445c;
+  font: inherit;
+  font-size: 12px;
+}
+
+.audit-filters button {
+  min-height: 42px;
+}
+
+/* ===== Bảng lịch sử ===== */
+.audit-time {
+  white-space: nowrap;
+}
+
+[data-audit-row] td:last-child {
+  min-width: 230px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .audit-filters {
+    grid-template-columns: 1fr;
+  }
+}

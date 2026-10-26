@@ -1,0 +1,177 @@
+/* Bảng màu chủ đề kỷ niệm */
+:root {
+    --anniversary-paper: #fffbef;
+    --anniversary-blue: #245d88;
+    --anniversary-gold: #efd097;
+}
+
+/* Nền giấy kem */
+body {
+    position: relative;
+    isolation: isolate;
+    background: var(--anniversary-paper);
+    color: #24445c;
+}
+
+/* Tòa nhà in chìm */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+
+    background-image: url("../images/back.jpg");
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: min(1400px, 110vw) auto;
+
+    opacity: 0.06;
+}
+
+/* Header */
+.header {
+    background: rgba(255, 253, 246, 0.96);
+    border-bottom-color: #e9dfbf;
+}
+
+/* Banner và khối giới thiệu đăng nhập */
+.hero,
+.auth-intro {
+    background: rgba(245, 239, 216, 0.80);
+    border: 1px solid #e9dfbf;
+}
+
+/* Thẻ sách, biểu mẫu và bảng lịch */
+.book-card,
+.catalog-item,
+.auth-card,
+.room-table-wrap,
+.detail-location {
+    background: rgba(255, 254, 250, 0.96);
+    border-color: #e9dfbf;
+}
+
+/* Nền khu vực bìa sách */
+.book-cover-area,
+.detail-cover-area {
+    background: #f0ecdf;
+}
+
+/* Màu chữ nhấn */
+.eyebrow,
+.auth0eyebrow,
+.hero h1 span {
+    color: var(--anniversary-blue);
+}
+
+/* Các nút chính */
+.search-box button,
+.auth-submit,
+.detail-primary,
+.room-confirm {
+    background: var(--anniversary-gold);
+    color: #24445c;
+}
+
+.search-box button:hover,
+.auth-submit:hover,
+.detail-primary:hover:not(:disabled),
+.room-confirm:hover {
+    background: #e6c364;
+}
+
+/* Nhãn kỷ niệm trên trang chủ */
+.anniversary-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-bottom: 18px;
+    padding: 10px 16px;
+
+    border: 1px solid #dcc486;
+    border-radius: 8px;
+    background: #fff9e6;
+
+    color: var(--anniversary-blue);
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.anniversary-label strong {
+    font-family: "Literata", Georgia, serif;
+    font-size: 32px;
+    line-height: 1;
+    color: #896719;
+}
+
+/* Điều chỉnh trên điện thoại */
+@media (max-width: 600px) {
+    body::before {
+        background-size: 850px auto;
+        background-position: 55% bottom;
+        opacity: 0.04;
+    }
+
+    .anniversary-label {
+        padding: 9px 12px;
+        font-size: 11px;
+    }
+}
+
+/* Ẩn nền trang trí khi in */
+@media print {
+    body::before {
+        display: none;
+    }
+}
+
+
+/* Bộ nhận diện */
+.faculty-brand {
+    width: min(100%, 560px);
+    margin-bottom: 20px;
+}
+
+.faculty-brand img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+/* ===== Dịch ảnh nhận diện sang trái và lên trên ===== */
+.faculty-brand {
+  position: relative;
+  left: -30px;
+  top: -25px;
+}
+
+/* ===== Giảm độ dịch trên điện thoại ===== */
+@media (max-width: 600px) {
+  .faculty-brand {
+    left: -10px;
+    top: -15px;
+  }
+}
+
+/* ===== Đồng bộ nền và tránh lộ nền khi kéo vượt mép ===== */
+/* ===== Nền kem phủ toàn bộ trang ===== */
+html {
+  min-height: 100%;
+  background: #fffbef;
+  overscroll-behavior-y: none;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #fffbef;
+  overscroll-behavior-y: none;
+}
+
+/* ===== Nền đặc cho thanh điều hướng cố định ===== */
+.header {
+  background: #fffdf6;
+}
