@@ -64,9 +64,9 @@ $roles = [
             <form id="login-form">
                 <!-- Vai trò trải nghiệm -->
                 <div class="auth-field">
-                    <label for="login-role">Vai trò trải nghiệm</label>
+                    <label for="login-role">Chọn vai trò trải nghiệm</label>
 
-                    <select id="login-role" required>
+                    <select id="login-role">
                         <?php foreach ($roles as $value => $label): ?>
                             <option value="<?= htmlspecialchars(
                                 $value,
@@ -83,31 +83,45 @@ $roles = [
                     </select>
                 </div>
 
-                <!-- Email đăng nhập -->
+                <!-- Phím tắt vào nhanh trực tiếp theo vai trò -->
+                <div class="auth-quick-actions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; margin-bottom: 20px;">
+                    <a href="/profile" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef6fb; border: 1px solid #c2ddf0; border-radius: 10px; text-decoration: none; color: #005baa; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                        <span style="font-size: 22px; margin-bottom: 4px;">🎓</span>
+                        <span>Sinh viên</span>
+                    </a>
+                    <a href="/librarian" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef9f2; border: 1px solid #bce6cc; border-radius: 10px; text-decoration: none; color: #1b8846; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                        <span style="font-size: 22px; margin-bottom: 4px;">📚</span>
+                        <span>Cán bộ</span>
+                    </a>
+                    <a href="/admin/settings" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #fff8e6; border: 1px solid #f6dd9e; border-radius: 10px; text-decoration: none; color: #b78103; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                        <span style="font-size: 22px; margin-bottom: 4px;">⚙️</span>
+                        <span>Quản trị viên</span>
+                    </a>
+                </div>
+
+                <!-- Email đăng nhập (Không bắt buộc) -->
                 <div class="auth-field">
-                    <label for="login-email">Email</label>
+                    <label for="login-email">Email <span style="font-size: 12px; font-weight: 400; color: #718695;">(Không bắt buộc)</span></label>
 
                     <input
                         id="login-email"
                         type="email"
                         autocomplete="username"
-                        placeholder="Nhập email của bạn"
-                        required
+                        placeholder="Có thể bỏ trống để vào xem ngay"
                     >
                 </div>
 
-                <!-- Mật khẩu & nút hiện/ẩn -->
+                <!-- Mật khẩu & nút hiện/ẩn (Không bắt buộc) -->
                 <div class="auth-field">
-                    <label for="login-password">Mật khẩu</label>
+                    <label for="login-password">Mật khẩu <span style="font-size: 12px; font-weight: 400; color: #718695;">(Không bắt buộc)</span></label>
 
                     <div class="auth-password">
                         <input
                             id="login-password"
                             type="password"
                             autocomplete="current-password"
-                            placeholder="Nhập mật khẩu thử nghiệm"
+                            placeholder="Có thể bỏ trống để vào xem ngay"
                             aria-describedby="login-note"
-                            required
                         >
 
                         <button
@@ -123,13 +137,11 @@ $roles = [
 
                 <!-- Thông báo phạm vi bản thử -->
                 <p class="auth-notice" id="login-note">
-                    Bản thử giao diện: hãy dùng thông tin giả.
-                    Mật khẩu không được gửi đi hoặc lưu lại.
-                    Chọn vai trò không cấp quyền truy cập thật.
+                    Chế độ trải nghiệm giao diện nhanh: Không cần nhập Email và Mật khẩu. Bạn có thể chọn vai trò ở trên hoặc bấm nút dưới đây để vào xem trực tiếp.
                 </p>
 
                 <button class="auth-submit" type="submit">
-                    Thử đăng nhập
+                    Vào xem giao diện ngay →
                 </button>
 
                 <!-- Kết quả thao tác mẫu -->
