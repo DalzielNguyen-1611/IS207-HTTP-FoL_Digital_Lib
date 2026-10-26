@@ -48,7 +48,7 @@
 ## 👨‍🎓 3. THÀNH VIÊN NHÓM THỰC HIỆN
 
 | STT | Họ và Tên | MSSV | Lớp | Vai trò | GitHub | Email |
-| :---: | :--- | :---: | :--- :---: | :---: | :---: | :--- |
+| :---: | :--- | :---: | :---: | :---: | :---: | :--- |
 | 1 | **Nguyễn Đoàn Đức Hiếu** | 24520500 | IS207.R11 | **Leader** | [@DalzielNguyen-1611](https://github.com/DalzielNguyen-1611) | [24520500@gm.uit.edu.vn](mailto:24520500@gm.uit.edu.vn) |
 | 2 | **Nguyễn Văn Phát** | 24521314 | IS207.R11 | Member | — | [24521314@gm.uit.edu.vn](mailto:24521314@gm.uit.edu.vn) |
 | 3 | **Trần Hoàng Phúc** | 24521398 | IS207.R11 | Member | — | [24521398@gm.uit.edu.vn](mailto:24521398@gm.uit.edu.vn) |
