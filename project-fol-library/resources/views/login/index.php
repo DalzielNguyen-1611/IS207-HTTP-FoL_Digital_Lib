@@ -42,28 +42,6 @@ $savedEmail = $_GET['email'] ?? '';
             align-items: center;
             gap: 10px;
         }
-        .sample-role-btn {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 10px 6px;
-            border-radius: 8px;
-            cursor: pointer;
-            border: 1px solid #d1d5db;
-            background: #ffffff;
-            font-size: 12px;
-            font-weight: 500;
-            color: #374151;
-            transition: all 0.2s ease;
-        }
-        .sample-role-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .sample-role-btn.student:hover { border-color: #005baa; background: #eef6fb; color: #005baa; }
-        .sample-role-btn.librarian:hover { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
-        .sample-role-btn.admin:hover { border-color: #d97706; background: #fffbeb; color: #d97706; }
     </style>
 </head>
 <body>
@@ -97,13 +75,13 @@ $savedEmail = $_GET['email'] ?? '';
             <span class="auth-decoration" aria-hidden="true">❧</span>
         </section>
 
-        <!-- Biểu mẫu đăng nhập xác thực thật -->
+        <!-- Biểu mẫu đăng nhập xác thực -->
         <section class="auth-card" aria-labelledby="login-title">
-            <p class="auth-eyebrow">CỔNG XÁC THỰC TẬP TRUNG</p>
+            <p class="auth-eyebrow">CHÀO MỪNG BẠN TRỞ LẠI</p>
             <h2 id="login-title">Đăng nhập</h2>
 
             <p class="auth-description">
-                Đăng nhập bằng tài khoản nội bộ để truy cập hệ thống theo đúng quyền hạn.
+                Sử dụng tài khoản thư viện của bạn.
             </p>
 
             <?php if (!empty($error)): ?>
@@ -119,28 +97,6 @@ $savedEmail = $_GET['email'] ?? '';
                     <span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             <?php endif; ?>
-
-            <!-- Bảng tài khoản mẫu hỗ trợ điền nhanh để kiểm thử -->
-            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
-                <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; justify-content: space-between;">
-                    <span>Tài khoản kiểm thử trong CSDL:</span>
-                    <span style="font-weight: 400; color: #94a3b8;">Bấm để tự điền form</span>
-                </div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
-                    <button type="button" class="sample-role-btn student" data-email="student@gm.uit.edu.vn" data-password="Password@123">
-                        <span style="font-size: 18px; margin-bottom: 2px;">🎓</span>
-                        <span>Sinh viên</span>
-                    </button>
-                    <button type="button" class="sample-role-btn librarian" data-email="librarian@fol.uit.edu.vn" data-password="Password@123">
-                        <span style="font-size: 18px; margin-bottom: 2px;">📚</span>
-                        <span>Thủ thư</span>
-                    </button>
-                    <button type="button" class="sample-role-btn admin" data-email="admin@fol.uit.edu.vn" data-password="Password@123">
-                        <span style="font-size: 18px; margin-bottom: 2px;">⚙️</span>
-                        <span>Quản trị viên</span>
-                    </button>
-                </div>
-            </div>
 
             <!-- Form POST đăng nhập trực tiếp vào Backend -->
             <form id="login-form" method="POST" action="/login">
@@ -192,7 +148,7 @@ $savedEmail = $_GET['email'] ?? '';
                 </div>
 
                 <button class="auth-submit" type="submit" id="submit-login-btn">
-                    Đăng nhập hệ thống →
+                    Đăng nhập →
                 </button>
 
                 <!-- Kết quả thao tác -->
