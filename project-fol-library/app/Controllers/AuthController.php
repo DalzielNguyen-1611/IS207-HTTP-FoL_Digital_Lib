@@ -93,6 +93,54 @@ class AuthController
     }
 
     /**
+     * Xử lý đăng nhập bằng tài khoản Google (dành riêng cho sinh viên)
+     */
+    public function loginWithGoogle(?string $email = null): array
+    {
+        $targetEmail = $email ? trim($email) : 'student@gm.uit.edu.vn';
+
+        $user = $this->userRepo->findByEmail($targetEmail);
+        if ($user === null) {
+            return [
+                'success' => false,
+                'message' => "Tài khoản Google ({$targetEmail}) chưa được liên kết với hồ sơ sinh viên thư viện."
+            ];
+        }
+
+        // Kiểm tra trạng thái tài khoản
+        if (($user['trang_thai'] ?? '') !== 'HoatDong') {
+            return [
+                'success' => false,
+                'message' => 'Tài khoản sinh viên của bạn đang bị khóa hoặc đình chỉ.'
+            ];
+        }
+
+        // Thiết lập Session đăng nhập an toàn
+        Session::setAuthUser($user);
+
+        // Ghi nhận nhật ký kiểm toán
+        $this->auditService->log(
+            userId: (int)$user['id_tai_khoan'],
+            action: 'DangNhapGoogle',
+            targetTable: 'tai_khoan',
+            targetId: (string)$user['id_tai_khoan'],
+            description: "Sinh viên đăng nhập thành công qua tài khoản Google ({$targetEmail})"
+        );
+
+        return [
+            'success' => true,
+            'message' => 'Đăng nhập Google thành công.',
+            'redirect' => '/profile',
+            'user' => [
+                'id' => $user['id_tai_khoan'],
+                'email' => $user['email'],
+                'role' => $user['ma_vai_tro'],
+                'name' => $user['ho_ten'] ?? $user['email']
+            ]
+        ];
+    }
+
+    /**
      * Xử lý đăng xuất
      */
     public function logout(): void

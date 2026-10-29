@@ -42,6 +42,49 @@ $savedEmail = $_GET['email'] ?? '';
             align-items: center;
             gap: 10px;
         }
+        .btn-google-login {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+            padding: 12px 16px;
+            background: #ffffff;
+            border: 1px solid #dadce0;
+            border-radius: 8px;
+            color: #3c4043;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.08);
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+        }
+        .btn-google-login:hover {
+            background: #f8fafc;
+            border-color: #4285f4;
+            box-shadow: 0 2px 8px rgba(66, 133, 244, 0.2);
+            transform: translateY(-1px);
+        }
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            margin: 22px 0 18px 0;
+            color: #94a3b8;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .auth-divider::before,
+        .auth-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #e2e8f0;
+        }
+        .auth-divider span {
+            padding: 0 12px;
+        }
     </style>
 </head>
 <body>
@@ -98,18 +141,38 @@ $savedEmail = $_GET['email'] ?? '';
                 </div>
             <?php endif; ?>
 
-            <!-- Form POST đăng nhập trực tiếp vào Backend -->
+            <!-- Đăng nhập Google dành riêng cho Sinh viên -->
+            <div style="margin-bottom: 8px;">
+                <a href="/auth/google" class="btn-google-login" id="btn-google-login" title="Đăng nhập tài khoản Google sinh viên">
+                    <svg width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+                        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.66 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.66 48 24 48z"/>
+                    </svg>
+                    <span>Đăng nhập với Google (@gm.uit.edu.vn)</span>
+                </a>
+                <p style="font-size: 12px; color: #718695; text-align: center; margin-top: 6px; margin-bottom: 0;">
+                    Dành riêng cho sinh viên sử dụng tài khoản Google trường cấp
+                </p>
+            </div>
+
+            <div class="auth-divider">
+                <span>hoặc cán bộ &amp; quản trị</span>
+            </div>
+
+            <!-- Form POST đăng nhập trực tiếp vào Backend dành cho Cán bộ & Quản trị -->
             <form id="login-form" method="POST" action="/login">
                 <!-- Email đăng nhập -->
                 <div class="auth-field">
-                    <label for="login-email">Email tài khoản</label>
+                    <label for="login-email">Email nội bộ</label>
 
                     <input
                         id="login-email"
                         name="email"
                         type="email"
                         autocomplete="username"
-                        placeholder="Nhập email của bạn (ví dụ: student@gm.uit.edu.vn)"
+                        placeholder="ví dụ: librarian@fol.uit.edu.vn"
                         required
                         value="<?= htmlspecialchars($savedEmail, ENT_QUOTES, 'UTF-8') ?>"
                     >
@@ -148,7 +211,7 @@ $savedEmail = $_GET['email'] ?? '';
                 </div>
 
                 <button class="auth-submit" type="submit" id="submit-login-btn">
-                    Đăng nhập →
+                    Đăng nhập hệ thống →
                 </button>
 
                 <!-- Kết quả thao tác -->
@@ -159,11 +222,6 @@ $savedEmail = $_GET['email'] ?? '';
                     style="margin-top: 12px; font-size: 13px; color: #0284c7; text-align: center;"
                 ></p>
             </form>
-
-            <!-- Liên kết đăng ký dành riêng cho sinh viên -->
-            <p class="auth-switch">
-                Sinh viên chưa có tài khoản? <a href="/register">Đăng ký tài khoản mới</a>
-            </p>
         </section>
     </main>
 

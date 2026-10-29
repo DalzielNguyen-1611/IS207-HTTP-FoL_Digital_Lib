@@ -93,6 +93,19 @@ if ($path === '/logout') {
     $authController->logout();
 }
 
+// 2.1. Xử lý Đăng nhập Google dành riêng cho Sinh viên
+if ($path === '/auth/google') {
+    $authController = new \App\Controllers\AuthController();
+    $email = $_GET['email'] ?? null;
+    $result = $authController->loginWithGoogle($email);
+    if ($result['success']) {
+        header('Location: ' . $result['redirect']);
+    } else {
+        header('Location: /login?error=' . urlencode($result['message']));
+    }
+    exit;
+}
+
 // 3. Xử lý Đăng nhập POST thật
 if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $authController = new \App\Controllers\AuthController();
