@@ -205,6 +205,9 @@ if ($path === '/librarian/books/delete' && $_SERVER['REQUEST_METHOD'] === 'POST'
 // -----------------------------------------------------------------------------
 $routes = [
     '/' => dirname(__DIR__) . '/resources/views/home/index.php',
+    '/about' => dirname(__DIR__) . '/resources/views/about/index.php',
+    '/rules' => dirname(__DIR__) . '/resources/views/rules/index.php',
+    '/feedback' => dirname(__DIR__) . '/resources/views/feedback/index.php',
     '/books' => dirname(__DIR__) . '/resources/views/books/index.php',
     '/book-detail' => dirname(__DIR__) . '/resources/views/book-detail/index.php',
     '/collections' => dirname(__DIR__) . '/resources/views/collections/index.php',

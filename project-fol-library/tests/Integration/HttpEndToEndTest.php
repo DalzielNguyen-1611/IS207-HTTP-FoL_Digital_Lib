@@ -178,6 +178,50 @@ $results['E2E-12: Sinh viên đăng xuất thành công chuyển hướng về /
     'detail' => "HTTP {$res['code']}, Đã thu hồi phiên sinh viên"
 ];
 
+// 13. Khách truy cập trang Giới thiệu /about
+$res = httpRequest('GET', "{$baseUrl}/about");
+$results['E2E-13: Khách truy cập trang Giới thiệu /about thành công (HTTP 200)'] = [
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Giới thiệu') && str_contains($res['body'], 'Sứ Mệnh')),
+    'detail' => "HTTP {$res['code']}, Đã hiển thị trang Giới thiệu"
+];
+
+// 14. Khách truy cập trang Nội quy /rules
+$res = httpRequest('GET', "{$baseUrl}/rules");
+$results['E2E-14: Khách truy cập trang Nội quy /rules thành công (HTTP 200)'] = [
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Nội quy') && str_contains($res['body'], 'Quy chế Mượn - Trả')),
+    'detail' => "HTTP {$res['code']}, Đã hiển thị trang Nội quy"
+];
+
+// 15. Khách truy cập trang Góp ý /feedback
+$res = httpRequest('GET', "{$baseUrl}/feedback");
+$results['E2E-15: Khách truy cập trang Góp ý & Đề xuất sách /feedback thành công (HTTP 200)'] = [
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Góp ý') && str_contains($res['body'], 'Đề xuất Sách mới')),
+    'detail' => "HTTP {$res['code']}, Đã hiển thị trang Góp ý"
+];
+
+// 16. Khách truy cập trang Liên hệ /contact
+$res = httpRequest('GET', "{$baseUrl}/contact");
+$results['E2E-16: Khách truy cập trang Liên hệ /contact thành công (HTTP 200)'] = [
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Liên hệ') && str_contains($res['body'], 'Địa chỉ')),
+    'detail' => "HTTP {$res['code']}, Đã hiển thị trang Liên hệ"
+];
+
+// 17. Trang chủ / render đầy đủ cấu trúc menu mới và dropdown
+$res = httpRequest('GET', "{$baseUrl}/");
+$hasNewNav = (
+    $res['code'] === 200
+    && str_contains($res['body'], 'nav-dropdown')
+    && str_contains($res['body'], 'Dịch vụ')
+    && str_contains($res['body'], '/about')
+    && str_contains($res['body'], '/rules')
+    && str_contains($res['body'], '/feedback')
+    && str_contains($res['body'], '/contact')
+);
+$results['E2E-17: Trang chủ render đầy đủ Menu mới (Dịch vụ dropdown, Giới thiệu, Nội quy, Góp ý, Liên hệ)'] = [
+    'pass' => $hasNewNav,
+    'detail' => "HTTP {$res['code']}, Cấu trúc Navigation chuẩn xác"
+];
+
 // Dọn dẹp tệp cookie tạm
 if (file_exists($cookieFile)) {
     unlink($cookieFile);

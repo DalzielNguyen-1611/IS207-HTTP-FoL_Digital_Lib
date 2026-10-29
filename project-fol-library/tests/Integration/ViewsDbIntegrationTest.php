@@ -63,6 +63,22 @@ class ViewsDbIntegrationTest
                 'file' => 'resources/views/admin-audit/index.php',
                 'mustContain' => ['Nhật ký hệ thống', 'Lịch sử hoạt động'],
             ],
+            'view_about_renders_successfully' => [
+                'file' => 'resources/views/about/index.php',
+                'mustContain' => ['Giới thiệu', 'Thư viện Khoa Văn học', 'Sứ Mệnh'],
+            ],
+            'view_rules_renders_successfully' => [
+                'file' => 'resources/views/rules/index.php',
+                'mustContain' => ['Nội quy', 'Quy chế Mượn - Trả', 'Phòng đọc'],
+            ],
+            'view_feedback_renders_successfully' => [
+                'file' => 'resources/views/feedback/index.php',
+                'mustContain' => ['Góp ý', 'Đề xuất Sách mới', 'Gửi ý kiến'],
+            ],
+            'view_contact_renders_successfully' => [
+                'file' => 'resources/views/contact/index.php',
+                'mustContain' => ['Liên hệ', 'Thư viện Khoa Văn học', 'Địa chỉ'],
+            ],
         ];
 
         foreach ($views as $testName => $meta) {

@@ -61,8 +61,37 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
 
         <nav class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
-            <a href="/books">Tra cứu sách</a>
-            <a href="/reading-room">Phòng đọc</a>
+
+            <!-- Menu thả xuống: Dịch vụ thư viện -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+                    <span>Dịch vụ</span>
+                    <svg class="nav-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu" role="menu">
+                    <a href="/books" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">📚</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Tra cứu sách</span>
+                            <span class="nav-dropdown-desc">Kho 1.200+ giáo trình, chuyên khảo & luận văn</span>
+                        </div>
+                    </a>
+                    <a href="/reading-room" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">🪑</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Phòng đọc & Chỗ ngồi</span>
+                            <span class="nav-dropdown-desc">Đặt chỗ tự học theo ca, xem sơ đồ chỗ trống</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <a href="/about">Giới thiệu</a>
+            <a href="/rules">Nội quy</a>
+            <a href="/feedback">Góp ý</a>
+            <a href="/contact">Liên hệ</a>
             <a href="/profile" class="active" aria-current="page">Cá nhân</a>
             <?php $navRole = \App\Core\Session::getRoleCode(); ?>
             <?php if ($navRole === 'ADMIN'): ?>
