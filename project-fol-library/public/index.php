@@ -151,6 +151,15 @@ if (isset($routeGuards[$path])) {
 }
 
 // -----------------------------------------------------------------------------
+// ĐIỀU PHỐI CONTROLLERS
+// -----------------------------------------------------------------------------
+if ($path === '/librarian' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->index();
+    exit;
+}
+
+// -----------------------------------------------------------------------------
 // ÁNH XẠ GIAO DIỆN VIEWS
 // -----------------------------------------------------------------------------
 $routes = [

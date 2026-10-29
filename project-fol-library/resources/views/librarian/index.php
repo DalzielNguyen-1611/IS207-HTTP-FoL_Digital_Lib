@@ -2,42 +2,16 @@
 
 declare(strict_types=1);
 
-// Ngày hiển thị theo múi giờ Việt Nam.
-$today = new DateTimeImmutable(
-    'today',
-    new DateTimeZone('Asia/Ho_Chi_Minh')
-);
-
-// Số liệu minh họa, chưa tổng hợp từ CSDL.
-$statistics = [
-    ['label' => 'Sách đang mượn', 'value' => '128', 'note' => 'Tổng phiếu đang mở'],
-    ['label' => 'Sách quá hạn', 'value' => '9', 'note' => 'Cần theo dõi xử lý'],
-    ['label' => 'Lượt đặt phòng hôm nay', 'value' => '36', 'note' => 'Trong 4 ca đọc'],
-];
-
-// Các ca đọc mẫu trong ngày.
-$readingShifts = [
-    ['name' => 'Ca 1', 'time' => '07:30 – 09:30', 'booked' => 12],
-    ['name' => 'Ca 2', 'time' => '09:45 – 11:45', 'booked' => 8],
-    ['name' => 'Ca 3', 'time' => '13:00 – 15:00', 'booked' => 10],
-    ['name' => 'Ca 4', 'time' => '15:15 – 17:15', 'booked' => 6],
-];
-
-// Phiếu cần chú ý, hoàn toàn là dữ liệu giả.
-$attentionLoans = [
-    [
-        'code' => 'PM001',
-        'student' => 'SV2026001',
-        'book' => 'Dẫn luận ngôn ngữ học',
-        'status' => 'Quá hạn',
-    ],
-    [
-        'code' => 'PM002',
-        'student' => 'SV2026002',
-        'book' => 'Truyện Kiều',
-        'status' => 'Chờ nhận sách',
-    ],
-];
+// Dữ liệu thời gian thực được cung cấp từ LibrarianController
+// Tự động khởi tạo qua LibrarianDashboardService nếu được truy cập hoặc require độc lập
+if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || !isset($today)) {
+    $dashboardService = new \App\Services\LibrarianDashboardService();
+    $overviewData = $dashboardService->getOverviewData();
+    $today = $overviewData['today'];
+    $statistics = $overviewData['statistics'];
+    $readingShifts = $overviewData['readingShifts'];
+    $attentionLoans = $overviewData['attentionLoans'];
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -123,7 +97,7 @@ $attentionLoans = [
                         $today->format('d/m/Y'),
                         ENT_QUOTES,
                         'UTF-8'
-                    ) ?> · Số liệu minh họa
+                    ) ?> · Dữ liệu thời gian thực từ CSDL Thư viện FoL
                 </p>
             </section>
 
@@ -173,18 +147,21 @@ $attentionLoans = [
 
                             <strong>
                                 <?= htmlspecialchars(
-                                    (string) $shift['booked'],
+                                    (string) ($shift['booked'] ?? 0),
                                     ENT_QUOTES,
                                     'UTF-8'
-                                ) ?> / 40 chỗ đã đặt
+                                ) ?> / <?= htmlspecialchars(
+                                    (string) ($shift['capacity'] ?? 40),
+                                    ENT_QUOTES,
+                                    'UTF-8'
+                                ) ?> chỗ đã đặt
                             </strong>
                         </article>
                     <?php endforeach; ?>
                 </div>
 
                 <p class="staff-note">
-                    Lịch minh họa, không xác nhận thư viện mở cửa
-                    vào ngày đang hiển thị.
+                    Số liệu ghi nhận theo các ca đọc và lượt đặt chỗ thực tế trong ngày tại Thư viện FoL.
                 </p>
             </section>
 
@@ -236,9 +213,19 @@ $attentionLoans = [
                                         ) ?></td>
 
                                         <td>
-                                            <span class="staff-badge">
+                                            <?php
+                                                $status = $loan['status'] ?? 'Chờ xử lý';
+                                                $badgeStyle = match ($status) {
+                                                    'Quá hạn' => 'background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;',
+                                                    'Chờ nhận sách' => 'background:#e0f2fe;color:#0369a1;border:1px solid #7dd3fc;',
+                                                    'Chờ duyệt' => 'background:#fef3c7;color:#b45309;border:1px solid #fde68a;',
+                                                    'Đang mượn' => 'background:#dcfce7;color:#15803d;border:1px solid #86efac;',
+                                                    default => 'background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;',
+                                                };
+                                            ?>
+                                            <span class="staff-badge" style="<?= $badgeStyle ?>font-weight:600;">
                                                 <?= htmlspecialchars(
-                                                    $loan['status'],
+                                                    $status,
                                                     ENT_QUOTES,
                                                     'UTF-8'
                                                 ) ?>
@@ -252,10 +239,9 @@ $attentionLoans = [
                 <?php endif; ?>
             </section>
 
-            <!-- Phạm vi bản thử -->
+            <!-- Ghi chú vận hành -->
             <p class="staff-note">
-                Chưa xác thực vai trò cán bộ.
-                Số liệu minh họa độc lập với các trang nghiệp vụ.
+                Hệ thống đồng bộ dữ liệu thời gian thực giữa phiếu mượn, bản sách vật lý và phòng đọc.
             </p>
         </div>
     </main>
