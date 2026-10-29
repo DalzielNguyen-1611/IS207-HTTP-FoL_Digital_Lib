@@ -22,18 +22,35 @@ class Session
         $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
             || (isset($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443);
 
-        session_set_cookie_params([
-            'lifetime' => 7200, // 2 giờ
-            'path' => '/',
-            'domain' => '',
-            'secure' => $isHttps,
-            'httponly' => true,
-            'samesite' => 'Lax',
-        ]);
+        $lifetimeMinutes = (int)($_ENV['SESSION_LIFETIME'] ?? 120);
+        $lifetimeSeconds = $lifetimeMinutes > 0 ? $lifetimeMinutes * 60 : 7200;
 
-        session_name('fol_lib_session');
-        session_start();
+        if (!headers_sent()) {
+            session_set_cookie_params([
+                'lifetime' => $lifetimeSeconds,
+                'path' => '/',
+                'domain' => '',
+                'secure' => $isHttps,
+                'httponly' => true,
+                'samesite' => 'Lax',
+            ]);
+
+            session_name('fol_lib_session');
+            session_start();
+        } else {
+            @session_start();
+        }
+
         self::$started = true;
+
+        // Kiểm tra thời hạn phiên làm việc (Session Timeout)
+        if (isset($_SESSION['authenticated_at'])) {
+            $elapsed = time() - (int)$_SESSION['authenticated_at'];
+            if ($elapsed > $lifetimeSeconds) {
+                self::destroy();
+                return;
+            }
+        }
     }
 
     public static function writeClose(): void
@@ -130,7 +147,13 @@ class Session
     public static function getRoleCode(): ?string
     {
         $user = self::getAuthUser();
-        return $user['ma_vai_tro'] ?? null;
+        return isset($user['ma_vai_tro']) ? strtoupper(trim((string)$user['ma_vai_tro'])) : null;
+    }
+
+    public static function hasRole(string $roleCode): bool
+    {
+        $current = self::getRoleCode();
+        return $current !== null && $current === strtoupper(trim($roleCode));
     }
 
     public static function isAuthenticated(): bool

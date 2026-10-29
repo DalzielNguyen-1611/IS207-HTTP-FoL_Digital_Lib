@@ -47,6 +47,17 @@ class AuthenticationMiddleware
             return false;
         }
 
+        // Tự động đồng bộ vai trò mới nhất từ CSDL vào session nếu có thay đổi
+        $sessionUser = Session::getAuthUser();
+        if ($sessionUser !== null) {
+            $dbRole = strtoupper(trim((string)($user['ma_vai_tro'] ?? '')));
+            if ($dbRole !== '' && ($sessionUser['ma_vai_tro'] ?? '') !== $dbRole) {
+                $sessionUser['id_vai_tro'] = $user['id_vai_tro'];
+                $sessionUser['ma_vai_tro'] = $dbRole;
+                Session::set('user', $sessionUser);
+            }
+        }
+
         return true;
     }
 

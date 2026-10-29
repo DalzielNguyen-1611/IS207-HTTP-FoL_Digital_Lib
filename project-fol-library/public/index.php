@@ -61,49 +61,14 @@ if (PHP_SAPI === 'cli-server') {
 // XỬ LÝ XÁC THỰC VÀ PHÂN QUYỀN RBAC TẠI BACKEND
 // -----------------------------------------------------------------------------
 
-// 1. Chuyển đổi vai trò trải nghiệm nhanh (Mock Auth kết nối CSDL thực tế)
-$switchRole = $_GET['switch_role'] ?? null;
-if ($switchRole !== null && in_array(strtolower($switchRole), ['admin', 'librarian', 'student'], true)) {
-    $emailMap = [
-        'admin' => 'admin@fol.uit.edu.vn',
-        'librarian' => 'librarian@fol.uit.edu.vn',
-        'student' => 'student@gm.uit.edu.vn'
-    ];
-    $email = $emailMap[strtolower($switchRole)];
+// -----------------------------------------------------------------------------
+// XỬ LÝ XÁC THỰC VÀ PHÂN QUYỀN RBAC TẠI BACKEND
+// -----------------------------------------------------------------------------
 
-    try {
-        $userRepo = new \App\Repositories\UserRepository();
-        $user = $userRepo->findByEmail($email);
-        if ($user !== null) {
-            \App\Core\Session::setAuthUser($user);
-
-            $auditService = new \App\Services\AuditService();
-            $auditService->log(
-                userId: (int)$user['id_tai_khoan'],
-                action: 'ChuyenVaiTroThuNghiem',
-                targetTable: 'tai_khoan',
-                targetId: (string)$user['id_tai_khoan'],
-                description: 'Đăng nhập vai trò ' . $user['ma_vai_tro'] . ' qua cổng chuyển vai trò'
-            );
-        }
-    } catch (\Throwable $e) {
-        // Fallback session nếu DB chưa chạy
-        \App\Core\Session::setAuthUser([
-            'id_tai_khoan' => match(strtolower($switchRole)) { 'admin' => 1, 'librarian' => 2, default => 3 },
-            'id_vai_tro' => match(strtolower($switchRole)) { 'admin' => 1, 'librarian' => 2, default => 3 },
-            'email' => $email,
-            'ma_vai_tro' => strtoupper($switchRole),
-            'trang_thai' => 'HoatDong'
-        ]);
-    }
-
-    $redirectUrl = match (strtolower($switchRole)) {
-        'admin' => '/admin/settings',
-        'librarian' => '/librarian',
-        default => '/profile',
-    };
-    header("Location: {$redirectUrl}");
-    exit;
+// 1. Chống leo thang đặc quyền / giả mạo vai trò qua request (AUTH-10)
+// Không chấp nhận bất kỳ thay đổi vai trò hoặc tài khoản tùy tiện từ client
+if (isset($_GET['switch_role']) || isset($_POST['role']) || isset($_GET['role']) || isset($_POST['id_vai_tro'])) {
+    // Quyền hạn luôn được xác định nghiêm ngặt từ CSDL và Session máy chủ
 }
 
 // 2. Xử lý Đăng xuất
@@ -124,6 +89,20 @@ if ($path === '/auth/google/callback') {
     $authController->googleCallback();
 }
 
+// 2.3. Điều hướng người dùng đã đăng nhập nếu truy cập trang /login hoặc /register (Guest Guard)
+if (($path === '/login' || $path === '/register') && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    if (\App\Core\Session::isAuthenticated()) {
+        $role = \App\Core\Session::getRoleCode();
+        $redirectUrl = match ($role) {
+            'ADMIN' => '/admin/settings',
+            'LIBRARIAN' => '/librarian',
+            default => '/profile',
+        };
+        header("Location: {$redirectUrl}");
+        exit;
+    }
+}
+
 // 3. Xử lý Đăng nhập POST thật
 if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $authController = new \App\Controllers\AuthController();
@@ -140,31 +119,34 @@ if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // -----------------------------------------------------------------------------
 // MA TRẬN PHÂN QUYỀN ROUTE (RBAC ENFORCEMENT)
-// Mặc định từ chối nếu không đủ quyền tại Backend
+// Mặc định từ chối nếu không đủ quyền tại Backend (AUTH-01 đến AUTH-05)
 // -----------------------------------------------------------------------------
-$routePermissions = [
-    '/profile' => 'authenticated',
-    '/librarian' => 'loan.confirm',
-    '/librarian/books' => 'book.inventory',
-    '/librarian/counter' => 'loan.confirm',
-    '/librarian/rooms' => 'room.manage',
-    '/librarian/reports' => 'loan.confirm',
-    '/admin/users' => 'user.view',
-    '/admin/audit' => 'audit.view',
-    '/admin/settings' => 'setting.manage',
+$routeGuards = [
+    // Trang dành riêng cho Sinh viên
+    '/profile' => 'role:STUDENT',
+
+    // Trang nghiệp vụ Thủ thư
+    '/librarian' => 'permission:loan.confirm',
+    '/librarian/books' => 'permission:book.inventory',
+    '/librarian/counter' => 'permission:loan.confirm',
+    '/librarian/rooms' => 'permission:room.manage',
+    '/librarian/reports' => 'permission:loan.confirm',
+
+    // Trang Quản trị viên
+    '/admin/users' => 'permission:user.view',
+    '/admin/audit' => 'permission:audit.view',
+    '/admin/settings' => 'permission:setting.manage',
 ];
 
-if (isset($routePermissions[$path])) {
-    $requiredPermission = $routePermissions[$path];
+if (isset($routeGuards[$path])) {
+    $requiredGuard = $routeGuards[$path];
 
-    // Kiểm tra danh tính & trạng thái tài khoản
+    // 1. Kiểm tra danh tính & trạng thái tài khoản thời gian thực (AUTH-01, AUTH-12)
     $authMiddleware = new \App\Middleware\AuthenticationMiddleware();
     if ($authMiddleware->handle()) {
-        // Nếu route yêu cầu quyền chuyên biệt <resource>.<action>
-        if ($requiredPermission !== 'authenticated') {
-            $rbacMiddleware = new \App\Middleware\AuthorizationMiddleware();
-            $rbacMiddleware->handle($requiredPermission);
-        }
+        // 2. Kiểm tra phân quyền RBAC (vai trò hoặc mã quyền) (AUTH-02 đến AUTH-05)
+        $rbacMiddleware = new \App\Middleware\AuthorizationMiddleware();
+        $rbacMiddleware->handle($requiredGuard);
     }
 }
 
@@ -175,6 +157,8 @@ $routes = [
     '/' => dirname(__DIR__) . '/resources/views/home/index.php',
     '/books' => dirname(__DIR__) . '/resources/views/books/index.php',
     '/book-detail' => dirname(__DIR__) . '/resources/views/book-detail/index.php',
+    '/collections' => dirname(__DIR__) . '/resources/views/collections/index.php',
+    '/contact' => dirname(__DIR__) . '/resources/views/contact/index.php',
     '/login' => dirname(__DIR__) . '/resources/views/login/index.php',
     '/register' => dirname(__DIR__) . '/resources/views/register/index.php',
     '/reading-room' => dirname(__DIR__) . '/resources/views/reading-room/index.php',
@@ -214,9 +198,6 @@ if ($view === null || !is_file($view)) {
 
     exit;
 }
-
-// Giải phóng khóa session trước khi nạp template giao diện
-\App\Core\Session::writeClose();
 
 // Hiển thị View của trang được yêu cầu
 require $view;
