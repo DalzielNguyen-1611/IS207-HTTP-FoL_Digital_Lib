@@ -50,6 +50,11 @@ class AuthorizationMiddleware
 
         $currentUserRole = Session::getRoleCode() ?? 'UNKNOWN';
 
+        // 0. Quản trị viên (ADMIN) có đặc quyền tối cao đảm nhận cả 3 vai trò (Sinh viên, Cán bộ, Quản trị) để kiểm thử
+        if ($currentUserRole === 'ADMIN') {
+            return true;
+        }
+
         // 1. Kiểm tra theo Vai trò (Role guard, ví dụ: "role:STUDENT")
         if (str_starts_with($requiredRule, 'role:')) {
             $allowedRoles = array_map('strtoupper', array_map('trim', explode(',', substr($requiredRule, 5))));

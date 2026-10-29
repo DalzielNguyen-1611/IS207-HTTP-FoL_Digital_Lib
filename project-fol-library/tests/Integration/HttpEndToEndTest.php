@@ -92,22 +92,23 @@ $results['E2E-03: Admin truy cập bảng cấu hình /admin/settings thành cô
     'detail' => "HTTP {$res['code']}, Đã hiển thị trang cấu hình"
 ];
 
-// 4. Admin truy cập /profile (Trang chỉ dành cho sinh viên)
+// 4. Admin truy cập /profile (Admin có thể đảm nhận cả 3 role để test)
 $res = httpRequest('GET', "{$baseUrl}/profile", [], $cookieFile);
-$adminProfileForbidden = ($res['code'] === 403 && str_contains($res['body'], 'HTTP 403 Forbidden'));
-$results['E2E-04: Admin truy cập /profile bị từ chối với mã HTTP 403 Forbidden'] = [
-    'pass' => $adminProfileForbidden,
-    'detail' => "HTTP {$res['code']}, Hiển thị giao diện 403 từ chối truy cập"
+$adminProfileAccess = ($res['code'] === 200 && str_contains($res['body'], 'Trang cá nhân'));
+$results['E2E-04: Admin truy cập /profile thành công để test vai trò Sinh viên (HTTP 200)'] = [
+    'pass' => $adminProfileAccess,
+    'detail' => "HTTP {$res['code']}, Admin đảm nhận được role Sinh viên để kiểm thử"
 ];
 
-// 5. Admin quay về trang chủ / (Kiểm tra lỗi mất Session)
+// 5. Admin quay về trang chủ / (Kiểm tra lỗi mất Session & hiển thị đầy đủ nav link)
 $res = httpRequest('GET', "{$baseUrl}/", [], $cookieFile);
 $adminSessionPersistsOnHome = (
     $res['code'] === 200
-    && str_contains($res['body'], 'Quản trị viên')
+    && str_contains($res['body'], 'Cán bộ')
+    && str_contains($res['body'], 'Quản trị')
     && str_contains($res['body'], 'Đăng xuất')
 );
-$results['E2E-05: Admin quay về trang chủ / VẪN GIỮ NGUYÊN SESSION (Hiện Quản trị viên & Đăng xuất)'] = [
+$results['E2E-05: Admin quay về trang chủ / VẪN GIỮ NGUYÊN SESSION (Hiện Cán bộ, Quản trị & Đăng xuất)'] = [
     'pass' => $adminSessionPersistsOnHome,
     'detail' => "HTTP {$res['code']}, Session duy trì hoàn hảo"
 ];
@@ -160,10 +161,11 @@ $results['E2E-10: Sinh viên truy cập /admin/settings bị từ chối với m
 $res = httpRequest('GET', "{$baseUrl}/", [], $cookieFile);
 $studentSessionPersistsOnHome = (
     $res['code'] === 200
-    && str_contains($res['body'], 'Sinh viên')
+    && str_contains($res['body'], 'Cá nhân')
     && str_contains($res['body'], 'Đăng xuất')
+    && !str_contains($res['body'], 'Quản trị')
 );
-$results['E2E-11: Sinh viên quay về trang chủ / VẪN GIỮ NGUYÊN SESSION (Hiện Sinh viên & Đăng xuất)'] = [
+$results['E2E-11: Sinh viên quay về trang chủ / VẪN GIỮ NGUYÊN SESSION (Hiện Cá nhân & Đăng xuất)'] = [
     'pass' => $studentSessionPersistsOnHome,
     'detail' => "HTTP {$res['code']}, Session sinh viên duy trì an toàn"
 ];

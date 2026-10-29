@@ -98,18 +98,22 @@ $favoriteCatalog = require dirname(__DIR__, 2) . '/mock/books.php';
             <a href="/">Trang chủ</a>
             <a href="/books">Tra cứu sách</a>
             <a href="/reading-room">Phòng đọc</a>
-            <a href="/profile" class="active" aria-current="page">
-                Cá nhân
-            </a>
+            <a href="/profile" class="active" aria-current="page">Cá nhân</a>
+            <?php $navRole = \App\Core\Session::getRoleCode(); ?>
+            <?php if ($navRole === 'ADMIN'): ?>
+                <a href="/librarian">Cán bộ</a>
+                <a href="/admin/settings">Quản trị</a>
+            <?php elseif ($navRole === 'LIBRARIAN'): ?>
+                <a href="/librarian">Cán bộ</a>
+            <?php endif; ?>
         </nav>
 
         <!-- Trạng thái xác thực & Đăng xuất -->
         <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;margin-left:auto;">
-            <span class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;">
+            <a href="/profile" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
                 <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
                 <span><?= htmlspecialchars($student['name'], ENT_QUOTES, 'UTF-8') ?></span>
-                <span style="font-size:11px;padding:2px 7px;background:#e2e8f0;color:#334155;border-radius:6px;font-weight:600;">Sinh viên</span>
-            </span>
+            </a>
             <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
                 Đăng xuất
             </a>

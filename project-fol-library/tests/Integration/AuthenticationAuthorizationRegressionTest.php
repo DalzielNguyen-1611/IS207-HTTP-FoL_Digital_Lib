@@ -95,22 +95,12 @@ class AuthenticationAuthorizationRegressionTest
         );
 
         // ---------------------------------------------------------------------
-        // AUTH-03: Admin truy cập trang chỉ dành cho sinh viên (/profile)
-        // Kỳ vọng: Bị từ chối (403); session admin CÒN NGUYÊN VẸN, không bị hủy
+        // AUTH-03: Admin có thể đảm nhận cả 3 vai trò (Sinh viên, Cán bộ, Quản trị) để kiểm thử
+        // Kỳ vọng: Được phép truy cập (handle() trả về true); session admin CÒN NGUYÊN VẸN
         // ---------------------------------------------------------------------
         Session::setAuthUser($adminUser);
-        $_SERVER['HTTP_ACCEPT'] = 'application/json'; // Dùng json mode để test bắt status code mà không die html
         $rbacMid = new AuthorizationMiddleware($this->authService);
-        
-        // Gọi kiểm tra role:STUDENT đối với tài khoản Admin
-        $allowed = false;
-        try {
-            // Trong CLI, gọi handle() khi role không khớp sẽ gọi forbidden()
-            // Ta kiểm tra logic vai trò trực tiếp và bảo toàn session
-            $allowed = (Session::getRoleCode() === 'STUDENT');
-        } catch (\Throwable $e) {
-            $allowed = false;
-        }
+        $allowed = $rbacMid->handle('role:STUDENT');
 
         $sessionStillIntact = (
             Session::isAuthenticated() === true
@@ -119,8 +109,8 @@ class AuthenticationAuthorizationRegressionTest
         );
 
         $results['AUTH-03'] = $this->assert(
-            $allowed === false && $sessionStillIntact === true,
-            'Admin bị từ chối vào trang sinh viên (role:STUDENT), Session Admin vẫn được bảo toàn nguyên vẹn'
+            $allowed === true && $sessionStillIntact === true,
+            'Admin có đặc quyền đảm nhận cả 3 role để test (truy cập role:STUDENT thành công), Session bảo toàn nguyên vẹn'
         );
 
         // ---------------------------------------------------------------------
@@ -161,13 +151,11 @@ class AuthenticationAuthorizationRegressionTest
         );
 
         // ---------------------------------------------------------------------
-        // AUTH-06: Admin bị từ chối rồi quay lại trang chủ
+        // AUTH-06: Admin chuyển qua lại giữa các vai trò rồi quay lại trang chủ
         // Kỳ vọng: Vẫn giữ trạng thái đăng nhập Admin
         // ---------------------------------------------------------------------
         Session::setAuthUser($adminUser);
-        // Giả lập từ chối truy cập /profile
-        $denied = (Session::getRoleCode() === 'STUDENT'); // false
-        // Quay về trang chủ /
+        // Admin kiểm thử trang profile sinh viên và quay về trang chủ /
         $homeStateIsAdmin = (
             Session::isAuthenticated() === true
             && Session::getRoleCode() === 'ADMIN'
@@ -175,8 +163,8 @@ class AuthenticationAuthorizationRegressionTest
         );
 
         $results['AUTH-06'] = $this->assert(
-            $denied === false && $homeStateIsAdmin === true,
-            'Admin sau khi bị từ chối truy cập /profile quay về trang chủ / vẫn giữ nguyên phiên đăng nhập Quản trị'
+            $homeStateIsAdmin === true,
+            'Admin chuyển đổi giữa các vai trò để test và quay về trang chủ / vẫn giữ nguyên phiên đăng nhập Quản trị'
         );
 
         // ---------------------------------------------------------------------

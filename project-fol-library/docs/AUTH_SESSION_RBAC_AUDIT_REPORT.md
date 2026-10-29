@@ -288,10 +288,16 @@ Bạn có thể mở trực tiếp trình duyệt Web bất kỳ (Chrome, Edge, 
    - Nút: *"← Quay lại Bảng Quản trị (Admin)"* và nút *"Về trang chủ"*.
 6. Click vào nút **"Về trang chủ"** (hoặc gõ `http://localhost:8000/`):
 7. **Kỳ vọng (Xác minh không mất Session):**
-   - Góc phải Header hiển thị chấm xanh online, tên **"Quản trị viên Hệ thống"**, huy hiệu **"Quản trị viên"** và nút **"Đăng xuất"**.
-   - Bấm vào tên quản trị sẽ mở lại ngay `/admin/settings`.
-8. Thử gõ `http://localhost:8000/login`: Trình duyệt tự động chuyển về `/admin/settings` mà không hiện lại form đăng nhập.
-9. Bấm **"Đăng xuất"**: Phiên làm việc kết thúc an toàn.
+   - Thanh điều hướng (Navbar) hiển thị đầy đủ các liên kết mà Admin có quyền truy cập: **"Trang chủ"**, **"Tra cứu sách"**, **"Phòng đọc"**, **"Cá nhân"** (`/profile`), **"Cán bộ"** (`/librarian`), **"Quản trị"** (`/admin/settings`).
+   - Góc phải Header hiển thị chấm xanh online, tên **"Quản trị viên Hệ thống"** (gọn gàng, bỏ huy hiệu chữ xám rườm rà) và nút **"Đăng xuất"**.
+   - Bấm vào tên quản trị sẽ mở ngay Bảng điều khiển Quản trị (`/admin/settings`).
+8. **Kiểm thử Admin đảm nhận cả 3 vai trò (Sinh viên, Cán bộ, Quản trị):**
+   - Bấm vào **"Cá nhân"**: Mở trang `/profile` thành công (HTTP 200) để kiểm thử giao diện và chức năng của vai trò Sinh viên.
+   - Bấm vào **"Cán bộ"**: Mở trang `/librarian` thành công (HTTP 200) để kiểm thử giao diện và chức năng của vai trò Thủ thư/Cán bộ thư viện.
+   - Bấm vào **"Quản trị"**: Mở trang `/admin/settings` thành công (HTTP 200) để cấu hình hệ thống.
+   - Tại mọi màn hình (kể cả Header trang Cán bộ và Quản trị), luôn có các liên kết và nút bấm giúp Admin chuyển đổi qua lại mượt mà giữa các vai trò mà không bao giờ bị gián đoạn hay mất phiên.
+9. Thử gõ `http://localhost:8000/login`: Trình duyệt tự động chuyển về `/admin/settings` mà không hiện lại form đăng nhập (Guest Guard).
+10. Bấm **"Đăng xuất"**: Phiên làm việc kết thúc an toàn.
 
 ### Kịch bản 3: Kiểm thử Tài khoản Sinh viên (Student)
 1. Truy cập `http://localhost:8000/login`.
@@ -299,10 +305,10 @@ Bạn có thể mở trực tiếp trình duyệt Web bất kỳ (Chrome, Edge, 
    - **Email:** `student@gm.uit.edu.vn`
    - **Mật khẩu:** `Password@123`
    *(Hoặc đăng nhập Google bằng email sinh viên có đuôi `@gm.uit.edu.vn` hoặc `@sv.ussh.edu.vn`).*
-3. **Kỳ vọng:** Đăng nhập thành công, chuyển hướng vào Trang cá nhân sinh viên (`/profile`). Thông tin họ tên và mã số sinh viên được lấy chính xác từ phiên làm việc.
+3. **Kỳ vọng:** Đăng nhập thành công, chuyển hướng vào Trang cá nhân sinh viên (`/profile`). Thanh điều hướng chỉ hiển thị các mục Sinh viên được phép truy cập (**Trang chủ**, **Tra cứu sách**, **Phòng đọc**, **Cá nhân**). Tuyệt đối không hiển thị liên kết "Cán bộ" hay "Quản trị".
 4. Sửa URL trên thanh địa chỉ sang trang quản trị: `http://localhost:8000/admin/settings` hoặc `http://localhost:8000/admin/users`.
 5. **Kỳ vọng:** Nhận màn hình **HTTP 403 Forbidden** kèm nút *"← Quay lại Trang Cá nhân Sinh viên"*.
-6. Click quay về Trang chủ (`/`): Header vẫn hiển thị tên sinh viên, huy hiệu **"Sinh viên"** và nút **"Đăng xuất"**.
+6. Click quay về Trang chủ (`/`): Header vẫn hiển thị tên sinh viên và nút **"Đăng xuất"** (không mất Session).
 7. Bấm **"Đăng xuất"**: Đăng xuất thành công.
 
 ---

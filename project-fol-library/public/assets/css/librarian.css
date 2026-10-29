@@ -46,6 +46,68 @@
   font-size: 12px;
 }
 
+/* ===== Điều hướng và tương tác trên Header cán bộ / quản trị ===== */
+.staff-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.staff-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 13px;
+}
+
+.staff-nav a {
+  color: #2b4251;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.15s ease;
+}
+
+.staff-nav a:hover,
+.staff-nav a.active {
+  color: #1a56db;
+}
+
+.staff-nav a.active {
+  font-weight: 600;
+}
+
+.staff-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.staff-btn-user {
+  background: #ffffff;
+  color: #1e293b;
+  border: 1px solid #d4e2ec;
+}
+
+.staff-btn-user:hover {
+  border-color: #94a3b8;
+}
+
+.staff-btn-logout {
+  background: #fff5f5;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.staff-btn-logout:hover {
+  background: #fee2e2;
+}
+
 /* ===== Bố cục khu vực cán bộ ===== */
 .staff-layout {
   display: grid;

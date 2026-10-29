@@ -63,11 +63,38 @@ $attentionLoans = [
             <img src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
             <span>
                 <strong>Thư viện Khoa Văn học</strong>
-                <small>Khu vực cán bộ</small>
+                <small>Cán bộ</small>
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang chủ</a>
+        <div class="staff-header-actions">
+            <nav class="staff-nav" aria-label="Điều hướng">
+                <a href="/">Trang chủ</a>
+                <?php $currentRole = \App\Core\Session::getRoleCode(); ?>
+                <?php if ($currentRole === 'ADMIN'): ?>
+                    <a href="/profile">Cá nhân</a>
+                    <a href="/librarian" class="active">Cán bộ</a>
+                    <a href="/admin/settings">Quản trị</a>
+                <?php elseif ($currentRole === 'LIBRARIAN'): ?>
+                    <a href="/librarian" class="active">Cán bộ</a>
+                <?php endif; ?>
+            </nav>
+
+            <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
+                <?php
+                    $currentUser = \App\Core\Session::getAuthUser();
+                    $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Tài khoản', ENT_QUOTES, 'UTF-8');
+                    $dashUrl = ($currentRole === 'ADMIN') ? '/admin/settings' : '/librarian';
+                ?>
+                <a href="<?= $dashUrl ?>" class="staff-btn staff-btn-user" title="Tài khoản của bạn">
+                    <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
+                    <span><?= $userName ?></span>
+                </a>
+                <a href="/logout" class="staff-btn staff-btn-logout" title="Đăng xuất khỏi hệ thống">
+                    Đăng xuất
+                </a>
+            </div>
+        </div>
     </header>
 
     <main class="staff-layout">
@@ -79,6 +106,11 @@ $attentionLoans = [
             <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms">Phòng đọc</a>
             <a href="/librarian/reports">Báo cáo</a>
+            <?php if (\App\Core\Session::getRoleCode() === 'ADMIN'): ?>
+                <span class="staff-menu-label" style="margin-top:16px;">CHUYỂN VAI TRÒ TEST</span>
+                <a href="/admin/settings">Về trang quản trị</a>
+                <a href="/profile">Về trang cá nhân (SV)</a>
+            <?php endif; ?>
         </nav>
 
                 <div class="staff-content">
