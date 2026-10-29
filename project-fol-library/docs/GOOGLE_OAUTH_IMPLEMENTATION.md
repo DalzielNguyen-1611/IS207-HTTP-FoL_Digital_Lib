@@ -26,39 +26,68 @@ Hệ thống Thư viện số FoL yêu cầu cơ chế xác thực an toàn, ti�
 
 Hệ thống tuân thủ nghiêm ngặt chuẩn **OAuth 2.0 Authorization Code Grant Flow** kết hợp **OpenID Connect**:
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor User as Người dùng (Trình duyệt)
-    participant Client as FoL Library Web (/login)
-    participant AuthCtrl as AuthController (/auth/google)
-    participant Google as Google Identity (OAuth 2.0)
-    participant DB as MariaDB (tai_khoan, ho_so)
-    participant RBAC as AuthorizationService
-
-    User->>Client: Bấm "Đăng nhập với Google"
-    Client->>AuthCtrl: GET /auth/google
-    Note over AuthCtrl: Sinh mã CSRF state ngẫu nhiên<br/>Lưu state vào HttpOnly Session
-    AuthCtrl-->>User: HTTP 302 Chuyển hướng tới Google<br/>(kèm prompt=select_account, state, client_id)
-    User->>Google: Đăng nhập & Chọn tài khoản Google
-    Google-->>User: HTTP 302 Chuyển hướng về Library<br/>/auth/google/callback?code=...&state=...
-    User->>AuthCtrl: GET /auth/google/callback?code=...&state=...
-    Note over AuthCtrl: Kiểm tra hash_equals(state, session_state)
-    AuthCtrl->>Google: POST /token (Code + Client Secret)
-    Google-->>AuthCtrl: Trả về access_token & id_token
-    AuthCtrl->>Google: GET /userinfo (Authorization: Bearer token)
-    Google-->>AuthCtrl: Trả về email, sub, name, picture
-    Note over AuthCtrl: Kiểm tra domain sinh viên hoặc Admin<br/>(Không dán cứng code)
-    AuthCtrl->>DB: Kiểm tra / Tạo mới tai_khoan & ho_so_nguoi_dung
-    DB-->>AuthCtrl: Thông tin người dùng & vai trò
-    Note over AuthCtrl: Session::regenerate() chống Session Fixation<br/>Lưu thông tin phiên đăng nhập
-    AuthCtrl->>DB: Ghi log vào nhat_ky_hoat_dong
-    alt Vai trò ADMIN
-        AuthCtrl-->>User: HTTP 302 Chuyển hướng tới /admin/settings
-    else Vai trò STUDENT
-        AuthCtrl-->>User: HTTP 302 Chuyển hướng tới /profile
-    end
 ```
+[1. Người dùng bấm "Đăng nhập với Google"]
+                 │
+                 ▼
+[2. Controller /auth/google]
+                 │  • Sinh token CSRF ngẫu nhiên: bin2hex(random_bytes(32))
+                 │  • Lưu state vào HttpOnly Session
+                 │  • Tạo Auth URL: prompt=select_account, scope=openid email profile
+                 ▼
+[3. Chuyển hướng sang Google Accounts (accounts.google.com)]
+                 │  • Người dùng đăng nhập và chọn tài khoản Google
+                 │  • Google trả kết quả về: /auth/google/callback?code=...&state=...
+                 ▼
+[4. Xử lý Callback tại AuthController (/auth/google/callback)]
+                 │
+                 ├──► [4.1] Xác thực CSRF Token: hash_equals($_SESSION['state'], $_GET['state'])
+                 │          └─► Không hợp lệ ──► Chuyển về /login?error=...
+                 │
+                 ├──► [4.2] Đổi Code lấy Token (POST oauth2.googleapis.com/token)
+                 │          └─► Nhận access_token và id_token từ Google
+                 │
+                 ├──► [4.3] Xác minh thông tin (GET googleapis.com/oauth2/v3/userinfo)
+                 │          └─► Nhận email, google_sub, ho_ten, anh_dai_dien
+                 │
+                 ├──► [4.4] Kiểm tra phân quyền động (GoogleAuthService)
+                 │          ├─► Email thuộc GOOGLE_ADMIN_EMAILS hoặc CSDL có vai trò ADMIN
+                 │          │   └──► Xác định vai trò: ADMIN (1)
+                 │          ├─► Email thuộc domain @gm.uit.edu.vn hoặc @sv.ussh.edu.vn
+                 │          │   └──► Xác định vai trò: STUDENT (3)
+                 │          └─► Domain khác ngoài quy định
+                 │              └──► Bị từ chối ngay lập tức (Deny by default)
+                 │
+                 ├──► [4.5] Tra cứu & Đồng bộ CSDL (UserRepository)
+                 │          ├─► Tìm kiếm theo google_sub hoặc email có sẵn
+                 │          └─► Nếu mới: Khởi tạo tai_khoan & ho_so_nguoi_dung (Mã ADxxxxx hoặc SVxxxxx)
+                 │
+                 ├──► [4.6] Bảo mật phiên làm việc: Session::regenerate() chống Session Fixation
+                 │
+                 └──► [4.7] Ghi nhận kiểm toán: AuditService::log('DangNhapGoogleOAuth')
+                 │
+                 ▼
+[5. Điều hướng theo vai trò người dùng (Role-based Redirect)]
+                 ├──► Quản trị viên (ADMIN) ──► HTTP 302 Chuyển hướng tới /admin/settings
+                 └──► Sinh viên (STUDENT)    ──► HTTP 302 Chuyển hướng tới /profile
+```
+
+### Bảng chi tiết các bước trong chu trình xác thực:
+
+| Bước | Thực thể thực hiện | Thao tác chi tiết | Mục đích bảo mật / Nghiệp vụ |
+| :---: | :--- | :--- | :--- |
+| **1** | Người dùng | Bấm nút "Đăng nhập với Google" tại `/login` | Bắt đầu quy trình xác thực ủy quyền |
+| **2** | Backend (`/auth/google`) | Sinh chuỗi `state` ngẫu nhiên 32 bytes qua `random_bytes()`, lưu vào Session | Chống tấn công giả mạo yêu cầu chéo (CSRF Protection) |
+| **3** | Google OAuth | Mở màn hình đăng nhập Google với cờ `prompt=select_account` | Luôn cho phép người dùng chủ động chọn tài khoản trường/cá nhân |
+| **4** | Google $\rightarrow$ Callback | Chuyển hướng về `/auth/google/callback` kèm `code` và `state` | Trao đổi mã ủy quyền (Authorization Code) |
+| **5** | Backend | Kiểm tra `hash_equals(session_state, get_state)` | Đảm bảo phản hồi xuất phát từ chính phiên làm việc hợp lệ |
+| **6** | Backend $\rightarrow$ Google | Gửi HTTP POST trao đổi `code` lấy `access_token` bằng cURL (SSL verify) | Xác thực Backend an toàn với Google bằng `Client Secret` |
+| **7** | Backend $\rightarrow$ Google | Gửi HTTP GET lấy thông tin hồ sơ (`email`, `sub`, `name`, `picture`) | Lấy thông tin danh tính đã được Google xác thực (`email_verified=true`) |
+| **8** | Backend (Logic RBAC) | Phân tích domain: `@gm.uit.edu.vn`, `@sv.ussh.edu.vn` hoặc Admin cấu hình | Kiểm soát truy cập không dán cứng, loại trừ người ngoài tổ chức |
+| **9** | Backend $\rightarrow$ Database | Kiểm tra/tạo bản ghi `tai_khoan`, `ho_so_nguoi_dung`, gán vai trò tương ứng | Tự động đồng bộ hóa thông tin người dùng vào hệ thống Thư viện |
+| **10** | Backend (Session) | Gọi `Session::regenerate()` và lưu dữ liệu người dùng | Chống tấn công Session Fixation, thiết lập phiên an toàn |
+| **11** | Backend (Audit) | Ghi nhận sự kiện `DangNhapGoogleOAuth` vào `nhat_ky_hoat_dong` | Đảm bảo khả năng truy vết và kiểm toán an ninh |
+| **12** | Backend $\rightarrow$ Trình duyệt | Admin chuyển tới `/admin/settings`, Sinh viên chuyển tới `/profile` | Điều hướng theo đúng thẩm quyền nghiệp vụ |
 
 ---
 
