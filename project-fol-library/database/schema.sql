@@ -368,4 +368,99 @@ CREATE TABLE IF NOT EXISTS `nhat_ky_hoat_dong` (
     CONSTRAINT `fk_32` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- -----------------------------------------------------------------------------
+-- 10. TRIGGERS, PROCEDURES & FUNCTIONS (ĐỒNG BỘ DỮ LIỆU)
+-- -----------------------------------------------------------------------------
+
+-- Hàm tính số lượng cuốn sách hiện có theo mã đầu sách
+DROP FUNCTION IF EXISTS `fn_dem_so_luong_cuon_sach`;
+DELIMITER //
+CREATE FUNCTION `fn_dem_so_luong_cuon_sach`(p_id_dau_sach VARCHAR(50))
+RETURNS INT
+DETERMINISTIC
+READS SQL DATA
+BEGIN
+    DECLARE v_so_luong INT DEFAULT 0;
+    SELECT COUNT(*) INTO v_so_luong
+    FROM `cuon_sach`
+    WHERE `id_dau_sach` = p_id_dau_sach;
+    RETURN v_so_luong;
+END //
+DELIMITER ;
+
+-- Thủ tục đồng bộ số lượng cuốn sách vào bảng đầu sách (một đầu sách hoặc toàn bộ)
+DROP PROCEDURE IF EXISTS `sp_cap_nhat_so_luong_dau_sach`;
+DELIMITER //
+CREATE PROCEDURE `sp_cap_nhat_so_luong_dau_sach`(IN p_id_dau_sach VARCHAR(50))
+BEGIN
+    IF p_id_dau_sach IS NOT NULL THEN
+        UPDATE `dau_sach`
+        SET `so_luong` = (SELECT COUNT(*) FROM `cuon_sach` WHERE `id_dau_sach` = p_id_dau_sach),
+            `ngay_cap_nhat` = NOW()
+        WHERE `id_dau_sach` = p_id_dau_sach;
+    ELSE
+        UPDATE `dau_sach` ds
+        LEFT JOIN (
+            SELECT `id_dau_sach`, COUNT(*) AS `cnt`
+            FROM `cuon_sach`
+            GROUP BY `id_dau_sach`
+        ) cs ON ds.`id_dau_sach` = cs.`id_dau_sach`
+        SET ds.`so_luong` = COALESCE(cs.`cnt`, 0),
+            ds.`ngay_cap_nhat` = NOW();
+    END IF;
+END //
+DELIMITER ;
+
+-- Trigger: Tự động cập nhật số lượng khi thêm cuốn sách mới
+DROP TRIGGER IF EXISTS `tg_cuon_sach_after_insert`;
+DELIMITER //
+CREATE TRIGGER `tg_cuon_sach_after_insert`
+AFTER INSERT ON `cuon_sach`
+FOR EACH ROW
+BEGIN
+    UPDATE `dau_sach`
+    SET `so_luong` = (SELECT COUNT(*) FROM `cuon_sach` WHERE `id_dau_sach` = NEW.id_dau_sach),
+        `ngay_cap_nhat` = NOW()
+    WHERE `id_dau_sach` = NEW.id_dau_sach;
+END //
+DELIMITER ;
+
+-- Trigger: Tự động cập nhật số lượng khi chuyển cuốn sách sang đầu sách khác
+DROP TRIGGER IF EXISTS `tg_cuon_sach_after_update`;
+DELIMITER //
+CREATE TRIGGER `tg_cuon_sach_after_update`
+AFTER UPDATE ON `cuon_sach`
+FOR EACH ROW
+BEGIN
+    IF OLD.id_dau_sach != NEW.id_dau_sach THEN
+        -- Cập nhật đầu sách cũ
+        UPDATE `dau_sach`
+        SET `so_luong` = (SELECT COUNT(*) FROM `cuon_sach` WHERE `id_dau_sach` = OLD.id_dau_sach),
+            `ngay_cap_nhat` = NOW()
+        WHERE `id_dau_sach` = OLD.id_dau_sach;
+
+        -- Cập nhật đầu sách mới
+        UPDATE `dau_sach`
+        SET `so_luong` = (SELECT COUNT(*) FROM `cuon_sach` WHERE `id_dau_sach` = NEW.id_dau_sach),
+            `ngay_cap_nhat` = NOW()
+        WHERE `id_dau_sach` = NEW.id_dau_sach;
+    END IF;
+END //
+DELIMITER ;
+
+-- Trigger: Tự động cập nhật số lượng khi xóa cuốn sách
+DROP TRIGGER IF EXISTS `tg_cuon_sach_after_delete`;
+DELIMITER //
+CREATE TRIGGER `tg_cuon_sach_after_delete`
+AFTER DELETE ON `cuon_sach`
+FOR EACH ROW
+BEGIN
+    UPDATE `dau_sach`
+    SET `so_luong` = (SELECT COUNT(*) FROM `cuon_sach` WHERE `id_dau_sach` = OLD.id_dau_sach),
+        `ngay_cap_nhat` = NOW()
+    WHERE `id_dau_sach` = OLD.id_dau_sach;
+END //
+DELIMITER ;
+
 SET FOREIGN_KEY_CHECKS = 1;
+
