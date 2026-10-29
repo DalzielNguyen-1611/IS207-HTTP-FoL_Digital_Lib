@@ -101,10 +101,31 @@ class AuthController
 
         $user = $this->userRepo->findByEmail($targetEmail);
         if ($user === null) {
-            return [
-                'success' => false,
-                'message' => "Tài khoản Google ({$targetEmail}) chưa được liên kết với hồ sơ sinh viên thư viện."
-            ];
+            // Tự động khởi tạo tài khoản Sinh viên cho tài khoản Google mới
+            try {
+                $db = \App\Core\Database::getInstance();
+                $stmt = $db->prepare("INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) VALUES (3, :email, NULL, 'HoatDong', NOW(), NOW())");
+                $stmt->execute(['email' => $targetEmail]);
+                $newUserId = (int)$db->lastInsertId();
+
+                $namePart = explode('@', $targetEmail)[0];
+                $cleanName = ucwords(str_replace(['.', '_', '-'], ' ', $namePart));
+                $mssvGen = 'SV' . str_pad((string)$newUserId, 5, '0', STR_PAD_LEFT);
+
+                $profileStmt = $db->prepare("INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `anh_dai_dien`) VALUES (:id, :mssv, :name, 1, 'Nam', '2005-01-01', '/assets/images/logo.png')");
+                $profileStmt->execute([
+                    'id' => $newUserId,
+                    'mssv' => $mssvGen,
+                    'name' => $cleanName
+                ]);
+
+                $user = $this->userRepo->findById($newUserId);
+            } catch (\Throwable $e) {
+                return [
+                    'success' => false,
+                    'message' => "Không thể khởi tạo tài khoản cho {$targetEmail}: " . $e->getMessage()
+                ];
+            }
         }
 
         // Kiểm tra trạng thái tài khoản

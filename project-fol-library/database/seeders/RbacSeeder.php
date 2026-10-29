@@ -66,9 +66,10 @@ class RbacSeeder
         $userStmt = $db->prepare("INSERT INTO `tai_khoan` (`id_tai_khoan`, `id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) VALUES
             (1, 1, 'admin@fol.uit.edu.vn', :h1, 'HoatDong', NOW(), NOW()),
             (2, 2, 'librarian@fol.uit.edu.vn', :h2, 'HoatDong', NOW(), NOW()),
-            (3, 3, 'student@gm.uit.edu.vn', :h3, 'HoatDong', NOW(), NOW())
+            (3, 3, 'student@gm.uit.edu.vn', :h3, 'HoatDong', NOW(), NOW()),
+            (4, 3, '24521234@gm.uit.edu.vn', :h4, 'HoatDong', NOW(), NOW())
             ON DUPLICATE KEY UPDATE `id_vai_tro` = VALUES(`id_vai_tro`), `mat_khau` = VALUES(`mat_khau`), `trang_thai` = VALUES(`trang_thai`);");
-        $userStmt->execute(['h1' => $hash, 'h2' => $hash, 'h3' => $hash]);
+        $userStmt->execute(['h1' => $hash, 'h2' => $hash, 'h3' => $hash, 'h4' => $hash]);
 
         // 5. Ngành, lớp và hồ sơ
         $db->exec("INSERT INTO `nganh` (`id_nganh`, `ten_nganh`) VALUES (1, 'Văn học'), (2, 'Ngôn ngữ học') ON DUPLICATE KEY UPDATE `ten_nganh` = VALUES(`ten_nganh`);");
@@ -76,7 +77,8 @@ class RbacSeeder
         $db->exec("INSERT INTO `ho_so_nguoi_dung` (`id_ho_so`, `id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `so_dien_thoai`, `anh_dai_dien`) VALUES
             (1, 1, 'AD0001', 'Quản trị viên Hệ thống', 1, 'Nam', '1990-01-01', '0901234567', '/assets/images/logo.png'),
             (2, 2, 'CB0001', 'Nguyễn Thị Thu Thư', 1, 'Nữ', '1992-05-15', '0912345678', '/assets/images/logo.png'),
-            (3, 3, '24520500', 'Nguyễn Đoàn Đức Hiếu', 1, 'Nam', '2006-11-16', '0987654321', '/assets/images/logo.png')
+            (3, 3, '24520500', 'Nguyễn Đoàn Đức Hiếu', 1, 'Nam', '2006-11-16', '0987654321', '/assets/images/logo.png'),
+            (4, 4, '24521234', 'Trần Phương Anh', 1, 'Nữ', '2006-03-24', '0981122334', '/assets/images/logo.png')
             ON DUPLICATE KEY UPDATE `ho_ten` = VALUES(`ho_ten`), `so_dien_thoai` = VALUES(`so_dien_thoai`);");
 
         $db->exec('SET FOREIGN_KEY_CHECKS = 1;');

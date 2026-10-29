@@ -67,4 +67,9 @@ class Database
     {
         self::$instance = $pdo;
     }
+
+    public static function getInstance(): PDO
+    {
+        return self::getConnection();
+    }
 }
