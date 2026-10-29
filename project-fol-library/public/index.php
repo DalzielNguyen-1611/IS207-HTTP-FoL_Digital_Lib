@@ -6,6 +6,25 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/app/Core/Autoloader.php';
 \App\Core\Autoloader::register();
 
+// Tải biến môi trường từ .env nếu tồn tại
+$envFile = dirname(__DIR__) . '/.env';
+if (file_exists($envFile) && is_readable($envFile)) {
+    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($lines as $line) {
+        $trimmed = trim($line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#') || !str_contains($trimmed, '=')) {
+            continue;
+        }
+        [$key, $value] = explode('=', $trimmed, 2);
+        $key = trim($key);
+        $value = trim($value, " \t\n\r\0\x0B\"'");
+        if (!isset($_ENV[$key])) {
+            $_ENV[$key] = $value;
+        }
+        putenv("{$key}={$value}");
+    }
+}
+
 // Khởi động Session bảo mật
 \App\Core\Session::start();
 
