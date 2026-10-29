@@ -30,6 +30,11 @@ $defaultFine = 5000;
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Cấu hình hệ thống · Thư viện Khoa Văn học</title>
 
+    <!-- Favicon biểu trưng Khoa Văn học -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/admin-settings.css">
@@ -38,15 +43,15 @@ $defaultFine = 5000;
 <body>
     <!-- Header quản trị -->
     <header class="staff-header">
-        <a class="staff-brand" href="/admin/users">
+        <a class="staff-brand" href="/" title="Về trang chủ Thư viện">
             <img src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
             <span>
                 <strong>Thư viện Khoa Văn học</strong>
-                <small>Khu vực quản trị · Bản thử giao diện</small>
+                <small>Khu vực quản trị</small>
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang sinh viên</a>
+        <a class="staff-public-link" href="/">Về trang chủ</a>
     </header>
 
     <main class="staff-layout">

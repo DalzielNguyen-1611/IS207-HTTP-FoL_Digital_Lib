@@ -44,6 +44,11 @@ $featureBooks = [
 
     <title><?= htmlspecialchars($libraryName, ENT_QUOTES, 'UTF-8') ?></title>
 
+    <!-- Favicon biểu trưng Khoa Văn học -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
@@ -67,15 +72,59 @@ $featureBooks = [
         </a>
 
         <nav class="navigation" aria-label="Điều hướng chính">
-            <a href="#home" class="active">Trang chủ</a>
+            <a href="/" class="active">Trang chủ</a>
             <a href="/books">Tra cứu sách</a>
+            <a href="/reading-room">Phòng đọc</a>
+            <?php if (\App\Core\Session::isAuthenticated()): ?>
+                <?php
+                    $navRole = \App\Core\Session::getRoleCode();
+                    $workspaceUrl = match ($navRole) {
+                        'ADMIN' => '/admin/settings',
+                        'LIBRARIAN' => '/librarian',
+                        default => '/profile',
+                    };
+                    $workspaceLabel = match ($navRole) {
+                        'ADMIN' => 'Khu vực Quản trị',
+                        'LIBRARIAN' => 'Khu vực Thủ thư',
+                        default => 'Trang cá nhân',
+                    };
+                ?>
+                <a href="<?= $workspaceUrl ?>"><?= $workspaceLabel ?></a>
+            <?php endif; ?>
         </nav>
 
-        <!-- Liên kết tới trang đăng nhập -->
-        <a class="login-button" href="/login">
-            Đăng nhập 
-        </a>
-        
+        <!-- Trạng thái xác thực người dùng / Đăng nhập -->
+        <?php if (\App\Core\Session::isAuthenticated()): ?>
+            <?php
+                $currentUser = \App\Core\Session::getAuthUser();
+                $currentRole = \App\Core\Session::getRoleCode();
+                $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Người dùng', ENT_QUOTES, 'UTF-8');
+                $dashboardUrl = match ($currentRole) {
+                    'ADMIN' => '/admin/settings',
+                    'LIBRARIAN' => '/librarian',
+                    default => '/profile',
+                };
+                $roleLabel = match ($currentRole) {
+                    'ADMIN' => 'Quản trị viên',
+                    'LIBRARIAN' => 'Thủ thư',
+                    default => 'Sinh viên',
+                };
+            ?>
+            <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;margin-left:auto;">
+                <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;text-decoration:none;" title="Truy cập Bảng điều khiển cá nhân">
+                    <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
+                    <span><?= $userName ?></span>
+                    <span style="font-size:11px;padding:2px 7px;background:#e2e8f0;color:#334155;border-radius:6px;font-weight:600;"><?= $roleLabel ?></span>
+                </a>
+                <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
+                    Đăng xuất
+                </a>
+            </div>
+        <?php else: ?>
+            <a class="login-button" href="/login">
+                Đăng nhập
+            </a>
+        <?php endif; ?>
     </header>
 
     <!-- Banner chính & tìm kiếm mẫu -->

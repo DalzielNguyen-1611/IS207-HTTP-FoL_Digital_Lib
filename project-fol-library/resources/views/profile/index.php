@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-//Hồ sơ mẫu, chưa kết nối tài khoản hoặc CSDL
+// Tải thông tin tài khoản sinh viên đã xác thực từ Session
+$authUser = \App\Core\Session::getAuthUser();
 $student = [
-    'name' => 'Nguyễn Minh Anh',
-    'code' => 'SV2026001',
-    'email' => 'minhanh@example.com',
-    'phone' => '',
-    'major' => 'Văn học',
+    'name' => $authUser['ho_ten'] ?? 'Sinh viên Văn khoa',
+    'code' => $authUser['mssv'] ?? ('SV' . str_pad((string)($authUser['id_tai_khoan'] ?? 1), 6, '0', STR_PAD_LEFT)),
+    'email' => $authUser['email'] ?? 'student@gm.uit.edu.vn',
+    'phone' => $authUser['so_dien_thoai'] ?? '',
+    'major' => $authUser['ten_nganh'] ?? 'Văn học',
 ];
 
 //Các mục trong trang cá nhân
@@ -68,6 +69,11 @@ $favoriteCatalog = require dirname(__DIR__, 2) . '/mock/books.php';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Trang cá nhân · Thư viện Khoa Văn học</title>
 
+    <!-- Favicon biểu trưng Khoa Văn học -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link rel="stylesheet" href='/assets/css/base.css'>
     <link rel="stylesheet" href='/assets/css/home.css'>
     <link rel="stylesheet" href='/assets/css/profile.css'>
@@ -96,6 +102,18 @@ $favoriteCatalog = require dirname(__DIR__, 2) . '/mock/books.php';
                 Cá nhân
             </a>
         </nav>
+
+        <!-- Trạng thái xác thực & Đăng xuất -->
+        <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;margin-left:auto;">
+            <span class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 14px;">
+                <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
+                <span><?= htmlspecialchars($student['name'], ENT_QUOTES, 'UTF-8') ?></span>
+                <span style="font-size:11px;padding:2px 7px;background:#e2e8f0;color:#334155;border-radius:6px;font-weight:600;">Sinh viên</span>
+            </span>
+            <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
+                Đăng xuất
+            </a>
+        </div>
     </header>
 
     <main class="page">
