@@ -177,7 +177,7 @@ class AuthController
             }
 
             // 7. Tái tạo Session ID chống Session Fixation và lưu phiên đăng nhập
-            Session::regenerateId();
+            Session::regenerate();
             Session::setAuthUser($user);
 
             // 8. Ghi nhận nhật ký kiểm toán

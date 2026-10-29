@@ -50,6 +50,11 @@ class Session
         session_regenerate_id(true);
     }
 
+    public static function regenerateId(): void
+    {
+        self::regenerate();
+    }
+
     public static function set(string $key, mixed $value): void
     {
         self::start();
