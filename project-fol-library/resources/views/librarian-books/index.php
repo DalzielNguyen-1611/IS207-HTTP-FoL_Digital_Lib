@@ -27,11 +27,11 @@ $books = require dirname(__DIR__, 2) . '/mock/books.php';
             >
             <span>
                 <strong>Thư viện Khoa Văn học</strong>
-                <small>Khu vực cán bộ · Bản thử giao diện</small>
+                <small>Khu vực cán bộ</small>
             </span>
         </a>
 
-        <a class="staff-public-link" href="/">Về trang sinh viên</a>
+        <a class="staff-public-link" href="/">Về trang chủ</a>
     </header>
 
     <main class="staff-layout">

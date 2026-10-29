@@ -124,6 +124,11 @@ IS207_HTTP_Project/project-fol-library/
   <?php endif; ?>
   ```
 - File `profile/index.php`: Thay thế dữ liệu tĩnh mẫu bằng dữ liệu thực lấy từ `Session::getAuthUser()`.
+- Cập nhật thanh điều hướng `<nav class="navigation">` tại Trang chủ (`/`), Tra cứu sách (`/books`), Chi tiết sách (`/book-detail`) và Phòng đọc (`/reading-room`): **Bất kỳ vai trò nào khi đã đăng nhập đều có liên kết trực tiếp đến khu vực làm việc của mình ngay từ Trang chủ** (Admin có liên kết *"Khu vực Quản trị"*, Thủ thư có *"Khu vực Thủ thư"*, Sinh viên có *"Trang cá nhân"*).
+
+#### 6. Các View Quản trị & Cán bộ (`admin-*`, `librarian-*`)
+- **Loại bỏ chữ " · Bản thử giao diện":** Chuẩn hóa tiêu đề khu vực thành `<small>Khu vực quản trị</small>` và `<small>Khu vực cán bộ</small>`.
+- **Sửa nhãn điều hướng "Về trang sinh viên" thành "Về trang chủ":** Trước đây link trỏ về `href="/"` nhưng hiển thị nhãn gây hiểu lầm là *"Về trang sinh viên"*. Đã chuẩn hóa thành `<a class="staff-public-link" href="/">Về trang chủ</a>`, giúp mọi vai trò có thể quay về Trang chủ và từ Trang chủ đi đến mọi chức năng được cấp phép.
 
 ---
 

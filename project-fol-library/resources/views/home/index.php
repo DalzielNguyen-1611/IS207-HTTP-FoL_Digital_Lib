@@ -72,8 +72,25 @@ $featureBooks = [
         </a>
 
         <nav class="navigation" aria-label="Điều hướng chính">
-            <a href="#home" class="active">Trang chủ</a>
+            <a href="/" class="active">Trang chủ</a>
             <a href="/books">Tra cứu sách</a>
+            <a href="/reading-room">Phòng đọc</a>
+            <?php if (\App\Core\Session::isAuthenticated()): ?>
+                <?php
+                    $navRole = \App\Core\Session::getRoleCode();
+                    $workspaceUrl = match ($navRole) {
+                        'ADMIN' => '/admin/settings',
+                        'LIBRARIAN' => '/librarian',
+                        default => '/profile',
+                    };
+                    $workspaceLabel = match ($navRole) {
+                        'ADMIN' => 'Khu vực Quản trị',
+                        'LIBRARIAN' => 'Khu vực Thủ thư',
+                        default => 'Trang cá nhân',
+                    };
+                ?>
+                <a href="<?= $workspaceUrl ?>"><?= $workspaceLabel ?></a>
+            <?php endif; ?>
         </nav>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
