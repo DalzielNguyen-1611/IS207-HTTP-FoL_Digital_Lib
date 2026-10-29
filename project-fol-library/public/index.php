@@ -93,22 +93,16 @@ if ($path === '/logout') {
     $authController->logout();
 }
 
-// 2.1. Xử lý Đăng nhập Google dành riêng cho Sinh viên
+// 2.1. Khởi tạo luồng Google OAuth 2.0 (Redirect sang accounts.google.com)
 if ($path === '/auth/google') {
-    $email = $_GET['email'] ?? null;
-    if (empty($email)) {
-        require_once dirname(__DIR__) . '/resources/views/login/google_select.php';
-        exit;
-    }
-
     $authController = new \App\Controllers\AuthController();
-    $result = $authController->loginWithGoogle($email);
-    if ($result['success']) {
-        header('Location: ' . $result['redirect']);
-    } else {
-        header('Location: /login?error=' . urlencode($result['message']));
-    }
-    exit;
+    $authController->googleRedirect();
+}
+
+// 2.2. Tiếp nhận phản hồi xác thực từ Google (Google OAuth Callback)
+if ($path === '/auth/google/callback') {
+    $authController = new \App\Controllers\AuthController();
+    $authController->googleCallback();
 }
 
 // 3. Xử lý Đăng nhập POST thật

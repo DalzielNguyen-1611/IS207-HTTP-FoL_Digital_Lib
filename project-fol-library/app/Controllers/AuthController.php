@@ -7,7 +7,10 @@ namespace App\Controllers;
 use App\Core\Session;
 use App\Repositories\UserRepository;
 use App\Services\AuditService;
+use App\Services\GoogleAuthService;
 use App\Validators\AuthValidator;
+use DomainException;
+use Throwable;
 
 /**
  * Controller Xử lý Xác thực Người dùng (Auth Controller)
@@ -16,13 +19,16 @@ class AuthController
 {
     private UserRepository $userRepo;
     private AuditService $auditService;
+    private GoogleAuthService $googleAuthService;
 
     public function __construct(
         ?UserRepository $userRepo = null,
-        ?AuditService $auditService = null
+        ?AuditService $auditService = null,
+        ?GoogleAuthService $googleAuthService = null
     ) {
         $this->userRepo = $userRepo ?? new UserRepository();
         $this->auditService = $auditService ?? new AuditService();
+        $this->googleAuthService = $googleAuthService ?? new GoogleAuthService();
     }
 
     /**
@@ -93,72 +99,107 @@ class AuthController
     }
 
     /**
-     * Xử lý đăng nhập bằng tài khoản Google (dành riêng cho sinh viên)
+     * Bắt đầu luồng Google OAuth 2.0 (Redirect đến accounts.google.com với prompt=select_account)
      */
-    public function loginWithGoogle(?string $email = null): array
+    public function googleRedirect(): void
     {
-        $targetEmail = $email ? trim($email) : 'student@gm.uit.edu.vn';
+        if (!$this->googleAuthService->isConfigured()) {
+            // Nếu chưa điền Client ID và Secret trong config/auth.php, hiển thị thông báo hướng dẫn rõ ràng
+            header('Location: /login?error=' . urlencode('Chưa cấu hình GOOGLE_CLIENT_ID và GOOGLE_CLIENT_SECRET trong config/auth.php hoặc .env. Vui lòng thiết lập để kết nối Google Cloud.'));
+            exit;
+        }
 
-        $user = $this->userRepo->findByEmail($targetEmail);
-        if ($user === null) {
-            // Tự động khởi tạo tài khoản Sinh viên cho tài khoản Google mới
-            try {
-                $db = \App\Core\Database::getInstance();
-                $stmt = $db->prepare("INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) VALUES (3, :email, NULL, 'HoatDong', NOW(), NOW())");
-                $stmt->execute(['email' => $targetEmail]);
-                $newUserId = (int)$db->lastInsertId();
+        // Tạo mã CSRF state ngẫu nhiên cho mỗi phiên đăng nhập
+        $state = bin2hex(random_bytes(32));
+        $_SESSION['google_oauth_state'] = $state;
+        Session::writeClose();
 
-                $namePart = explode('@', $targetEmail)[0];
-                $cleanName = ucwords(str_replace(['.', '_', '-'], ' ', $namePart));
-                $mssvGen = 'SV' . str_pad((string)$newUserId, 5, '0', STR_PAD_LEFT);
+        $authUrl = $this->googleAuthService->createAuthUrl($state);
+        header("Location: {$authUrl}");
+        exit;
+    }
 
-                $profileStmt = $db->prepare("INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `anh_dai_dien`) VALUES (:id, :mssv, :name, 1, 'Nam', '2005-01-01', '/assets/images/logo.png')");
-                $profileStmt->execute([
-                    'id' => $newUserId,
-                    'mssv' => $mssvGen,
-                    'name' => $cleanName
-                ]);
+    /**
+     * Xử lý callback trả về từ Google (accounts.google.com/o/oauth2/v2/auth)
+     */
+    public function googleCallback(): void
+    {
+        $expectedState = (string)($_SESSION['google_oauth_state'] ?? '');
+        $receivedState = (string)($_GET['state'] ?? '');
+        unset($_SESSION['google_oauth_state']);
 
-                $user = $this->userRepo->findById($newUserId);
-            } catch (\Throwable $e) {
-                return [
-                    'success' => false,
-                    'message' => "Không thể khởi tạo tài khoản cho {$targetEmail}: " . $e->getMessage()
-                ];
+        // 1. Chống tấn công giả mạo yêu cầu (CSRF Protection)
+        if ($expectedState === '' || $receivedState === '' || !hash_equals($expectedState, $receivedState)) {
+            header('Location: /login?error=' . urlencode('Yêu cầu xác thực không hợp lệ hoặc đã hết hạn (CSRF error). Vui lòng thử lại.'));
+            exit;
+        }
+
+        // 2. Kiểm tra nếu người dùng hủy tại màn hình chọn tài khoản Google
+        if (isset($_GET['error']) || empty($_GET['code'])) {
+            header('Location: /login?error=' . urlencode('Bạn đã hủy quá trình chọn tài khoản Google.'));
+            exit;
+        }
+
+        try {
+            // 3. Trao đổi authorization code và xác minh token từ Google
+            $payload = $this->googleAuthService->exchangeAndVerify((string)$_GET['code']);
+            $email = $payload['email'];
+            $googleSub = $payload['sub'];
+
+            // 4. Kiểm tra domain email có thuộc phạm vi nhà trường cho phép không
+            if (!$this->googleAuthService->isAllowedDomain($email)) {
+                header('Location: /login?error=' . urlencode("Email ({$email}) không thuộc danh sách tên miền được phép của nhà trường."));
+                exit;
             }
+
+            // 5. Kiểm tra tài khoản trong CSDL (theo google_sub trước, sau đó theo email)
+            $user = $this->userRepo->findByGoogleSub($googleSub);
+            if ($user === null) {
+                $userByEmail = $this->userRepo->findByEmail($email);
+                if ($userByEmail !== null) {
+                    $this->userRepo->updateGoogleSub((int)$userByEmail['id_tai_khoan'], $googleSub);
+                    $user = $this->userRepo->findById((int)$userByEmail['id_tai_khoan']);
+                } else {
+                    // Tự động khởi tạo tài khoản Sinh viên mới (vai trò STUDENT = 3)
+                    $newId = $this->userRepo->createFromGoogle($payload);
+                    $user = $this->userRepo->findById($newId);
+                }
+            }
+
+            if ($user === null) {
+                throw new DomainException('Không thể tải hoặc tạo hồ sơ sinh viên từ tài khoản Google.');
+            }
+
+            // 6. Kiểm tra trạng thái hoạt động của tài khoản
+            if (($user['trang_thai'] ?? '') !== 'HoatDong') {
+                header('Location: /login?error=' . urlencode('Tài khoản sinh viên của bạn đang bị khóa hoặc đình chỉ.'));
+                exit;
+            }
+
+            // 7. Tái tạo Session ID chống Session Fixation và lưu phiên đăng nhập
+            Session::regenerateId();
+            Session::setAuthUser($user);
+
+            // 8. Ghi nhận nhật ký kiểm toán
+            $this->auditService->log(
+                userId: (int)$user['id_tai_khoan'],
+                action: 'DangNhapGoogleOAuth',
+                targetTable: 'tai_khoan',
+                targetId: (string)$user['id_tai_khoan'],
+                description: "Sinh viên đăng nhập thành công qua Google OAuth ({$email})"
+            );
+
+            Session::writeClose();
+            header('Location: /profile');
+            exit;
+        } catch (DomainException $e) {
+            header('Location: /login?error=' . urlencode($e->getMessage()));
+            exit;
+        } catch (Throwable $e) {
+            error_log('Google OAuth callback error: ' . $e->getMessage());
+            header('Location: /login?error=' . urlencode('Đăng nhập Google thất bại: ' . $e->getMessage()));
+            exit;
         }
-
-        // Kiểm tra trạng thái tài khoản
-        if (($user['trang_thai'] ?? '') !== 'HoatDong') {
-            return [
-                'success' => false,
-                'message' => 'Tài khoản sinh viên của bạn đang bị khóa hoặc đình chỉ.'
-            ];
-        }
-
-        // Thiết lập Session đăng nhập an toàn
-        Session::setAuthUser($user);
-
-        // Ghi nhận nhật ký kiểm toán
-        $this->auditService->log(
-            userId: (int)$user['id_tai_khoan'],
-            action: 'DangNhapGoogle',
-            targetTable: 'tai_khoan',
-            targetId: (string)$user['id_tai_khoan'],
-            description: "Sinh viên đăng nhập thành công qua tài khoản Google ({$targetEmail})"
-        );
-
-        return [
-            'success' => true,
-            'message' => 'Đăng nhập Google thành công.',
-            'redirect' => '/profile',
-            'user' => [
-                'id' => $user['id_tai_khoan'],
-                'email' => $user['email'],
-                'role' => $user['ma_vai_tro'],
-                'name' => $user['ho_ten'] ?? $user['email']
-            ]
-        ];
     }
 
     /**

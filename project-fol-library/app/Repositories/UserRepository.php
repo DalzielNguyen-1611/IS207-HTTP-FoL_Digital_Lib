@@ -87,4 +87,68 @@ class UserRepository
             ':user_id' => $userId
         ]);
     }
+
+    public function findByGoogleSub(string $googleSub): ?array
+    {
+        $stmt = $this->db->prepare(
+            'SELECT 
+                tk.`id_tai_khoan`, tk.`id_vai_tro`, tk.`email`, tk.`mat_khau`,
+                tk.`google_sub`, tk.`trang_thai`, tk.`created_at`, tk.`updated_at`,
+                vt.`ma_vai_tro`, vt.`ten_vai_tro`,
+                hs.`ho_ten`, hs.`mssv`, hs.`so_dien_thoai`, hs.`anh_dai_dien`
+             FROM `tai_khoan` tk
+             INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
+             LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+             WHERE tk.`google_sub` = :sub
+             LIMIT 1'
+        );
+        $stmt->execute([':sub' => $googleSub]);
+        $row = $stmt->fetch();
+
+        return $row ?: null;
+    }
+
+    public function updateGoogleSub(int $userId, string $googleSub): bool
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE `tai_khoan`
+             SET `google_sub` = :sub, `updated_at` = NOW()
+             WHERE `id_tai_khoan` = :id'
+        );
+
+        return $stmt->execute([
+            ':sub' => $googleSub,
+            ':id' => $userId
+        ]);
+    }
+
+    public function createFromGoogle(array $profile): int
+    {
+        $stmt = $this->db->prepare(
+            'INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `google_sub`, `trang_thai`, `created_at`, `updated_at`)
+             VALUES (3, :email, NULL, :sub, "HoatDong", NOW(), NOW())'
+        );
+        $stmt->execute([
+            ':email' => $profile['email'],
+            ':sub' => $profile['sub']
+        ]);
+        $userId = (int)$this->db->lastInsertId();
+
+        $name = trim((string)($profile['name'] ?? explode('@', $profile['email'])[0]));
+        $picture = (string)($profile['picture'] ?? '/assets/images/logo.png');
+        $mssv = 'SV' . str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
+
+        $profileStmt = $this->db->prepare(
+            'INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `anh_dai_dien`)
+             VALUES (:id, :mssv, :name, 1, "Nam", "2005-01-01", :avatar)'
+        );
+        $profileStmt->execute([
+            ':id' => $userId,
+            ':mssv' => $mssv,
+            ':name' => $name,
+            ':avatar' => $picture
+        ]);
+
+        return $userId;
+    }
 }
