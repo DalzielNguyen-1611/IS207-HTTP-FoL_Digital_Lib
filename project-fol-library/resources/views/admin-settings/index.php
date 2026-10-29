@@ -43,7 +43,7 @@ $defaultFine = 5000;
 <body>
     <!-- Header quản trị -->
     <header class="staff-header">
-        <a class="staff-brand" href="/admin/users">
+        <a class="staff-brand" href="/" title="Về trang chủ Thư viện">
             <img src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
             <span>
                 <strong>Thư viện Khoa Văn học</strong>

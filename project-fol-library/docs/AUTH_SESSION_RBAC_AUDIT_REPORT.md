@@ -128,6 +128,7 @@ IS207_HTTP_Project/project-fol-library/
 
 #### 6. Các View Quản trị & Cán bộ (`admin-*`, `librarian-*`)
 - **Loại bỏ chữ " · Bản thử giao diện":** Chuẩn hóa tiêu đề khu vực thành `<small>Khu vực quản trị</small>` và `<small>Khu vực cán bộ</small>`.
+- **Liên kết Logo & Tiêu đề Brand về Trang chủ (`href="/"`) cho mọi role:** Trước đây click vào Logo/Title dẫn tới `/admin/users` hoặc `/librarian`. Đã cập nhật thành `<a class="staff-brand" href="/" title="Về trang chủ Thư viện">` cho toàn bộ 8 view, đảm bảo click vào logo luôn trở về Trang chủ (`/`) và duy trì phiên đăng nhập trọn vẹn cho mọi vai trò.
 - **Sửa nhãn điều hướng "Về trang sinh viên" thành "Về trang chủ":** Trước đây link trỏ về `href="/"` nhưng hiển thị nhãn gây hiểu lầm là *"Về trang sinh viên"*. Đã chuẩn hóa thành `<a class="staff-public-link" href="/">Về trang chủ</a>`, giúp mọi vai trò có thể quay về Trang chủ và từ Trang chủ đi đến mọi chức năng được cấp phép.
 
 ---

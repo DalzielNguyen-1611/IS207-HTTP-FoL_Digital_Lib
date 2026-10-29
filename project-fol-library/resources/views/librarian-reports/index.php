@@ -42,7 +42,7 @@ $periods = [
 <body>
     <!-- Header khu vực cán bộ -->
     <header class="staff-header">
-        <a class="staff-brand" href="/librarian">
+        <a class="staff-brand" href="/" title="Về trang chủ Thư viện">
             <img src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
             <span>
                 <strong>Thư viện Khoa Văn học</strong>
