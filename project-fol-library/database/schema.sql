@@ -1,4 +1,4 @@
-﻿-- =============================================================================
+-- =============================================================================
 -- FoL Digital Library — Database Schema Definition
 -- Main Project: Hệ Thống Thư Viện Số Khoa Văn Học (IS207.R11)
 -- Hệ quản trị CSDL: MySQL 8.0+ / MariaDB 10.4+
@@ -234,7 +234,7 @@ CREATE TABLE IF NOT EXISTS `the_loai` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `dau_sach` (
-    `id_dau_sach` INT AUTO_INCREMENT PRIMARY KEY,
+    `id_dau_sach` VARCHAR(50) NOT NULL PRIMARY KEY,
     `tieu_de` VARCHAR(300) NOT NULL,
     `isbn` VARCHAR(20) NULL UNIQUE,
     `mo_ta` TEXT NULL,
@@ -249,30 +249,30 @@ CREATE TABLE IF NOT EXISTS `dau_sach` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `tac_gia_sach` (
-    `id_dau_sach` INT NOT NULL,
+    `id_dau_sach` VARCHAR(50) NOT NULL,
     `id_tac_gia` INT NOT NULL,
     PRIMARY KEY (`id_dau_sach`, `id_tac_gia`),
-    CONSTRAINT `fk_3` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT `fk_4` FOREIGN KEY (`id_tac_gia`) REFERENCES `tac_gia` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT `fk_3` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_4` FOREIGN KEY (`id_tac_gia`) REFERENCES `tac_gia` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `dau_sach_the_loai` (
-    `id_dau_sach` INT NOT NULL,
+    `id_dau_sach` VARCHAR(50) NOT NULL,
     `id_the_loai` INT NOT NULL,
     PRIMARY KEY (`id_dau_sach`, `id_the_loai`),
-    CONSTRAINT `fk_5` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT `fk_6` FOREIGN KEY (`id_the_loai`) REFERENCES `the_loai` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT `fk_5` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_6` FOREIGN KEY (`id_the_loai`) REFERENCES `the_loai` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `cuon_sach` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `ma_vach` VARCHAR(50) NOT NULL UNIQUE,
-    `id_dau_sach` INT NOT NULL,
+    `id_dau_sach` VARCHAR(50) NOT NULL,
     `id_o_sach` INT NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'SanSang' COMMENT 'SanSang, DangMuon, Mat, Hong, ThanhLy',
     `ngay_nhap_kho` DATE NULL,
     `ghi_chu` VARCHAR(500) NULL,
-    CONSTRAINT `fk_7` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT `fk_7` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_33` FOREIGN KEY (`id_o_sach`) REFERENCES `o_sach` (`id_o_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -282,17 +282,17 @@ CREATE TABLE IF NOT EXISTS `cuon_sach` (
 
 CREATE TABLE IF NOT EXISTS `sach_yeu_thich` (
     `id_nguoi_dung` INT NOT NULL,
-    `id_dau_sach` INT NOT NULL,
+    `id_dau_sach` VARCHAR(50) NOT NULL,
     `ngay_them` DATETIME NOT NULL,
     PRIMARY KEY (`id_nguoi_dung`, `id_dau_sach`),
-    CONSTRAINT `fk_9` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT `fk_10` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT `fk_9` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT `fk_10` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `lich_su_sach_yeu_thich` (
     `id_lich_su` INT AUTO_INCREMENT PRIMARY KEY,
     `id_nguoi_dung` INT NOT NULL,
-    `id_dau_sach` INT NOT NULL,
+    `id_dau_sach` VARCHAR(50) NOT NULL,
     `hanh_dong` VARCHAR(255) NOT NULL COMMENT 'Them, BoYeuThich',
     `thoi_diem` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `fk_36` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION,
