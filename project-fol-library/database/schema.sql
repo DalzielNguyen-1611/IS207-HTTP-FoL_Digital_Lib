@@ -265,7 +265,7 @@ CREATE TABLE IF NOT EXISTS `dau_sach_the_loai` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `cuon_sach` (
-    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `id_cuon_sach` VARCHAR(50) NOT NULL PRIMARY KEY,
     `ma_vach` VARCHAR(50) NOT NULL UNIQUE,
     `id_dau_sach` VARCHAR(50) NOT NULL,
     `id_o_sach` INT NULL,
@@ -319,14 +319,14 @@ CREATE TABLE IF NOT EXISTS `phieu_muon` (
 CREATE TABLE IF NOT EXISTS `chi_tiet_muon` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
     `id_phieu_muon` INT NOT NULL,
-    `id_cuon_sach` INT NOT NULL,
+    `id_cuon_sach` VARCHAR(50) NOT NULL,
     `ngay_muon` DATE NULL COMMENT 'Ngay thuc te nhan sach',
     `han_tra` DATE NULL COMMENT 'Han tra sach',
     `ngay_tra_thuc_te` DATE NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DangMuon' COMMENT 'DangMuon, DaTra, Mat, Hong',
     `ghi_chu` VARCHAR(500) NULL,
     CONSTRAINT `fk_13` FOREIGN KEY (`id_phieu_muon`) REFERENCES `phieu_muon` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT `fk_14` FOREIGN KEY (`id_cuon_sach`) REFERENCES `cuon_sach` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT `fk_14` FOREIGN KEY (`id_cuon_sach`) REFERENCES `cuon_sach` (`id_cuon_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `phieu_phat` (

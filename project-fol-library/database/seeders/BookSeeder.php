@@ -221,9 +221,10 @@ class BookSeeder
                 }
 
                 for ($i = 1; $i <= $qty; $i++) {
-                    $barcode = sprintf('%s-%02d', $bookCode, $i);
+                    $copyId = sprintf('%s.%d', $bookCode, $i);
                     $copies[] = [
-                        'ma_vach' => $barcode,
+                        'id_cuon_sach' => $copyId,
+                        'ma_vach' => $copyId,
                         'id_dau_sach' => $bookCode,
                     ];
                 }
@@ -312,12 +313,13 @@ class BookSeeder
                 $values = [];
                 foreach ($chunk as $c) {
                     $values[] = sprintf(
-                        "(%s, %s, 'SanSang', CURDATE(), 'Kho lưu trữ Thư viện FoL')",
+                        "(%s, %s, %s, 'SanSang', CURDATE(), 'Kho lưu trữ Thư viện FoL')",
+                        self::sqlEscape($c['id_cuon_sach']),
                         self::sqlEscape($c['ma_vach']),
                         self::sqlEscape($c['id_dau_sach'])
                     );
                 }
-                $db->exec("INSERT INTO `cuon_sach` (`ma_vach`, `id_dau_sach`, `trang_thai`, `ngay_nhap_kho`, `ghi_chu`) VALUES \n" .
+                $db->exec("INSERT INTO `cuon_sach` (`id_cuon_sach`, `ma_vach`, `id_dau_sach`, `trang_thai`, `ngay_nhap_kho`, `ghi_chu`) VALUES \n" .
                     implode(",\n", $values) .
                     "\nON DUPLICATE KEY UPDATE `trang_thai` = VALUES(`trang_thai`);");
             }
@@ -451,11 +453,12 @@ class BookSeeder
         fwrite($out, "-- -----------------------------------------------------------------------------\n");
         $copyChunks = array_chunk($copies, 500);
         foreach ($copyChunks as $chunk) {
-            fwrite($out, "INSERT INTO `cuon_sach` (`ma_vach`, `id_dau_sach`, `trang_thai`, `ngay_nhap_kho`, `ghi_chu`) VALUES\n");
+            fwrite($out, "INSERT INTO `cuon_sach` (`id_cuon_sach`, `ma_vach`, `id_dau_sach`, `trang_thai`, `ngay_nhap_kho`, `ghi_chu`) VALUES\n");
             $rows = [];
             foreach ($chunk as $c) {
                 $rows[] = sprintf(
-                    "(%s, %s, 'SanSang', CURDATE(), 'Kho lưu trữ Thư viện FoL')",
+                    "(%s, %s, %s, 'SanSang', CURDATE(), 'Kho lưu trữ Thư viện FoL')",
+                    self::sqlEscape($c['id_cuon_sach']),
                     self::sqlEscape($c['ma_vach']),
                     self::sqlEscape($c['id_dau_sach'])
                 );
