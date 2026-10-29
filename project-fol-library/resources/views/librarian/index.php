@@ -47,6 +47,11 @@ $attentionLoans = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tổng quan cán bộ · Thư viện Khoa Văn học</title>
 
+    <!-- Favicon biểu trưng Khoa Văn học -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
