@@ -65,6 +65,37 @@ class AuditLogRepository
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
 
-        return $stmt->fetchAll();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    public function getFilteredLogs(int $limit = 50, ?string $action = null): array
+    {
+        $sql = 'SELECT 
+                    nk.`id`, nk.`id_nguoi_dung`, nk.`hanh_dong`, nk.`doi_tuong`,
+                    nk.`id_doi_tuong`, nk.`mo_ta`, nk.`dia_chi_ip`, nk.`thoi_gian`,
+                    tk.`email`, hs.`ho_ten`,
+                    DATE_FORMAT(nk.`thoi_gian`, "%Y-%m-%d") AS `date`,
+                    DATE_FORMAT(nk.`thoi_gian`, "%H:%i:%s") AS `time`,
+                    CONCAT(COALESCE(hs.`mssv`, "CB"), " · ", COALESCE(hs.`ho_ten`, tk.`email`)) AS `staff`,
+                    nk.`hanh_dong` AS `action`,
+                    COALESCE(nk.`id_doi_tuong`, nk.`doi_tuong`) AS `target`,
+                    nk.`mo_ta` AS `detail`
+                FROM `nhat_ky_hoat_dong` nk
+                LEFT JOIN `tai_khoan` tk ON nk.`id_nguoi_dung` = tk.`id_tai_khoan`
+                LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`';
+
+        $params = [];
+        if ($action !== null && $action !== '' && $action !== 'all') {
+            $sql .= ' WHERE nk.`hanh_dong` LIKE :action';
+            $params[':action'] = '%' . $action . '%';
+        }
+
+        $sql .= ' ORDER BY nk.`thoi_gian` DESC LIMIT ' . (int)$limit;
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 }
+

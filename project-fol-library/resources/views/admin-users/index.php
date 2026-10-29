@@ -8,37 +8,30 @@ $today = new DateTimeImmutable(
     new DateTimeZone('Asia/Ho_Chi_Minh')
 );
 
-// Tài khoản mẫu, không đại diện người dùng thật.
-$users = [
-    [
-        'code' => 'SV2026001',
-        'name' => 'Nguyễn Minh Anh',
-        'email' => 'minhanh@example.com',
-        'role' => 'student',
-        'status' => 'active',
+require_once dirname(__DIR__, 3) . '/app/Core/Autoloader.php';
+\App\Core\Autoloader::register();
+
+use App\Repositories\UserRepository;
+
+$userRepo = new UserRepository();
+$dbUsers = $userRepo->getAllUsers();
+
+// Chuyển đổi dữ liệu từ CSDL fol_library_db sang cấu trúc phục vụ hiển thị
+$users = array_map(static function (array $u): array {
+    return [
+        'code' => (string)($u['code'] ?? 'ND' . $u['id_tai_khoan']),
+        'name' => (string)($u['name'] ?? $u['email']),
+        'email' => (string)$u['email'],
+        'role' => (string)($u['role_slug'] ?? 'student'),
+        'status' => (string)($u['status_slug'] ?? 'active'),
         'until' => '',
-    ],
-    [
-        'code' => 'SV2026002',
-        'name' => 'Trần Hoàng Nam',
-        'email' => 'hoangnam@example.com',
-        'role' => 'student',
-        'status' => 'suspended',
-        'until' => $today->modify('+30 days')->format('d/m/Y'),
-    ],
-    [
-        'code' => 'CB001',
-        'name' => 'Trần Thu Hà',
-        'email' => 'thuha@example.com',
-        'role' => 'librarian',
-        'status' => 'active',
-        'until' => '',
-    ],
-];
+    ];
+}, $dbUsers);
 
 $roles = [
     'student' => 'Sinh viên',
     'librarian' => 'Cán bộ',
+    'admin' => 'Quản trị viên',
 ];
 
 $statuses = [
@@ -171,13 +164,12 @@ $statuses = [
                     </button>
                 </div>
 
-                <!-- Số lượng kết quả và trạng thái rỗng -->
                 <p class="staff-note" id="user-count" role="status">
                     <?= htmlspecialchars(
                         (string) count($users),
                         ENT_QUOTES,
                         'UTF-8'
-                    ) ?> tài khoản mẫu
+                    ) ?> tài khoản
                 </p>
 
                 <!-- Kết quả chỉnh sửa mẫu -->
@@ -325,12 +317,13 @@ $statuses = [
                 >
             </div>
 
-            <!-- Vai trò mẫu -->
+            <!-- Vai trò -->
             <div class="admin-edit-field">
                 <label for="edit-user-role">Vai trò</label>
                 <select id="edit-user-role">
                     <option value="student">Sinh viên</option>
                     <option value="librarian">Cán bộ</option>
+                    <option value="admin">Quản trị viên</option>
                 </select>
             </div>
 

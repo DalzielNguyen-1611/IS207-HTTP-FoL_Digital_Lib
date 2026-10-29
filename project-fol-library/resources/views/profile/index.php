@@ -20,46 +20,11 @@ $sections = [
     'bookings' => 'Phòng đọc',
 ];
 
-// Dữ liệu mẫu minh họa trạng thái mượn sách.
-$loanGroups = [
-    [
-        'title' => 'Đang mượn',
-        'items' => [
-            [
-                'title' => 'Truyện Kiều',
-                'borrowed' => '20/10/2026',
-                'due' => '03/11/2026',
-                'status' => 'Trong hạn',
-                'returned' => 'Chưa trả',
-                'overdue' => false,
-            ],
-            [
-                'title' => 'Dẫn luận ngôn ngữ học',
-                'borrowed' => '01/10/2026',
-                'due' => '15/10/2026',
-                'status' => 'Quá hạn — dữ liệu minh họa',
-                'returned' => 'Chưa trả',
-                'overdue' => true,
-            ],
-        ],
-    ],
-    [
-        'title' => 'Lịch sử mượn',
-        'items' => [
-            [
-                'title' => 'Lý luận văn học',
-                'borrowed' => '01/09/2026',
-                'due' => '15/09/2026',
-                'status' => 'Đã trả',
-                'returned' => '12/09/2026',
-                'overdue' => false,
-            ],
-        ],
-    ],
-];
-
-//Danh mục mẫu dùng để hiển thị thông tin sách yêu thích
-$favoriteCatalog = require dirname(__DIR__, 2) . '/mock/books.php';
+// Đọc dữ liệu mượn sách và sách yêu thích thực tế của tài khoản từ CSDL
+$userId = (int)($authUser['id_tai_khoan'] ?? \App\Core\Session::getUserId() ?? 0);
+$loanRepo = new \App\Repositories\LoanRepository();
+$loanGroups = $loanRepo->getUserLoans($userId);
+$favoriteCatalog = $loanRepo->getUserFavorites($userId);
 ?>
 <!DOCTYPE html>
 <html lang="vi">

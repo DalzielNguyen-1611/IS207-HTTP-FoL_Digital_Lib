@@ -2,14 +2,56 @@
 
 declare(strict_types=1);
 
-//Đọc dữ liệu mẫu dùng chung, không kết nối CSDL
-$books = require dirname(__DIR__, 2) . '/mock/books.php';
+// Đọc dữ liệu sách từ CSDL thực tế qua BookService
+$bookService = new \App\Services\BookService();
 
-//Danh sách lựa chọn bộ lọc lấy từ dữ liệu mẫu
+$page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+$perPage = 20;
+$keyword = isset($_GET['q']) ? trim((string)$_GET['q']) : (isset($_GET['keyword']) ? trim((string)$_GET['keyword']) : null);
+$prefix = isset($_GET['prefix']) && trim((string)$_GET['prefix']) !== '' && strtoupper(trim((string)$_GET['prefix'])) !== 'ALL'
+    ? strtoupper(trim((string)$_GET['prefix']))
+    : null;
+
+$bookData = $bookService->getPaginatedBooks(
+    page: $page,
+    perPage: $perPage,
+    keyword: $keyword,
+    prefix: $prefix
+);
+
+$books = [];
+foreach ($bookData['items'] as $item) {
+    $category = match (substr($item['id'], 0, 6)) {
+        'KV-ANT' => 'Nhân học / Dân tộc',
+        'KV-ESS' => 'Tiểu luận / Nghiên cứu',
+        'KV-POE' => 'Thơ ca / Văn vần',
+        'KV-REC' => 'Tuyển tập / Tổng hợp',
+        default => 'Văn học & Ngôn ngữ'
+    };
+    $major = match (substr($item['id'], 0, 6)) {
+        'KV-ANT' => 'Nhân học',
+        'KV-ESS' => 'Tiểu luận',
+        'KV-POE' => 'Thơ ca',
+        'KV-REC' => 'Tuyển tập',
+        default => 'Khoa Văn học'
+    };
+
+    $books[] = [
+        'id' => $item['id'],
+        'title' => $item['title'],
+        'author' => $item['authorNames'] !== '' ? $item['authorNames'] : 'Chưa rõ tác giả',
+        'category' => $category,
+        'major' => $major,
+        'genre' => 'Sách chuyên khảo',
+        'available' => $item['availableQuantity'],
+        'location' => $item['location'] ?? 'Kho lưu trữ Thư viện FoL',
+    ];
+}
+
 $filterOptions = [
-    'major' => array_values(array_unique(array_column($books, 'major'))),
-    'genre' => array_values(array_unique(array_column($books, 'genre'))),
-    'author' => array_values(array_unique(array_column($books, 'author'))),
+    'major' => ['Nhân học', 'Tiểu luận', 'Thơ ca', 'Tuyển tập'],
+    'genre' => ['Sách chuyên khảo'],
+    'author' => array_values(array_unique(array_filter(array_column($books, 'author')))),
 ];
 
 $filterLabels = [
@@ -18,6 +60,9 @@ $filterLabels = [
     'author' => 'Tác giả',
 ];
 
+$totalBooks = $bookData['total'];
+$totalPages = $bookData['totalPages'];
+$currentPage = $bookData['page'];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -142,15 +187,11 @@ $filterLabels = [
         
         <!-- Số lượng kết quả -->
         <p class="catalog-count" id="catalog-count" role="status">
-            <?= htmlspecialchars(
-                (string) count($books),
-                ENT_QUOTES,
-                'UTF-8'
-            ) ?> tài liệu mẫu 
+            Hiển thị <?= count($books) ?> trong tổng số <strong><?= number_format($totalBooks) ?></strong> đầu sách từ CSDL Thư viện FoL (Trang <?= $currentPage ?> / <?= $totalPages ?>)
         </p>
 
         <!-- Trạng thái tìm kiếm không có kết quả -->
-         <p class="books-empty" id="catalog-empty" hidden>
+         <p class="books-empty" id="catalog-empty" <?= count($books) > 0 ? 'hidden' : '' ?>>
             Không tìm thấy tài liệu phù hợp. Bạn hãy thử từ khóa khác. 
         </p>
 
@@ -246,9 +287,30 @@ $filterLabels = [
             <?php endif; ?> 
         </section>
 
-        <!-- Thông báo phạm vi bản thử -->
+        <!-- Phân trang danh mục sách -->
+        <?php if ($totalPages > 1): ?>
+            <div style="display:flex;justify-content:center;align-items:center;gap:8px;margin:28px 0;flex-wrap:wrap;">
+                <?php if ($currentPage > 1): ?>
+                    <a href="/books?page=<?= $currentPage - 1 ?><?= $keyword ? '&q=' . urlencode($keyword) : '' ?><?= $prefix ? '&prefix=' . urlencode($prefix) : '' ?>" class="catalog-reset" style="text-decoration:none;display:inline-flex;align-items:center;">
+                        ← Trang trước
+                    </a>
+                <?php endif; ?>
+
+                <span style="font-size:13px;color:#475569;margin:0 10px;">
+                    Trang <strong><?= $currentPage ?></strong> / <?= $totalPages ?>
+                </span>
+
+                <?php if ($currentPage < $totalPages): ?>
+                    <a href="/books?page=<?= $currentPage + 1 ?><?= $keyword ? '&q=' . urlencode($keyword) : '' ?><?= $prefix ? '&prefix=' . urlencode($prefix) : '' ?>" class="catalog-reset" style="text-decoration:none;display:inline-flex;align-items:center;">
+                        Trang sau →
+                    </a>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Thông báo đồng bộ dữ liệu thời gian thực -->
         <p class="preview-note">
-            Dữ liệu mẫu · Bộ lọc và trang chi tiết sẽ được bổ sung tiếp. 
+            Dữ liệu đồng bộ trực tiếp từ CSDL Thư viện Khoa Văn học (USSH · VNU-HANOI). 
         </p> 
     </main>
 

@@ -2,59 +2,24 @@
 
 declare(strict_types=1);
 
-// Ngày mẫu theo giờ Việt Nam.
 $today = new DateTimeImmutable(
     'today',
     new DateTimeZone('Asia/Ho_Chi_Minh')
 );
 
-// Các ca đọc dùng để lọc.
-$shifts = [
-    '1' => 'Ca 1 · 07:30 – 09:30',
-    '2' => 'Ca 2 · 09:45 – 11:45',
-    '3' => 'Ca 3 · 13:00 – 15:00',
-    '4' => 'Ca 4 · 15:15 – 17:15',
-];
+// Đọc ca đọc và danh sách đặt chỗ thực tế từ CSDL
+$roomRepo = new \App\Repositories\RoomRepository();
+$selectedDate = isset($_GET['date']) && trim((string)$_GET['date']) !== ''
+    ? trim((string)$_GET['date'])
+    : $today->format('Y-m-d');
 
-// Danh sách đặt chỗ minh họa, không đọc dữ liệu sinh viên thật.
-$bookings = [
-    [
-        'id' => 'PD001',
-        'code' => 'SV2026001',
-        'name' => 'Nguyễn Minh Anh',
-        'date' => $today->format('Y-m-d'),
-        'shift' => '1',
-        'attendance' => 'reserved',
-        'violation' => false,
-    ],
-    [
-        'id' => 'PD002',
-        'code' => 'SV2026002',
-        'name' => 'Trần Hoàng Nam',
-        'date' => $today->format('Y-m-d'),
-        'shift' => '1',
-        'attendance' => 'checked-in',
-        'violation' => false,
-    ],
-    [
-        'id' => 'PD003',
-        'code' => 'SV2026003',
-        'name' => 'Lê Thu Hà',
-        'date' => $today->format('Y-m-d'),
-        'shift' => '3',
-        'attendance' => 'no-show',
-        'violation' => false,
-    ],
-    [
-        'id' => 'PD004',
-        'code' => 'SV2026004',
-        'name' => 'Phạm Gia Huy',
-        'date' => $today->modify('-1 day')->format('Y-m-d'),
-        'shift' => '2',
-        'attendance' => 'checked-in',
-        'violation' => true,
-    ],
-];
+$rawShifts = $roomRepo->getShifts();
+$shifts = [];
+foreach ($rawShifts as $sh) {
+    $shifts[(string)$sh['id_ca_doc']] = $sh['label'] . ' · ' . $sh['time'];
+}
+
+$bookings = $roomRepo->getBookingsByDate($selectedDate);
 
 $attendanceOptions = [
     'reserved' => 'Chưa check-in',

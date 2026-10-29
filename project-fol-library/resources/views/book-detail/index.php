@@ -28,20 +28,11 @@ if (is_string($rawId) && trim($rawId) !== '') {
             ];
         }
     } catch (\Throwable $e) {
-        // Dự phòng bên dưới
+        $book = null;
     }
 }
 
-if ($book === null) {
-    $mockFile = dirname(__DIR__, 2) . '/resources/mock/books.php';
-    if (file_exists($mockFile)) {
-        $mockBooks = require $mockFile;
-        $mockId = is_numeric($rawId) ? (int)$rawId : 2;
-        $book = $mockBooks[$mockId] ?? reset($mockBooks) ?: null;
-    }
-}
-
-//Trạng thái không tìm thấy sách
+// Trạng thái không tìm thấy sách trong CSDL
 if ($book === null) {
     http_response_code(404);
     ?>

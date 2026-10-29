@@ -2,55 +2,47 @@
 
 declare(strict_types=1);
 
-// Ngày mẫu theo múi giờ Việt Nam.
-$today = new DateTimeImmutable(
-    'today',
-    new DateTimeZone('Asia/Ho_Chi_Minh')
-);
+require_once dirname(__DIR__, 3) . '/app/Core/Autoloader.php';
+\App\Core\Autoloader::register();
 
-// Loại thao tác dùng để lọc.
-$actions = [
-    'borrow' => 'Xác nhận mượn',
-    'return' => 'Xác nhận trả',
+use App\Repositories\AuditLogRepository;
+
+$auditRepo = new AuditLogRepository();
+$logs = $auditRepo->getFilteredLogs(100);
+
+// Bảng ánh xạ nhãn hành động cho thân thiện
+$knownActionLabels = [
+    'MuonSach' => 'Mượn sách',
+    'TraSach' => 'Trả sách',
+    'TaoDauSach' => 'Thêm đầu sách',
+    'SuaDauSach' => 'Cập nhật sách',
+    'XoaDauSach' => 'Xóa đầu sách',
+    'DangNhap' => 'Đăng nhập',
+    'DangXuat' => 'Đăng xuất',
+    'DatCho' => 'Đặt chỗ',
+    'HuyDatCho' => 'Hủy đặt chỗ',
+    'DiemDanh' => 'Điểm danh',
     'create-book' => 'Thêm sách',
     'update-book' => 'Cập nhật sách',
+    'borrow' => 'Xác nhận mượn',
+    'return' => 'Xác nhận trả',
 ];
 
-// Nhật ký minh họa, chưa lấy từ hệ thống thật.
-$logs = [
-    [
-        'date' => $today->format('Y-m-d'),
-        'time' => '10:15:00',
-        'staff' => 'CB001 · Trần Thu Hà',
-        'action' => 'return',
-        'target' => 'PM002',
-        'detail' => 'Xác nhận trả sách Truyện Kiều.',
-    ],
-    [
-        'date' => $today->format('Y-m-d'),
-        'time' => '09:40:00',
-        'staff' => 'CB002 · Nguyễn Văn An',
-        'action' => 'borrow',
-        'target' => 'PM001',
-        'detail' => 'Xác nhận mượn Dẫn luận ngôn ngữ học.',
-    ],
-    [
-        'date' => $today->format('Y-m-d'),
-        'time' => '08:30:00',
-        'staff' => 'CB001 · Trần Thu Hà',
-        'action' => 'create-book',
-        'target' => 'BK005',
-        'detail' => 'Thêm tài liệu mẫu vào danh mục.',
-    ],
-    [
-        'date' => $today->modify('-1 day')->format('Y-m-d'),
-        'time' => '15:20:00',
-        'staff' => 'CB002 · Nguyễn Văn An',
-        'action' => 'update-book',
-        'target' => 'BK003',
-        'detail' => 'Cập nhật vị trí mẫu: Kệ 02 · Ô 04.',
-    ],
-];
+$actions = [];
+foreach ($logs as $logItem) {
+    $act = (string)($logItem['action'] ?? '');
+    if ($act !== '' && !isset($actions[$act])) {
+        $actions[$act] = $knownActionLabels[$act] ?? $act;
+    }
+}
+if (empty($actions)) {
+    $actions = [
+        'borrow' => 'Xác nhận mượn',
+        'return' => 'Xác nhận trả',
+        'create-book' => 'Thêm sách',
+        'update-book' => 'Cập nhật sách',
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -122,7 +114,7 @@ $logs = [
             <section class="staff-intro">
                 <span class="staff-eyebrow">LỊCH SỬ THAO TÁC</span>
                 <h1>Nhật ký hệ thống</h1>
-                <p>Theo dõi thao tác của cán bộ trong dữ liệu minh họa.</p>
+                <p>Theo dõi lịch sử thao tác của người dùng và cán bộ thư viện trên hệ thống.</p>
             </section>
 
             <section class="staff-panel" aria-labelledby="audit-title">
@@ -175,18 +167,18 @@ $logs = [
                     Không có nhật ký phù hợp.
                 </p>
 
-                <!-- Bảng lịch sử, không có thao tác sửa/xóa -->
+                <!-- Bảng lịch sử hoạt động -->
                 <div
                     class="staff-table-wrap"
                     tabindex="0"
                     role="region"
-                    aria-label="Bảng nhật ký hệ thống mẫu"
+                    aria-label="Bảng nhật ký hệ thống"
                 >
                     <table class="staff-table">
                         <thead>
                             <tr>
                                 <th scope="col">Thời gian</th>
-                                <th scope="col">Cán bộ</th>
+                                <th scope="col">Cán bộ / Người dùng</th>
                                 <th scope="col">Hành động</th>
                                 <th scope="col">Đối tượng</th>
                                 <th scope="col">Chi tiết</th>
@@ -195,14 +187,15 @@ $logs = [
 
                         <tbody>
                             <?php foreach ($logs as $log): ?>
-                                <!-- Một bản ghi nhật ký mẫu -->
+                                <?php $actionLabel = $actions[$log['action']] ?? $log['action']; ?>
+                                <!-- Bản ghi nhật ký hệ thống -->
                                 <tr
                                     data-audit-row
                                     data-date="<?= htmlspecialchars($log['date'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-action="<?= htmlspecialchars($log['action'], ENT_QUOTES, 'UTF-8') ?>"
                                     data-search="<?= htmlspecialchars(
                                         $log['staff'] . ' ' . $log['target'] . ' ' .
-                                        $log['detail'] . ' ' . $actions[$log['action']],
+                                        $log['detail'] . ' ' . $actionLabel,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"
@@ -224,7 +217,7 @@ $logs = [
                                     ) ?></td>
 
                                     <td><?= htmlspecialchars(
-                                        $actions[$log['action']],
+                                        $actionLabel,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?></td>
@@ -246,11 +239,10 @@ $logs = [
                     </table>
                 </div>
 
-                <!-- Phạm vi bản thử -->
+                <!-- Ghi chú nhật ký -->
                 <p class="staff-note">
-                    Thời gian hiển thị theo giờ Việt Nam.
-                    Có 3 bản ghi hôm nay và 1 bản ghi hôm qua.
-                    Nhật ký này chưa phản ánh thao tác thật ở các trang khác.
+                    Thời gian hiển thị theo múi giờ Việt Nam (Asia/Ho_Chi_Minh).
+                    Nhật ký ghi nhận lịch sử các thao tác nghiệp vụ trên toàn hệ thống.
                 </p>
             </section>
         </div>

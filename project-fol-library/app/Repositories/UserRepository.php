@@ -153,4 +153,64 @@ class UserRepository
 
         return $userId;
     }
+
+    /**
+     * Lấy toàn bộ danh sách tài khoản kèm vai trò và hồ sơ
+     */
+    public function getAllUsers(?string $role = null): array
+    {
+        $sql = 'SELECT 
+                    tk.`id_tai_khoan`, tk.`id_vai_tro`, tk.`email`,
+                    tk.`trang_thai`, tk.`created_at`, tk.`updated_at`,
+                    vt.`ma_vai_tro`, vt.`ten_vai_tro`,
+                    COALESCE(hs.`mssv`, CONCAT("ND", LPAD(tk.`id_tai_khoan`, 4, "0"))) AS `code`,
+                    COALESCE(hs.`ho_ten`, tk.`email`) AS `name`,
+                    hs.`so_dien_thoai`, hs.`anh_dai_dien`,
+                    CASE 
+                        WHEN vt.`ma_vai_tro` = "ADMIN" THEN "admin"
+                        WHEN vt.`ma_vai_tro` = "LIBRARIAN" THEN "librarian"
+                        ELSE "student"
+                    END AS `role_slug`,
+                    CASE 
+                        WHEN tk.`trang_thai` = "HoatDong" THEN "active"
+                        ELSE "suspended"
+                    END AS `status_slug`
+                FROM `tai_khoan` tk
+                INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
+                LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`';
+
+        $params = [];
+        if ($role !== null && $role !== '') {
+            $sql .= ' WHERE vt.`ma_vai_tro` = :role';
+            $params[':role'] = strtoupper($role);
+        }
+
+        $sql .= ' ORDER BY tk.`id_tai_khoan` ASC';
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Lấy danh sách bạn đọc sinh viên phục vụ mượn sách tại quầy
+     */
+    public function getStudents(): array
+    {
+        $sql = 'SELECT 
+                    hs.`mssv`,
+                    hs.`ho_ten` AS `name`,
+                    tk.`id_tai_khoan`,
+                    tk.`email`
+                FROM `tai_khoan` tk
+                INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
+                INNER JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+                WHERE vt.`ma_vai_tro` = "STUDENT" AND tk.`trang_thai` = "HoatDong"
+                ORDER BY hs.`mssv` ASC';
+
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 }
+

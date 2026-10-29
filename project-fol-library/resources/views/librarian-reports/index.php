@@ -8,15 +8,9 @@ $today = new DateTimeImmutable(
     new DateTimeZone('Asia/Ho_Chi_Minh')
 );
 
-// Số liệu hoạt động mẫu theo ngày, chưa tổng hợp từ CSDL.
-$reports = [
-    ['offset' => 0, 'borrowed' => 12, 'returned' => 8],
-    ['offset' => -1, 'borrowed' => 15, 'returned' => 10],
-    ['offset' => -7, 'borrowed' => 9, 'returned' => 6],
-    ['offset' => -35, 'borrowed' => 20, 'returned' => 18],
-    ['offset' => -100, 'borrowed' => 14, 'returned' => 12],
-    ['offset' => -370, 'borrowed' => 7, 'returned' => 5],
-];
+// Tổng hợp số liệu mượn và trả thực tế từ CSDL
+$loanRepo = new \App\Repositories\LoanRepository();
+$reports = $loanRepo->getReportsSummary();
 
 $periods = [
     'day' => 'Ngày',

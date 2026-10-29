@@ -2,13 +2,26 @@
 
 declare(strict_types=1);
 
-// Dữ liệu mẫu cho giao diện mượn tại quầy.
-$books = require dirname(__DIR__, 2) . '/mock/books.php';
+// Đọc dữ liệu sách và bạn đọc từ CSDL thực tế
+$bookRepo = new \App\Repositories\BookRepository();
+$userRepo = new \App\Repositories\UserRepository();
+$loanRepo = new \App\Repositories\LoanRepository();
 
-$students = [
-    'SV2026001' => 'Nguyễn Minh Anh',
-    'SV2026002' => 'Trần Hoàng Nam',
-];
+$bookData = $bookRepo->getPaginated(1, 100);
+$books = [];
+foreach ($bookData['items'] as $b) {
+    $books[] = [
+        'id' => $b['id_dau_sach'],
+        'title' => $b['tieu_de'],
+        'available' => (int)($b['co_the_muon'] ?? 0),
+    ];
+}
+
+$rawStudents = $userRepo->getStudents();
+$students = [];
+foreach ($rawStudents as $st) {
+    $students[$st['mssv']] = $st['name'];
+}
 
 $today = new DateTimeImmutable(
     'today',
@@ -120,10 +133,10 @@ $today = new DateTimeImmutable(
                             <datalist id="counter-students">
                                 <?php foreach ($students as $code => $name): ?>
                                     <option
-                                        value="<?= htmlspecialchars($code, ENT_QUOTES, 'UTF-8') ?>"
-                                        data-student-name="<?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>"
+                                        value="<?= htmlspecialchars((string)$code, ENT_QUOTES, 'UTF-8') ?>"
+                                        data-student-name="<?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>"
                                     >
-                                        <?= htmlspecialchars($name, ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8') ?>
                                     </option>
                                 <?php endforeach; ?>
                             </datalist>
@@ -152,7 +165,7 @@ $today = new DateTimeImmutable(
                                         <?= $book['available'] === 0 ? 'disabled' : '' ?>
                                     >
                                         <?= htmlspecialchars(
-                                            'BK' . $book['id'] . ' · ' .
+                                            $book['id'] . ' · ' .
                                             $book['title'] . ' · Còn ' .
                                             $book['available'] . ' bản',
                                             ENT_QUOTES,

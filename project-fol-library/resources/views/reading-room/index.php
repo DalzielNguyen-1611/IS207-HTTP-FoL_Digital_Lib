@@ -2,51 +2,13 @@
 
 declare(strict_types=1);
 
-// Tuần mẫu kế tiếp, theo giờ Việt Nam.
-$timezone = new DateTimeZone('Asia/Ho_Chi_Minh');
-$monday = (new DateTimeImmutable('today', $timezone))->modify('next monday');
+// Đọc lịch phòng đọc và số chỗ trống thực tế từ CSDL
+$roomRepo = new \App\Repositories\RoomRepository();
+$schedule = $roomRepo->getWeeklySchedule();
 
-$days = [];
-
-for ($index = 0; $index < 5; $index++) {
-    $date = $monday->modify('+' . $index . ' days');
-
-    $days[] = [
-        'date' => $date->format('Y-m-d'),
-        'label' => 'Thứ ' . ($index + 2),
-        'display' => $date->format('d/m'),
-    ];
-}
-
-// Ca đọc và số ghế trống mẫu.
-$shifts = [
-    [
-        'label' => 'Ca 1',
-        'time' => '07:30 – 09:30',
-        'start' => '07:30',
-        'free' => [20, 12, 0, 18, 25],
-    ],
-    [
-        'label' => 'Ca 2',
-        'time' => '09:45 – 11:45',
-        'start' => '09:45',
-        'free' => [15, 0, 22, 8, 16],
-    ],
-    [
-        'label' => 'Ca 3',
-        'time' => '13:00 – 15:00',
-        'start' => '13:00',
-        'free' => [24, 18, 10, 0, 20],
-    ],
-    [
-        'label' => 'Ca 4',
-        'time' => '15:15 – 17:15',
-        'start' => '15:15',
-        'free' => [10, 25, 16, 12, 30],
-    ],
-];
-
-$capacity = 40;
+$days = $schedule['days'];
+$shifts = $schedule['shifts'];
+$capacity = $schedule['capacity'];
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -155,12 +117,8 @@ $capacity = 40;
             >
                 <table class="room-table">
                     <caption class="room-caption">
-                        Tuần bắt đầu ngày
-                        <?= htmlspecialchars(
-                            $monday->format('d/m/Y'),
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>
+                        Tuần từ ngày <?= htmlspecialchars($days[0]['display'] ?? '', ENT_QUOTES, 'UTF-8') ?>
+                        đến ngày <?= htmlspecialchars(($days[array_key_last($days)]['display'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                     </caption>
 
                     <!-- Tiêu đề các ngày trong tuần -->
