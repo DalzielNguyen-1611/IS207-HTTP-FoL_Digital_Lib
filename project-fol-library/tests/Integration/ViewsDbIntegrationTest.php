@@ -21,7 +21,7 @@ class ViewsDbIntegrationTest
 
         // Khởi tạo phiên làm việc giả lập với tư cách Admin
         Session::start();
-        Session::set('user_id', 1);
+        Session::set('user_id', 6);
         Session::set('role_id', 1);
         Session::set('role_code', 'ADMIN');
 

@@ -34,57 +34,62 @@ class AuthorizationServiceTest
     {
         $results = [];
 
-        // 1. Kiểm tra quyền của Admin (User ID 1)
+        $pdo = \App\Core\Database::getConnection();
+        $adminId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 1 LIMIT 1")->fetchColumn() ?: 6);
+        $librarianId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 2 LIMIT 1")->fetchColumn() ?: 8);
+        $studentId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 3 LIMIT 1")->fetchColumn() ?: 7);
+
+        // 1. Kiểm tra quyền của Admin
         $results['admin_has_setting_manage'] = $this->assert(
-            $this->authService->hasPermission(1, 'setting.manage') === true,
+            $this->authService->hasPermission($adminId, 'setting.manage') === true,
             'Admin phải có quyền setting.manage'
         );
 
         $results['admin_has_user_manage'] = $this->assert(
-            $this->authService->hasPermission(1, 'user.manage') === true,
+            $this->authService->hasPermission($adminId, 'user.manage') === true,
             'Admin phải có quyền user.manage'
         );
 
         $results['admin_has_role_ADMIN'] = $this->assert(
-            $this->authService->hasRole(1, 'ADMIN') === true,
+            $this->authService->hasRole($adminId, 'ADMIN') === true,
             'Admin phải có vai trò ADMIN'
         );
 
-        // 2. Kiểm tra quyền của Thủ thư (User ID 2)
+        // 2. Kiểm tra quyền của Thủ thư
         $results['librarian_has_loan_confirm'] = $this->assert(
-            $this->authService->hasPermission(2, 'loan.confirm') === true,
+            $this->authService->hasPermission($librarianId, 'loan.confirm') === true,
             'Thủ thư phải có quyền xác nhận mượn trả loan.confirm'
         );
 
         $results['librarian_denied_setting_manage'] = $this->assert(
-            $this->authService->hasPermission(2, 'setting.manage') === false,
+            $this->authService->hasPermission($librarianId, 'setting.manage') === false,
             'Thủ thư KHÔNG ĐƯỢC có quyền setting.manage (Least privilege)'
         );
 
         $results['librarian_denied_user_manage'] = $this->assert(
-            $this->authService->hasPermission(2, 'user.manage') === false,
+            $this->authService->hasPermission($librarianId, 'user.manage') === false,
             'Thủ thư KHÔNG ĐƯỢC có quyền user.manage'
         );
 
-        // 3. Kiểm tra quyền của Sinh viên (User ID 3)
+        // 3. Kiểm tra quyền của Sinh viên
         $results['student_has_room_book'] = $this->assert(
-            $this->authService->hasPermission(3, 'room.book') === true,
+            $this->authService->hasPermission($studentId, 'room.book') === true,
             'Sinh viên phải có quyền đặt chỗ room.book'
         );
 
         $results['student_denied_book_create'] = $this->assert(
-            $this->authService->hasPermission(3, 'book.create') === false,
+            $this->authService->hasPermission($studentId, 'book.create') === false,
             'Sinh viên KHÔNG ĐƯỢC có quyền tạo sách book.create'
         );
 
         $results['student_denied_audit_view'] = $this->assert(
-            $this->authService->hasPermission(3, 'audit.view') === false,
+            $this->authService->hasPermission($studentId, 'audit.view') === false,
             'Sinh viên KHÔNG ĐƯỢC có quyền xem audit log audit.view'
         );
 
         // 4. Nguyên tắc Deny by default: Mã quyền không tồn tại hoặc ID âm/0
         $results['deny_unknown_permission'] = $this->assert(
-            $this->authService->hasPermission(1, 'non_existent.action') === false,
+            $this->authService->hasPermission($adminId, 'non_existent.action') === false,
             'Mã quyền không xác định phải bị từ chối mặc định'
         );
 
@@ -96,36 +101,36 @@ class AuthorizationServiceTest
         // 5. Kiểm tra Resource-level Policy: Đặt chỗ phòng đọc (BookingPolicy)
         $bookingStudentA = [
             'id_dat_cho' => 101,
-            'id_nguoi_dung' => 3, // Của sinh viên ID 3
+            'id_nguoi_dung' => $studentId, // Của sinh viên
             'trang_thai' => 'DaDat'
         ];
 
-        // Sinh viên 3 hủy đơn của chính mình -> ĐƯỢC PHÉP
+        // Sinh viên hủy đơn của chính mình -> ĐƯỢC PHÉP
         $results['student_can_cancel_own_booking'] = $this->assert(
-            $this->bookingPolicy->canCancel(3, $bookingStudentA) === true,
+            $this->bookingPolicy->canCancel($studentId, $bookingStudentA) === true,
             'Sinh viên được phép hủy lượt đặt chỗ còn hạn của chính mình'
         );
 
-        // Giả sử có một User ID khác (ví dụ User 99) cố tình hủy đơn của Sinh viên 3 -> PHẢI BỊ CHẶN
+        // Giả sử có một User ID khác (ví dụ User 9999) cố tình hủy đơn của Sinh viên -> PHẢI BỊ CHẶN
         $results['student_cannot_cancel_other_booking'] = $this->assert(
-            $this->bookingPolicy->canCancel(99, $bookingStudentA) === false,
+            $this->bookingPolicy->canCancel(9999, $bookingStudentA) === false,
             'Người dùng khác không được hủy lượt đặt chỗ của sinh viên khác'
         );
 
-        // Thủ thư (User 2) hủy đơn của sinh viên -> ĐƯỢC PHÉP vì có quyền room.manage
+        // Thủ thư hủy đơn của sinh viên -> ĐƯỢC PHÉP vì có quyền room.manage
         $results['librarian_can_cancel_any_booking'] = $this->assert(
-            $this->bookingPolicy->canCancel(2, $bookingStudentA) === true,
+            $this->bookingPolicy->canCancel($librarianId, $bookingStudentA) === true,
             'Thủ thư có quyền điều phối quản lý và hủy lượt đặt của sinh viên'
         );
 
         // Đơn đã check-in ('DaNhanCho') thì sinh viên không thể hủy
         $bookingFinished = [
             'id_dat_cho' => 102,
-            'id_nguoi_dung' => 3,
+            'id_nguoi_dung' => $studentId,
             'trang_thai' => 'DaNhanCho'
         ];
         $results['cannot_cancel_already_checkedin'] = $this->assert(
-            $this->bookingPolicy->canCancel(3, $bookingFinished) === false,
+            $this->bookingPolicy->canCancel($studentId, $bookingFinished) === false,
             'Không được hủy lượt đặt chỗ đã check-in nhận chỗ'
         );
 

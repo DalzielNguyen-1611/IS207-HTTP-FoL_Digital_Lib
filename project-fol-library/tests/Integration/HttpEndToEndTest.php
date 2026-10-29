@@ -74,7 +74,7 @@ $results['E2E-01: Khách truy cập /profile bị chuyển hướng đến /logi
 
 // 2. Đăng nhập tài khoản Quản trị viên (Admin)
 $loginData = [
-    'email' => 'admin@fol.uit.edu.vn',
+    'email' => 'nguyendoanduchieu16112006@gmail.com',
     'password' => 'Password@123'
 ];
 $res = httpRequest('POST', "{$baseUrl}/login", $loginData, $cookieFile);
@@ -131,7 +131,7 @@ $results['E2E-07: Admin đăng xuất thành công chuyển hướng về /login
 
 // 8. Đăng nhập tài khoản Sinh viên
 $studentLoginData = [
-    'email' => 'student@gm.uit.edu.vn',
+    'email' => '24520500@gm.uit.edu.vn',
     'password' => 'Password@123'
 ];
 $res = httpRequest('POST', "{$baseUrl}/login", $studentLoginData, $cookieFile);

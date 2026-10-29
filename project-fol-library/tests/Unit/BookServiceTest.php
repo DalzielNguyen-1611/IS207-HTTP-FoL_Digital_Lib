@@ -112,6 +112,7 @@ class BookServiceTest
         );
 
         // 6. Kiểm thử vòng đời CRUD sách: Tạo mới -> Cập nhật -> Xóa
+        $activeAdminId = (int)(\App\Core\Database::getConnection()->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 1 LIMIT 1")->fetchColumn() ?: 6);
         $testBookId = 'KV-TEST-' . time();
         $createRes = $this->bookService->createBook([
             'id_dau_sach' => $testBookId,
@@ -120,7 +121,7 @@ class BookServiceTest
             'nam_xuat_ban' => 2026,
             'so_luong' => 3,
             'mo_ta' => 'Tài liệu phục vụ kiểm thử tự động hệ thống thư viện',
-        ], 1);
+        ], $activeAdminId);
 
         $results['create_book_success'] = $this->assert(
             $createRes['success'] === true && $createRes['id'] === $testBookId,
@@ -141,7 +142,7 @@ class BookServiceTest
             'nam_xuat_ban' => 2026,
             'mo_ta' => 'Nội dung cập nhật',
             'additional_copies' => 1,
-        ], 1);
+        ], $activeAdminId);
 
         $results['update_book_success'] = $this->assert(
             $updateRes['success'] === true,
@@ -155,7 +156,7 @@ class BookServiceTest
         );
 
         // Xóa sách kiểm thử
-        $deleteRes = $this->bookService->deleteBook($testBookId, 1);
+        $deleteRes = $this->bookService->deleteBook($testBookId, $activeAdminId);
         $results['delete_book_success'] = $this->assert(
             $deleteRes['success'] === true,
             "Xóa đầu sách test {$testBookId} thành công"

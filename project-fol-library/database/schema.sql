@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `ho_so_nguoi_dung` (
     `ngay_sinh` DATE NOT NULL,
     `so_dien_thoai` VARCHAR(20) NOT NULL,
     `anh_dai_dien` VARCHAR(255) NULL COMMENT 'mặc định sẽ là 1 ảnh nào đấy',
-    CONSTRAINT `fk_52` FOREIGN KEY (`id_tai_khoan`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT `fk_52` FOREIGN KEY (`id_tai_khoan`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_44` FOREIGN KEY (`id_lop`) REFERENCES `id_lop` (`id_lop`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `dat_cho` (
     `thoi_gian_huy` DATETIME NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DaDat' COMMENT 'DaDat, DaNhanCho, Huy, QuaHanKhongDen',
     `ghi_chu` VARCHAR(500) NULL,
-    CONSTRAINT `fk_19` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT `fk_19` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_20` FOREIGN KEY (`id_cho_ngoi`) REFERENCES `cho_ngoi` (`id_cho_ngoi`) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT `fk_21` FOREIGN KEY (`id_ca_doc`) REFERENCES `ca_doc` (`id_ca_doc`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -295,7 +295,7 @@ CREATE TABLE IF NOT EXISTS `lich_su_sach_yeu_thich` (
     `id_dau_sach` VARCHAR(50) NOT NULL,
     `hanh_dong` VARCHAR(255) NOT NULL COMMENT 'Them, BoYeuThich',
     `thoi_diem` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `fk_36` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT `fk_36` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_37` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -365,7 +365,7 @@ CREATE TABLE IF NOT EXISTS `nhat_ky_hoat_dong` (
     `mo_ta` TEXT NULL,
     `dia_chi_ip` VARCHAR(45) NULL,
     `thoi_gian` DATETIME NOT NULL,
-    CONSTRAINT `fk_32` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE NO ACTION ON UPDATE NO ACTION
+    CONSTRAINT `fk_32` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -----------------------------------------------------------------------------
