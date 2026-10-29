@@ -74,6 +74,60 @@ class GoogleAuthService
     }
 
     /**
+     * Thực hiện HTTP request qua cURL với cơ chế ép IPv4 và tự động thử lại khi mạng chập chờn
+     */
+    private function executeHttpRequest(string $url, array $options, int $maxRetries = 2): array
+    {
+        $defaultOptions = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT => 25,
+            CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4, // Bắt buộc dùng IPv4 để tránh nghẽn/timeout IPv6 trên Windows/ISP
+            CURLOPT_SSL_VERIFYPEER => true,
+        ];
+
+        $mergedOptions = $options + $defaultOptions;
+
+        $lastError = '';
+        $lastHttpCode = 0;
+        $lastResponse = false;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, $mergedOptions);
+
+            $response = curl_exec($ch);
+            $httpCode = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response !== false && $httpCode === 200) {
+                return [
+                    'success' => true,
+                    'code' => $httpCode,
+                    'body' => (string)$response
+                ];
+            }
+
+            $lastError = $curlError ?: (string)$response;
+            $lastHttpCode = $httpCode;
+            $lastResponse = $response;
+
+            // Nếu gặp lỗi mạng tạm thời (timeout, connection reset), nghỉ 400ms rồi thử lại
+            if ($attempt < $maxRetries) {
+                usleep(400000);
+            }
+        }
+
+        return [
+            'success' => false,
+            'code' => $lastHttpCode,
+            'error' => $lastError,
+            'body' => (string)$lastResponse
+        ];
+    }
+
+    /**
      * Đổi mã authorization code lấy token và xác minh ID Token từ Google API
      * @return array{sub: string, email: string, email_verified: bool, name: string, picture: string}
      */
@@ -89,26 +143,18 @@ class GoogleAuthService
             'grant_type' => 'authorization_code'
         ]);
 
-        $ch = curl_init($tokenUrl);
-        curl_setopt_array($ch, [
+        $tokenResult = $this->executeHttpRequest($tokenUrl, [
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => $postData,
-            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => ['Content-Type: application/x-www-form-urlencoded'],
-            CURLOPT_TIMEOUT => 15,
-            CURLOPT_SSL_VERIFYPEER => true
         ]);
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $curlError = curl_error($ch);
-        curl_close($ch);
-
-        if ($response === false || $httpCode !== 200) {
-            throw new RuntimeException("Lỗi kết nối trao đổi token với Google (HTTP {$httpCode}): " . ($curlError ?: (string)$response));
+        if (!$tokenResult['success']) {
+            $detail = $tokenResult['error'] !== '' ? $tokenResult['error'] : $tokenResult['body'];
+            throw new RuntimeException("Lỗi kết nối trao đổi token với Google (HTTP {$tokenResult['code']}): {$detail}");
         }
 
-        $tokenData = json_decode((string)$response, true);
+        $tokenData = json_decode($tokenResult['body'], true);
         if (!is_array($tokenData) || empty($tokenData['access_token'])) {
             throw new RuntimeException('Phản hồi token từ Google không hợp lệ.');
         }
@@ -118,23 +164,16 @@ class GoogleAuthService
 
         // 2. Xác minh và lấy thông tin người dùng từ Google UserInfo Endpoint
         $userInfoUrl = 'https://www.googleapis.com/oauth2/v3/userinfo';
-        $chInfo = curl_init($userInfoUrl);
-        curl_setopt_array($chInfo, [
-            CURLOPT_RETURNTRANSFER => true,
+        $userResult = $this->executeHttpRequest($userInfoUrl, [
             CURLOPT_HTTPHEADER => ["Authorization: Bearer {$accessToken}"],
-            CURLOPT_TIMEOUT => 15,
-            CURLOPT_SSL_VERIFYPEER => true
         ]);
 
-        $userResponse = curl_exec($chInfo);
-        $userHttpCode = curl_getinfo($chInfo, CURLINFO_HTTP_CODE);
-        curl_close($chInfo);
-
-        if ($userResponse === false || $userHttpCode !== 200) {
-            throw new RuntimeException('Không thể xác thực thông tin tài khoản người dùng từ Google.');
+        if (!$userResult['success']) {
+            $detail = $userResult['error'] !== '' ? $userResult['error'] : $userResult['body'];
+            throw new RuntimeException("Không thể xác thực thông tin tài khoản người dùng từ Google (HTTP {$userResult['code']}): {$detail}");
         }
 
-        $payload = json_decode((string)$userResponse, true);
+        $payload = json_decode($userResult['body'], true);
         if (!is_array($payload) || empty($payload['sub']) || empty($payload['email'])) {
             throw new RuntimeException('Dữ liệu hồ sơ người dùng trả về từ Google bị thiếu trường bắt buộc.');
         }

@@ -224,7 +224,13 @@ class AuthController
             exit;
         } catch (Throwable $e) {
             error_log('Google OAuth callback error: ' . $e->getMessage());
-            header('Location: /login?error=' . urlencode('Đăng nhập Google thất bại: ' . $e->getMessage()));
+            $msg = $e->getMessage();
+            if (str_contains(strtolower($msg), 'timed out') || str_contains(strtolower($msg), 'could not resolve host')) {
+                $friendlyMsg = 'Không thể kết nối đến máy chủ xác thực Google (quá thời gian chờ). Vui lòng kiểm tra lại đường truyền mạng, tắt/bật VPN hoặc đăng nhập bằng tài khoản và mật khẩu bên dưới.';
+            } else {
+                $friendlyMsg = 'Đăng nhập Google thất bại: ' . $msg;
+            }
+            header('Location: /login?error=' . urlencode($friendlyMsg));
             exit;
         }
     }
