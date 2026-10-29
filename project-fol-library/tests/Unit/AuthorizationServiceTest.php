@@ -35,9 +35,18 @@ class AuthorizationServiceTest
         $results = [];
 
         $pdo = \App\Core\Database::getConnection();
-        $adminId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 1 LIMIT 1")->fetchColumn() ?: 6);
-        $librarianId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 2 LIMIT 1")->fetchColumn() ?: 8);
-        $studentId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 3 LIMIT 1")->fetchColumn() ?: 7);
+        $adminId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 1 LIMIT 1")->fetchColumn() ?: 1);
+        $studentId = (int)($pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 3 LIMIT 1")->fetchColumn() ?: 2);
+
+        $librarianId = (int)$pdo->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 2 LIMIT 1")->fetchColumn();
+        $isTempLibrarian = false;
+        if ($librarianId === 0) {
+            $pdo->exec("INSERT INTO `tai_khoan` (`id_tai_khoan`, `id_vai_tro`, `email`, `trang_thai`) VALUES (8888, 2, 'temp_lib@test.fol', 'HoatDong') ON DUPLICATE KEY UPDATE `id_vai_tro` = 2, `trang_thai` = 'HoatDong'");
+            $librarianId = 8888;
+            $isTempLibrarian = true;
+        }
+
+        try {
 
         // 1. Kiểm tra quyền của Admin
         $results['admin_has_setting_manage'] = $this->assert(
@@ -133,6 +142,12 @@ class AuthorizationServiceTest
             $this->bookingPolicy->canCancel($studentId, $bookingFinished) === false,
             'Không được hủy lượt đặt chỗ đã check-in nhận chỗ'
         );
+        } finally {
+            if ($isTempLibrarian) {
+                $pdo->exec("DELETE FROM `tai_khoan` WHERE `id_tai_khoan` = 8888");
+                $pdo->exec("ALTER TABLE `tai_khoan` AUTO_INCREMENT = 3");
+            }
+        }
 
         return $results;
     }
