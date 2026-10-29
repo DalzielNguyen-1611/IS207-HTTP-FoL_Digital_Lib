@@ -62,12 +62,13 @@ class RbacSeeder
             (3, 1), (3, 6), (3, 7), (3, 9), (3, 11), (3, 12), (3, 13);");
 
         // 4. Tài khoản mẫu
-        $hash = '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi'; // Password@123
-        $db->exec("INSERT INTO `tai_khoan` (`id_tai_khoan`, `id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) VALUES
-            (1, 1, 'admin@fol.uit.edu.vn', '{$hash}', 'HoatDong', NOW(), NOW()),
-            (2, 2, 'librarian@fol.uit.edu.vn', '{$hash}', 'HoatDong', NOW(), NOW()),
-            (3, 3, 'student@gm.uit.edu.vn', '{$hash}', 'HoatDong', NOW(), NOW())
+        $hash = password_hash('Password@123', PASSWORD_BCRYPT);
+        $userStmt = $db->prepare("INSERT INTO `tai_khoan` (`id_tai_khoan`, `id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) VALUES
+            (1, 1, 'admin@fol.uit.edu.vn', :h1, 'HoatDong', NOW(), NOW()),
+            (2, 2, 'librarian@fol.uit.edu.vn', :h2, 'HoatDong', NOW(), NOW()),
+            (3, 3, 'student@gm.uit.edu.vn', :h3, 'HoatDong', NOW(), NOW())
             ON DUPLICATE KEY UPDATE `id_vai_tro` = VALUES(`id_vai_tro`), `mat_khau` = VALUES(`mat_khau`), `trang_thai` = VALUES(`trang_thai`);");
+        $userStmt->execute(['h1' => $hash, 'h2' => $hash, 'h3' => $hash]);
 
         // 5. Ngành, lớp và hồ sơ
         $db->exec("INSERT INTO `nganh` (`id_nganh`, `ten_nganh`) VALUES (1, 'Văn học'), (2, 'Ngôn ngữ học') ON DUPLICATE KEY UPDATE `ten_nganh` = VALUES(`ten_nganh`);");

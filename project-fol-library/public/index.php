@@ -100,7 +100,9 @@ if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result['success']) {
         header('Location: ' . $result['redirect']);
     } else {
-        header('Location: /login?error=' . urlencode($result['message'] ?? 'Đăng nhập thất bại'));
+        $msg = $result['message'] ?? (!empty($result['errors']) ? reset($result['errors']) : 'Đăng nhập thất bại.');
+        $email = urlencode($_POST['email'] ?? '');
+        header("Location: /login?error=" . urlencode($msg) . "&email={$email}");
     }
     exit;
 }

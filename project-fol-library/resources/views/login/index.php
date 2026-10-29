@@ -2,12 +2,9 @@
 
 declare(strict_types=1);
 
-// Vai trò dùng để xem thử giao diện, không cấp quyền thật.
-$roles = [
-    'student' => 'Sinh viên',
-    'librarian' => 'Cán bộ thư viện',
-    'admin' => 'Quản trị viên',
-];
+$error = $_GET['error'] ?? null;
+$message = $_GET['message'] ?? null;
+$savedEmail = $_GET['email'] ?? '';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -20,6 +17,54 @@ $roles = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <style>
+        .auth-alert-error {
+            background: #fdf2f2;
+            border: 1px solid #f8b4b4;
+            color: #9b1c1c;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .auth-alert-success {
+            background: #f3faf7;
+            border: 1px solid #bcf0da;
+            color: #03543f;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sample-role-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 6px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.2s ease;
+        }
+        .sample-role-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .sample-role-btn.student:hover { border-color: #005baa; background: #eef6fb; color: #005baa; }
+        .sample-role-btn.librarian:hover { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+        .sample-role-btn.admin:hover { border-color: #d97706; background: #fffbeb; color: #d97706; }
+    </style>
 </head>
 <body>
     <!-- Điều hướng về trang chủ -->
@@ -46,82 +91,86 @@ $roles = [
 
             <p>
                 Tra cứu tài liệu, theo dõi sách mượn và tìm
-                một góc đọc dành riêng cho bạn.
+                một không gian đọc phù hợp dành riêng cho bạn.
             </p>
 
             <span class="auth-decoration" aria-hidden="true">❧</span>
         </section>
 
-        <!-- Biểu mẫu đăng nhập thử nghiệm -->
+        <!-- Biểu mẫu đăng nhập xác thực thật -->
         <section class="auth-card" aria-labelledby="login-title">
-            <p class="auth-eyebrow">CHÀO MỪNG BẠN TRỞ LẠI</p>
+            <p class="auth-eyebrow">CỔNG XÁC THỰC TẬP TRUNG</p>
             <h2 id="login-title">Đăng nhập</h2>
 
             <p class="auth-description">
-                Sử dụng tài khoản thư viện của bạn.
+                Đăng nhập bằng tài khoản nội bộ để truy cập hệ thống theo đúng quyền hạn.
             </p>
 
-            <form id="login-form">
-                <!-- Vai trò trải nghiệm -->
-                <div class="auth-field">
-                    <label for="login-role">Chọn vai trò trải nghiệm</label>
-
-                    <select id="login-role">
-                        <?php foreach ($roles as $value => $label): ?>
-                            <option value="<?= htmlspecialchars(
-                                $value,
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>">
-                                <?= htmlspecialchars(
-                                    $label,
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
+            <?php if (!empty($error)): ?>
+                <div class="auth-alert-error" role="alert">
+                    <span style="font-size: 18px;">⚠️</span>
+                    <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
+            <?php endif; ?>
 
-                <!-- Phím tắt vào nhanh trực tiếp theo vai trò -->
-                <div class="auth-quick-actions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; margin-bottom: 20px;">
-                    <a href="/login?switch_role=student" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef6fb; border: 1px solid #c2ddf0; border-radius: 10px; text-decoration: none; color: #005baa; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
-                        <span style="font-size: 22px; margin-bottom: 4px;">🎓</span>
+            <?php if (!empty($message)): ?>
+                <div class="auth-alert-success" role="status">
+                    <span style="font-size: 18px;">✅</span>
+                    <span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Bảng tài khoản mẫu hỗ trợ điền nhanh để kiểm thử -->
+            <div style="margin-bottom: 20px; padding: 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
+                <div style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; justify-content: space-between;">
+                    <span>Tài khoản kiểm thử trong CSDL:</span>
+                    <span style="font-weight: 400; color: #94a3b8;">Bấm để tự điền form</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;">
+                    <button type="button" class="sample-role-btn student" data-email="student@gm.uit.edu.vn" data-password="Password@123">
+                        <span style="font-size: 18px; margin-bottom: 2px;">🎓</span>
                         <span>Sinh viên</span>
-                    </a>
-                    <a href="/login?switch_role=librarian" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef9f2; border: 1px solid #bce6cc; border-radius: 10px; text-decoration: none; color: #1b8846; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
-                        <span style="font-size: 22px; margin-bottom: 4px;">📚</span>
-                        <span>Cán bộ</span>
-                    </a>
-                    <a href="/login?switch_role=admin" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #fff8e6; border: 1px solid #f6dd9e; border-radius: 10px; text-decoration: none; color: #b78103; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
-                        <span style="font-size: 22px; margin-bottom: 4px;">⚙️</span>
+                    </button>
+                    <button type="button" class="sample-role-btn librarian" data-email="librarian@fol.uit.edu.vn" data-password="Password@123">
+                        <span style="font-size: 18px; margin-bottom: 2px;">📚</span>
+                        <span>Thủ thư</span>
+                    </button>
+                    <button type="button" class="sample-role-btn admin" data-email="admin@fol.uit.edu.vn" data-password="Password@123">
+                        <span style="font-size: 18px; margin-bottom: 2px;">⚙️</span>
                         <span>Quản trị viên</span>
-                    </a>
+                    </button>
                 </div>
+            </div>
 
-                <!-- Email đăng nhập (Không bắt buộc) -->
+            <!-- Form POST đăng nhập trực tiếp vào Backend -->
+            <form id="login-form" method="POST" action="/login">
+                <!-- Email đăng nhập -->
                 <div class="auth-field">
-                    <label for="login-email">Email <span style="font-size: 12px; font-weight: 400; color: #718695;">(Không bắt buộc)</span></label>
+                    <label for="login-email">Email tài khoản</label>
 
                     <input
                         id="login-email"
+                        name="email"
                         type="email"
                         autocomplete="username"
-                        placeholder="Có thể bỏ trống để vào xem ngay"
+                        placeholder="Nhập email của bạn (ví dụ: student@gm.uit.edu.vn)"
+                        required
+                        value="<?= htmlspecialchars($savedEmail, ENT_QUOTES, 'UTF-8') ?>"
                     >
                 </div>
 
-                <!-- Mật khẩu & nút hiện/ẩn (Không bắt buộc) -->
+                <!-- Mật khẩu & nút hiện/ẩn -->
                 <div class="auth-field">
-                    <label for="login-password">Mật khẩu <span style="font-size: 12px; font-weight: 400; color: #718695;">(Không bắt buộc)</span></label>
+                    <label for="login-password">Mật khẩu</label>
 
                     <div class="auth-password">
                         <input
                             id="login-password"
+                            name="password"
                             type="password"
                             autocomplete="current-password"
-                            placeholder="Có thể bỏ trống để vào xem ngay"
-                            aria-describedby="login-note"
+                            placeholder="Nhập mật khẩu..."
+                            required
                         >
 
                         <button
@@ -135,31 +184,34 @@ $roles = [
                     </div>
                 </div>
 
-                <!-- Thông báo phạm vi bản thử -->
-                <p class="auth-notice" id="login-note">
-                    Chế độ trải nghiệm giao diện nhanh: Không cần nhập Email và Mật khẩu. Bạn có thể chọn vai trò ở trên hoặc bấm nút dưới đây để vào xem trực tiếp.
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 12px 0 18px 0; font-size: 13px;">
+                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; color: #4b5563;">
+                        <input type="checkbox" name="remember" value="1"> Ghi nhớ phiên đăng nhập
+                    </label>
+                    <a href="/forgot-password" style="color: #005baa; text-decoration: none;">Quên mật khẩu?</a>
+                </div>
 
-                <button class="auth-submit" type="submit">
-                    Vào xem giao diện ngay →
+                <button class="auth-submit" type="submit" id="submit-login-btn">
+                    Đăng nhập hệ thống →
                 </button>
 
-                <!-- Kết quả thao tác mẫu -->
+                <!-- Kết quả thao tác -->
                 <p
                     class="auth-feedback"
                     id="login-feedback"
                     role="status"
+                    style="margin-top: 12px; font-size: 13px; color: #0284c7; text-align: center;"
                 ></p>
             </form>
 
             <!-- Liên kết đăng ký dành riêng cho sinh viên -->
             <p class="auth-switch">
-                Sinh viên mới? <a href="/register">Đăng ký tài khoản</a>
+                Sinh viên chưa có tài khoản? <a href="/register">Đăng ký tài khoản mới</a>
             </p>
         </section>
     </main>
 
-    <!-- Tương tác giao diện đăng nhập -->
+    <!-- Tương tác điền form và hiện/ẩn mật khẩu -->
     <script src="/assets/js/auth.js" defer></script>
 </body>
 </html>
