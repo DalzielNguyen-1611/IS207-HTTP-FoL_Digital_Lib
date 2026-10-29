@@ -122,13 +122,14 @@ class UserRepository
         ]);
     }
 
-    public function createFromGoogle(array $profile): int
+    public function createFromGoogle(array $profile, int $roleId = 3): int
     {
         $stmt = $this->db->prepare(
             'INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `google_sub`, `trang_thai`, `created_at`, `updated_at`)
-             VALUES (3, :email, NULL, :sub, "HoatDong", NOW(), NOW())'
+             VALUES (:role_id, :email, NULL, :sub, "HoatDong", NOW(), NOW())'
         );
         $stmt->execute([
+            ':role_id' => $roleId,
             ':email' => $profile['email'],
             ':sub' => $profile['sub']
         ]);
@@ -136,11 +137,12 @@ class UserRepository
 
         $name = trim((string)($profile['name'] ?? explode('@', $profile['email'])[0]));
         $picture = (string)($profile['picture'] ?? '/assets/images/logo.png');
-        $mssv = 'SV' . str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
+        $prefix = ($roleId === 1) ? 'AD' : 'SV';
+        $mssv = $prefix . str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
 
         $profileStmt = $this->db->prepare(
-            'INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `anh_dai_dien`)
-             VALUES (:id, :mssv, :name, 1, "Nam", "2005-01-01", :avatar)'
+            'INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `so_dien_thoai`, `anh_dai_dien`)
+             VALUES (:id, :mssv, :name, 1, "Nam", "2005-01-01", "", :avatar)'
         );
         $profileStmt->execute([
             ':id' => $userId,

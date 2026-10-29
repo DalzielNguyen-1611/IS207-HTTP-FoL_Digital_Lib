@@ -146,11 +146,11 @@ class AuthController
             $email = $payload['email'];
             $googleSub = $payload['sub'];
 
-            // 4. Kiểm tra domain email có thuộc phạm vi nhà trường cho phép không
-            if (!$this->googleAuthService->isAllowedDomain($email)) {
-                header('Location: /login?error=' . urlencode("Email ({$email}) không thuộc danh sách tên miền được phép của nhà trường."));
-                exit;
-            }
+            // 4. Kiểm tra quyền truy cập:
+            // - Tài khoản sinh viên: Chỉ cho phép các domain sinh viên được cấu hình (@gm.uit.edu.vn, @sv.ussh.edu.vn)
+            // - Tài khoản quản trị viên: Khai báo trong GOOGLE_ADMIN_EMAILS hoặc đã được gán vai trò ADMIN trong CSDL
+            $isStudentDomain = $this->googleAuthService->isStudentDomain($email);
+            $isAdminConfig = $this->googleAuthService->isAdminEmail($email);
 
             // 5. Kiểm tra tài khoản trong CSDL (theo google_sub trước, sau đó theo email)
             $user = $this->userRepo->findByGoogleSub($googleSub);
@@ -159,20 +159,39 @@ class AuthController
                 if ($userByEmail !== null) {
                     $this->userRepo->updateGoogleSub((int)$userByEmail['id_tai_khoan'], $googleSub);
                     $user = $this->userRepo->findById((int)$userByEmail['id_tai_khoan']);
-                } else {
-                    // Tự động khởi tạo tài khoản Sinh viên mới (vai trò STUDENT = 3)
-                    $newId = $this->userRepo->createFromGoogle($payload);
-                    $user = $this->userRepo->findById($newId);
+                }
+            }
+
+            // Kiểm tra xem tài khoản trong CSDL có vai trò ADMIN hay không
+            $isDbAdmin = ($user !== null && ($user['ma_vai_tro'] ?? '') === 'ADMIN');
+            $isAdmin = $isAdminConfig || $isDbAdmin;
+
+            // Nếu không phải domain sinh viên được phép và cũng không phải tài khoản quản trị viên -> Từ chối
+            if (!$isStudentDomain && !$isAdmin) {
+                header('Location: /login?error=' . urlencode("Email ({$email}) không thuộc danh sách tên miền sinh viên (@gm.uit.edu.vn, @sv.ussh.edu.vn) hoặc chưa được cấp quyền quản trị."));
+                exit;
+            }
+
+            // Nếu chưa có tài khoản trong hệ thống, tự động tạo mới
+            if ($user === null) {
+                $targetRole = $isAdmin ? 1 : 3;
+                $newId = $this->userRepo->createFromGoogle($payload, $targetRole);
+                $user = $this->userRepo->findById($newId);
+            } else {
+                // Nếu được cấu hình là Admin nhưng DB chưa cập nhật thì đồng bộ vai trò ADMIN
+                if ($isAdmin && (int)$user['id_vai_tro'] !== 1) {
+                    $this->userRepo->updateRole((int)$user['id_tai_khoan'], 1);
+                    $user = $this->userRepo->findById((int)$user['id_tai_khoan']);
                 }
             }
 
             if ($user === null) {
-                throw new DomainException('Không thể tải hoặc tạo hồ sơ sinh viên từ tài khoản Google.');
+                throw new DomainException('Không thể tải hoặc tạo hồ sơ người dùng từ tài khoản Google.');
             }
 
             // 6. Kiểm tra trạng thái hoạt động của tài khoản
             if (($user['trang_thai'] ?? '') !== 'HoatDong') {
-                header('Location: /login?error=' . urlencode('Tài khoản sinh viên của bạn đang bị khóa hoặc đình chỉ.'));
+                header('Location: /login?error=' . urlencode('Tài khoản của bạn đang bị khóa hoặc đình chỉ.'));
                 exit;
             }
 
@@ -181,16 +200,24 @@ class AuthController
             Session::setAuthUser($user);
 
             // 8. Ghi nhận nhật ký kiểm toán
+            $roleCode = $user['ma_vai_tro'] ?? 'STUDENT';
             $this->auditService->log(
                 userId: (int)$user['id_tai_khoan'],
                 action: 'DangNhapGoogleOAuth',
                 targetTable: 'tai_khoan',
                 targetId: (string)$user['id_tai_khoan'],
-                description: "Sinh viên đăng nhập thành công qua Google OAuth ({$email})"
+                description: "Đăng nhập thành công qua Google OAuth với vai trò {$roleCode} ({$email})"
             );
 
+            // 9. Điều hướng theo vai trò (ADMIN -> /admin/settings, LIBRARIAN -> /librarian, STUDENT -> /profile)
+            $redirectUrl = match ($roleCode) {
+                'ADMIN' => '/admin/settings',
+                'LIBRARIAN' => '/librarian',
+                default => '/profile',
+            };
+
             Session::writeClose();
-            header('Location: /profile');
+            header('Location: ' . $redirectUrl);
             exit;
         } catch (DomainException $e) {
             header('Location: /login?error=' . urlencode($e->getMessage()));

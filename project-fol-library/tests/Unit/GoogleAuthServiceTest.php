@@ -50,12 +50,29 @@ assertTest(str_contains($authUrl, 'state=test_random_state_xyz'), "Auth URL ph�
 assertTest(str_contains($authUrl, 'client_id=test-id.apps.googleusercontent.com'), "Auth URL phải truyền client_id");
 assertTest(str_contains($authUrl, 'scope=openid+email+profile') || str_contains($authUrl, 'scope=openid%20email%20profile'), "Auth URL phải yêu cầu scope openid email profile");
 
-// 3. Kiểm tra kiểm tra domain email
-assertTest($configured->isAllowedDomain('24520500@gm.uit.edu.vn'), "Chấp nhận domain sinh viên gm.uit.edu.vn");
-assertTest($configured->isAllowedDomain('teacher@uit.edu.vn'), "Chấp nhận domain uit.edu.vn");
-assertTest($configured->isAllowedDomain('STUDENT@GM.UIT.EDU.VN'), "Chấp nhận domain không phân biệt hoa thường");
-assertTest(!$configured->isAllowedDomain('hacker@unknown-mail.com'), "Từ chối domain lạ không nằm trong danh sách trường");
-assertTest(!$configured->isAllowedDomain('fake@fake-uit.edu.vn'), "Từ chối domain mạo danh có chứa chuỗi gần giống");
+// 3. Kiểm tra domain sinh viên (@gm.uit.edu.vn, @sv.ussh.edu.vn)
+$authSvc = new GoogleAuthService([
+    'client_id' => 'test-id.apps.googleusercontent.com',
+    'client_secret' => 'test-secret',
+    'student_domains' => ['gm.uit.edu.vn', 'sv.ussh.edu.vn'],
+    'admin_emails' => ['admin@example.com', 'nguyendoanduchieu16112006@gmail.com']
+]);
+
+assertTest($authSvc->isStudentDomain('24520500@gm.uit.edu.vn'), "Chấp nhận domain sinh viên gm.uit.edu.vn");
+assertTest($authSvc->isStudentDomain('24520501@sv.ussh.edu.vn'), "Chấp nhận domain sinh viên sv.ussh.edu.vn");
+assertTest($authSvc->isStudentDomain('STUDENT@SV.USSH.EDU.VN'), "Chấp nhận domain không phân biệt hoa thường");
+assertTest(!$authSvc->isStudentDomain('hacker@unknown-mail.com'), "Từ chối domain lạ không nằm trong danh sách trường");
+assertTest(!$authSvc->isStudentDomain('student@gmail.com'), "Từ chối @gmail.com làm tài khoản sinh viên");
+
+// 4. Kiểm tra tài khoản Quản trị viên (Admin)
+assertTest($authSvc->isAdminEmail('nguyendoanduchieu16112006@gmail.com'), "Nhận diện đúng email Admin được cấu hình");
+assertTest($authSvc->isAdminEmail('NGUYENDOANDUCHIEU16112006@GMAIL.COM'), "Nhận diện email Admin không phân biệt hoa thường");
+assertTest(!$authSvc->isAdminEmail('stranger@gmail.com'), "Từ chối email không được cấp quyền Admin");
+
+// 5. Kiểm tra tính hợp lệ tổng thể isAllowed()
+assertTest($authSvc->isAllowed('24520500@gm.uit.edu.vn'), "isAllowed chấp nhận sinh viên hợp lệ");
+assertTest($authSvc->isAllowed('nguyendoanduchieu16112006@gmail.com'), "isAllowed chấp nhận Admin hợp lệ");
+assertTest(!$authSvc->isAllowed('unauthorized@gmail.com'), "isAllowed từ chối email lạ");
 
 echo "========================================================\n";
 echo "TỔNG KẾT: {$passCount}/{$totalCount} TEST CASES ĐẠT CHUẨN!\n";

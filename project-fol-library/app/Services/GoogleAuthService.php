@@ -17,6 +17,8 @@ class GoogleAuthService
     private string $clientSecret;
     private string $redirectUri;
     private array $allowedDomains;
+    private array $studentDomains;
+    private array $adminEmails;
     private string $prompt;
 
     public function __construct(?array $config = null)
@@ -30,6 +32,8 @@ class GoogleAuthService
         $this->clientSecret = (string)($config['client_secret'] ?? '');
         $this->redirectUri = (string)($config['redirect_uri'] ?? 'http://localhost:8000/auth/google/callback');
         $this->allowedDomains = (array)($config['allowed_domains'] ?? []);
+        $this->studentDomains = (array)($config['student_domains'] ?? ['gm.uit.edu.vn', 'sv.ussh.edu.vn']);
+        $this->adminEmails = array_map('strtolower', (array)($config['admin_emails'] ?? []));
         $this->prompt = (string)($config['prompt'] ?? 'select_account');
     }
 
@@ -150,12 +154,12 @@ class GoogleAuthService
     }
 
     /**
-     * Kiểm tra tên miền email có thuộc danh sách cho phép hay không
+     * Kiểm tra tên miền email có thuộc danh sách sinh viên (@gm.uit.edu.vn, @sv.ussh.edu.vn) hay không
      */
-    public function isAllowedDomain(string $email): bool
+    public function isStudentDomain(string $email): bool
     {
-        if (empty($this->allowedDomains)) {
-            return true;
+        if (empty($this->studentDomains)) {
+            return false;
         }
 
         $parts = explode('@', strtolower(trim($email)));
@@ -164,8 +168,43 @@ class GoogleAuthService
         }
 
         $domain = $parts[1];
-        $normalizedAllowed = array_map('strtolower', $this->allowedDomains);
+        $normalized = array_map('strtolower', $this->studentDomains);
 
-        return in_array($domain, $normalizedAllowed, true);
+        return in_array($domain, $normalized, true);
+    }
+
+    /**
+     * Kiểm tra email có nằm trong danh sách Quản trị viên (Admin) được cấu hình hay không
+     */
+    public function isAdminEmail(string $email): bool
+    {
+        $normalizedEmail = strtolower(trim($email));
+        return in_array($normalizedEmail, $this->adminEmails, true);
+    }
+
+    /**
+     * Kiểm tra tính hợp lệ của email (sinh viên hoặc quản trị viên)
+     */
+    public function isAllowed(string $email): bool
+    {
+        return $this->isAdminEmail($email) || $this->isStudentDomain($email);
+    }
+
+    /**
+     * Tương thích ngược: kiểm tra email được phép đăng nhập Google
+     */
+    public function isAllowedDomain(string $email): bool
+    {
+        return $this->isAllowed($email);
+    }
+
+    public function getStudentDomains(): array
+    {
+        return $this->studentDomains;
+    }
+
+    public function getAdminEmails(): array
+    {
+        return $this->adminEmails;
     }
 }
