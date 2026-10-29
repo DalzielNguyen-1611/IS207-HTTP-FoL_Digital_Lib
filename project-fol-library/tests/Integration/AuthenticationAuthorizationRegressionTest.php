@@ -331,18 +331,19 @@ class AuthenticationAuthorizationRegressionTest
         // AUTH-15: Truy cập tài nguyên người khác bằng cách sửa ID (IDOR/BOLA)
         // Kỳ vọng: Bị từ chối bởi Data-level Policy (BookingPolicy, LoanPolicy)
         // ---------------------------------------------------------------------
+        $currentStudentId = (int)(\App\Core\Database::getConnection()->query("SELECT id_tai_khoan FROM tai_khoan WHERE id_vai_tro = 3 LIMIT 1")->fetchColumn() ?: 2);
         $bookingOfStudentA = [
             'id_dat_cho' => 201,
-            'id_nguoi_dung' => 3, // Của sinh viên ID 3
+            'id_nguoi_dung' => $currentStudentId, // Của sinh viên chính chủ
             'trang_thai' => 'DaDat'
         ];
-        // Sinh viên B (ID 4) cố tình gửi ID 201 để sửa/hủy
-        $studentBCannotCancel = $this->bookingPolicy->canCancel(4, $bookingOfStudentA);
-        // Sinh viên A (chính chủ) hủy
-        $studentACanCancel = $this->bookingPolicy->canCancel(3, $bookingOfStudentA);
+        // Kẻ giả mạo (ID 9998) cố tình gửi ID 201 để sửa/hủy
+        $otherCannotCancel = $this->bookingPolicy->canCancel(9998, $bookingOfStudentA);
+        // Sinh viên chính chủ hủy
+        $studentACanCancel = $this->bookingPolicy->canCancel($currentStudentId, $bookingOfStudentA);
 
         $results['AUTH-15'] = $this->assert(
-            $studentBCannotCancel === false && $studentACanCancel === true,
+            $otherCannotCancel === false && $studentACanCancel === true,
             'Chống IDOR: Người dùng thay đổi ID tài nguyên sang bản ghi của người khác bị Policy từ chối tuyệt đối'
         );
 
