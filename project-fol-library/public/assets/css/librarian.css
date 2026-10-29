@@ -520,3 +520,132 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ===== Bộ lọc chuyên mục (Filter chips) ===== */
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 14px 0 18px;
+}
+
+.filter-chips-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid #d4e2ec;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.filter-chip:hover {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.filter-chip.active {
+  background: #24445c;
+  color: #ffffff;
+  border-color: #24445c;
+  font-weight: 600;
+}
+
+/* ===== Phân trang danh sách (Pagination) ===== */
+.staff-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e9dfbf;
+  font-size: 13px;
+  color: #475569;
+}
+
+.staff-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.staff-page-btn {
+  min-width: 34px;
+  height: 34px;
+  padding: 0 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d4e2ec;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 12px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.staff-page-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.staff-page-btn.active {
+  background: #24445c;
+  color: #ffffff;
+  border-color: #24445c;
+  font-weight: 600;
+}
+
+.staff-page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ===== Nút thao tác bổ sung ===== */
+.staff-action-button.danger {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.staff-action-button.danger:hover {
+  background: #fee2e2;
+}
+
+/* ===== Huy hiệu số lượng & trạng thái ===== */
+.badge-count {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge-available {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.badge-empty {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}

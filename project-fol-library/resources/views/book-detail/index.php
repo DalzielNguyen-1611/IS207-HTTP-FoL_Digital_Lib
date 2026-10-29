@@ -2,21 +2,44 @@
 
 declare(strict_types=1);
 
-//Đọc dữ liệu dùng chung
-$books = require dirname (__DIR__, 2) . '/mock/books.php';
+// Đọc dữ liệu sách từ cơ sở dữ liệu thật hoặc dữ liệu mẫu dự phòng
+$rawId = $_GET['id'] ?? 'KV-ANT-0001';
+$book = null;
 
-//Chỉ nhận mã sách là số nguyên dương; thiếu mã thì mở mẫu số 2
-$rawId = $_GET['id'] ?? '2';
+if (is_string($rawId) && trim($rawId) !== '') {
+    try {
+        $bookService = new \App\Services\BookService();
+        $found = $bookService->getBookDetail(trim($rawId));
+        if ($found) {
+            $book = [
+                'id' => $found->id,
+                'title' => $found->title,
+                'author' => $found->authorNames !== '' ? $found->authorNames : 'Chưa rõ tác giả',
+                'category' => 'Tài liệu Khoa Văn học',
+                'major' => 'Văn học',
+                'genre' => 'Giáo trình / Nghiên cứu',
+                'available' => $found->availableQuantity,
+                'total' => $found->totalQuantity,
+                'shelf' => 1,
+                'cell' => 1,
+                'location' => $found->location ?? 'Kho lưu trữ Thư viện FoL',
+                'description' => $found->description ?: 'Tài liệu lưu trữ và phục vụ bạn đọc tại Thư viện Khoa Văn học.',
+                'copies' => $found->copies,
+            ];
+        }
+    } catch (\Throwable $e) {
+        // Dự phòng bên dưới
+    }
+}
 
-$bookId = is_string($rawId)
-    ? filter_var(
-        $rawId,
-        FILTER_VALIDATE_INT,
-        ['option' => ['min_range' => 1]]
-    )
-    : false;
-
-$book = $bookId !== false ? ($books[$bookId] ?? null) : null;
+if ($book === null) {
+    $mockFile = dirname(__DIR__, 2) . '/resources/mock/books.php';
+    if (file_exists($mockFile)) {
+        $mockBooks = require $mockFile;
+        $mockId = is_numeric($rawId) ? (int)$rawId : 2;
+        $book = $mockBooks[$mockId] ?? reset($mockBooks) ?: null;
+    }
+}
 
 //Trạng thái không tìm thấy sách
 if ($book === null) {

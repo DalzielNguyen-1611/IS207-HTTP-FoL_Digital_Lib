@@ -128,6 +128,11 @@ $routeGuards = [
     // Trang nghiệp vụ Thủ thư
     '/librarian' => 'permission:loan.confirm',
     '/librarian/books' => 'permission:book.inventory',
+    '/librarian/books/detail' => 'permission:book.view',
+    '/librarian/books/next-id' => 'permission:book.view',
+    '/librarian/books/create' => 'permission:book.create',
+    '/librarian/books/update' => 'permission:book.update',
+    '/librarian/books/delete' => 'permission:book.delete',
     '/librarian/counter' => 'permission:loan.confirm',
     '/librarian/rooms' => 'permission:room.manage',
     '/librarian/reports' => 'permission:loan.confirm',
@@ -156,6 +161,42 @@ if (isset($routeGuards[$path])) {
 if ($path === '/librarian' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $librarianController = new \App\Controllers\LibrarianController();
     $librarianController->index();
+    exit;
+}
+
+if ($path === '/librarian/books' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->books();
+    exit;
+}
+
+if ($path === '/librarian/books/detail' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->getBookDetail();
+    exit;
+}
+
+if ($path === '/librarian/books/next-id' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->getNextBookId();
+    exit;
+}
+
+if ($path === '/librarian/books/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->createBook();
+    exit;
+}
+
+if ($path === '/librarian/books/update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->updateBook();
+    exit;
+}
+
+if ($path === '/librarian/books/delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->deleteBook();
     exit;
 }
 
