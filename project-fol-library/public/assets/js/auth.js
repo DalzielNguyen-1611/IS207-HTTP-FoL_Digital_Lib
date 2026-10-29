@@ -5,11 +5,11 @@ const passwordInput = document.querySelector('#login-password')
 const togglePassword = document.querySelector('#toggle-password')
 const loginFeedback = document.querySelector('#login-feedback')
 
-// Ánh xạ vai trò tới đường dẫn tương ứng
+// Ánh xạ vai trò tới đường dẫn tương ứng qua cổng kích hoạt phiên đăng nhập Backend
 const roleDestinations = {
-    student: '/profile',
-    librarian: '/librarian',
-    admin: '/admin/settings'
+    student: '/login?switch_role=student',
+    librarian: '/login?switch_role=librarian',
+    admin: '/login?switch_role=admin'
 }
 
 // Chuyển hướng tới giao diện theo vai trò

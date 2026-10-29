@@ -85,15 +85,15 @@ $roles = [
 
                 <!-- Phím tắt vào nhanh trực tiếp theo vai trò -->
                 <div class="auth-quick-actions" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; margin-bottom: 20px;">
-                    <a href="/profile" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef6fb; border: 1px solid #c2ddf0; border-radius: 10px; text-decoration: none; color: #005baa; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                    <a href="/login?switch_role=student" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef6fb; border: 1px solid #c2ddf0; border-radius: 10px; text-decoration: none; color: #005baa; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
                         <span style="font-size: 22px; margin-bottom: 4px;">🎓</span>
                         <span>Sinh viên</span>
                     </a>
-                    <a href="/librarian" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef9f2; border: 1px solid #bce6cc; border-radius: 10px; text-decoration: none; color: #1b8846; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                    <a href="/login?switch_role=librarian" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #eef9f2; border: 1px solid #bce6cc; border-radius: 10px; text-decoration: none; color: #1b8846; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
                         <span style="font-size: 22px; margin-bottom: 4px;">📚</span>
                         <span>Cán bộ</span>
                     </a>
-                    <a href="/admin/settings" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #fff8e6; border: 1px solid #f6dd9e; border-radius: 10px; text-decoration: none; color: #b78103; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
+                    <a href="/login?switch_role=admin" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 6px; background: #fff8e6; border: 1px solid #f6dd9e; border-radius: 10px; text-decoration: none; color: #b78103; font-size: 13px; font-weight: 500; text-align: center; transition: all 0.2s;">
                         <span style="font-size: 22px; margin-bottom: 4px;">⚙️</span>
                         <span>Quản trị viên</span>
                     </a>
