@@ -28,50 +28,113 @@ $periods = [
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Báo cáo thống kê · Thư viện Khoa Văn học</title>
 
+    <!-- Favicon biểu trưng Khoa Văn học -->
+    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+
     <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/reports.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
 </head>
 <body>
-    <!-- Header khu vực cán bộ -->
-    <header class="staff-header">
-        <a class="staff-brand" href="/" title="Về trang chủ Thư viện">
-            <img src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+    <!-- Header: Nhận diện thư viện & điều hướng -->
+    <header class="header">
+        <a class="brand" href="/" title="Về trang chủ Thư viện">
+            <img
+                class="brand-logo"
+                src="/assets/images/logo.jpg"
+                alt="Logo Khoa Văn học"
+            >
+
             <span>
+                <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
-                <small>Cán bộ</small>
             </span>
         </a>
 
-        <div class="staff-header-actions">
-            <nav class="staff-nav" aria-label="Điều hướng">
-                <a href="/">Trang chủ</a>
-                <?php $currentRole = \App\Core\Session::getRoleCode(); ?>
-                <?php if ($currentRole === 'ADMIN'): ?>
-                    <a href="/profile">Cá nhân</a>
-                    <a href="/librarian" class="active">Cán bộ</a>
-                    <a href="/admin/settings">Quản trị</a>
-                <?php elseif ($currentRole === 'LIBRARIAN'): ?>
-                    <a href="/librarian" class="active">Cán bộ</a>
-                <?php endif; ?>
-            </nav>
+        <nav class="navigation" aria-label="Điều hướng chính">
+            <a href="/">Trang chủ</a>
 
+            <!-- Menu thả xuống: Dịch vụ thư viện -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+                    <span>Dịch vụ</span>
+                    <svg class="nav-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu" role="menu">
+                    <a href="/books" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">📚</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Tra cứu sách</span>
+                            <span class="nav-dropdown-desc">Kho 1.200+ giáo trình, chuyên khảo & luận văn</span>
+                        </div>
+                    </a>
+                    <a href="/reading-room" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">🪑</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Phòng đọc & Chỗ ngồi</span>
+                            <span class="nav-dropdown-desc">Đặt chỗ tự học theo ca, xem sơ đồ chỗ trống</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <?php 
+                $isAuthenticated = \App\Core\Session::isAuthenticated();
+                $navRole = $isAuthenticated ? \App\Core\Session::getRoleCode() : null;
+            ?>
+
+            <?php if ($navRole !== 'ADMIN' && $navRole !== 'LIBRARIAN'): ?>
+                <a href="/about">Giới thiệu</a>
+                <a href="/rules">Nội quy</a>
+                <a href="/feedback">Góp ý</a>
+                <a href="/contact">Liên hệ</a>
+            <?php endif; ?>
+
+            <?php if ($isAuthenticated): ?>
+                <?php if ($navRole === 'ADMIN'): ?>
+                    <a href="/librarian" class="active" aria-current="page">Cán bộ</a>
+                    <a href="/admin/settings">Quản trị</a>
+                <?php elseif ($navRole === 'LIBRARIAN'): ?>
+                    <a href="/librarian" class="active" aria-current="page">Cán bộ</a>
+                <?php else: ?>
+                    <a href="/profile">Cá nhân</a>
+                <?php endif; ?>
+            <?php endif; ?>
+        </nav>
+
+        <!-- Trạng thái xác thực người dùng / Đăng xuất -->
+        <?php if ($isAuthenticated): ?>
+            <?php
+                $currentUser = \App\Core\Session::getAuthUser();
+                $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Người dùng', ENT_QUOTES, 'UTF-8');
+                $dashboardUrl = match ($navRole) {
+                    'ADMIN' => '/admin/settings',
+                    'LIBRARIAN' => '/librarian',
+                    default => '/profile',
+                };
+            ?>
             <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
-                <?php
-                    $currentUser = \App\Core\Session::getAuthUser();
-                    $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Tài khoản', ENT_QUOTES, 'UTF-8');
-                    $dashUrl = ($currentRole === 'ADMIN') ? '/admin/settings' : '/librarian';
-                ?>
-                <a href="<?= $dashUrl ?>" class="staff-btn staff-btn-user" title="Tài khoản của bạn">
-                    <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
-                    <span><?= $userName ?></span>
-                </a>
-                <a href="/logout" class="staff-btn staff-btn-logout" title="Đăng xuất khỏi hệ thống">
+                <?php if ($navRole !== 'ADMIN'): ?>
+                    <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
+                        <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
+                        <span><?= $userName ?></span>
+                    </a>
+                <?php endif; ?>
+                <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
                     Đăng xuất
                 </a>
             </div>
-        </div>
+        <?php else: ?>
+            <a class="login-button" href="/login">
+                Đăng nhập
+            </a>
+        <?php endif; ?>
     </header>
 
     <main class="staff-layout">
