@@ -81,15 +81,20 @@ $contactCards = [
                 </div>
             </div>
 
-            <a href="/about">Giới thiệu</a>
-            <a href="/rules">Nội quy</a>
-            <a href="/feedback">Góp ý</a>
-            <a href="/contact" class="active" aria-current="page">Liên hệ</a>
+            <?php 
+                $isAuthenticated = \App\Core\Session::isAuthenticated();
+                $navRole = $isAuthenticated ? \App\Core\Session::getRoleCode() : null;
+            ?>
 
-            <?php if (\App\Core\Session::isAuthenticated()): ?>
-                <?php $navRole = \App\Core\Session::getRoleCode(); ?>
+            <?php if ($navRole !== 'ADMIN' && $navRole !== 'LIBRARIAN'): ?>
+                <a href="/about">Giới thiệu</a>
+                <a href="/rules">Nội quy</a>
+                <a href="/feedback">Góp ý</a>
+                <a href="/contact" class="active" aria-current="page">Liên hệ</a>
+            <?php endif; ?>
+
+            <?php if ($isAuthenticated): ?>
                 <?php if ($navRole === 'ADMIN'): ?>
-                    <a href="/profile">Cá nhân</a>
                     <a href="/librarian">Cán bộ</a>
                     <a href="/admin/settings">Quản trị</a>
                 <?php elseif ($navRole === 'LIBRARIAN'): ?>
@@ -101,22 +106,23 @@ $contactCards = [
         </nav>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
-        <?php if (\App\Core\Session::isAuthenticated()): ?>
+        <?php if ($isAuthenticated): ?>
             <?php
                 $currentUser = \App\Core\Session::getAuthUser();
-                $currentRole = \App\Core\Session::getRoleCode();
                 $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Người dùng', ENT_QUOTES, 'UTF-8');
-                $dashboardUrl = match ($currentRole) {
+                $dashboardUrl = match ($navRole) {
                     'ADMIN' => '/admin/settings',
                     'LIBRARIAN' => '/librarian',
                     default => '/profile',
                 };
             ?>
             <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;margin-left:auto;">
-                <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
-                    <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
-                    <span><?= $userName ?></span>
-                </a>
+                <?php if ($navRole !== 'ADMIN'): ?>
+                    <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
+                        <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
+                        <span><?= $userName ?></span>
+                    </a>
+                <?php endif; ?>
                 <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
                     Đăng xuất
                 </a>
