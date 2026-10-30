@@ -154,7 +154,7 @@ $cells = range(1, 4);
                     default => '/profile',
                 };
             ?>
-            <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;margin-left:auto;">
+            <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
                 <?php if ($navRole !== 'ADMIN'): ?>
                     <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
                         <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
