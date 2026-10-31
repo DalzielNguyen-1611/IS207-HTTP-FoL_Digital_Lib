@@ -25,7 +25,8 @@
     },
     "scripts": {
         "serve": "php -S localhost:8000 -t public",
-        "test": "phpunit"
+        "test": "php tests/run_all_tests.php",
+        "test:all": "php tests/run_all_tests.php"
     },
     "config": {
         "optimize-autoloader": true,
