@@ -79,6 +79,14 @@ class ViewsDbIntegrationTest
                 'file' => 'resources/views/contact/index.php',
                 'mustContain' => ['Liên hệ', 'Thư viện Khoa Văn học', 'Địa chỉ'],
             ],
+            'view_onboarding_renders_successfully' => [
+                'file' => 'resources/views/onboarding/index.php',
+                'mustContain' => ['Kích hoạt Thẻ Thư viện', 'HỒ SƠ BẠN ĐỌC SINH VIÊN', 'Mã số sinh viên'],
+            ],
+            'view_librarian_students_renders_successfully' => [
+                'file' => 'resources/views/librarian-students/index.php',
+                'mustContain' => ['Duyệt thẻ sinh viên', 'XÉT DUYỆT BẠN ĐỌC'],
+            ],
         ];
 
         foreach ($views as $testName => $meta) {

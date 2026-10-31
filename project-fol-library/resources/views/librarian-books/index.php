@@ -160,6 +160,7 @@ $endItem = min($totalBooks, $currentPage * $perPage);
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
 
             <a href="/librarian">Tổng quan</a>
+            <a href="/librarian/students">Duyệt thẻ sinh viên</a>
             <a href="/librarian/books" aria-current="page">Quản lý sách</a>
             <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms">Phòng đọc</a>

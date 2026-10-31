@@ -13,9 +13,11 @@ $testSuites = [
         'tests/Unit/AuthorizationServiceTest.php' => 'Phân quyền RBAC & Quyền truy cập',
         'tests/Unit/BookServiceTest.php' => 'Xử lý logic Nghiệp vụ & Dữ liệu Đầu sách',
         'tests/Unit/GoogleAuthServiceTest.php' => 'Xác thực Google OAuth 2.0 & Giới hạn Domain trường',
+        'tests/Unit/ImageOptimizerServiceTest.php' => 'Tự động Thu nhỏ & Nén ảnh WebP (GD Library)',
+        'tests/Unit/StudentCardApprovalTest.php' => 'Quy trình Xét duyệt Thẻ Sinh viên & Luồng Chờ duyệt',
     ],
     'Integration Tests' => [
-        'tests/Integration/ViewsDbIntegrationTest.php' => 'Tích hợp 13 Giao diện Views kết nối CSDL thực',
+        'tests/Integration/ViewsDbIntegrationTest.php' => 'Tích hợp 15 Giao diện Views kết nối CSDL thực',
         'tests/Integration/BookManagementRegressionTest.php' => 'Hồi quy Quản lý sách & Phân trang thủ thư',
         'tests/Integration/AuthenticationAuthorizationRegressionTest.php' => 'Hồi quy Toàn diện Phiên đăng nhập & Bảo mật RBAC (16 Kịch bản)',
         'tests/Integration/HttpEndToEndTest.php' => 'Kiểm thử Live HTTP End-to-End trên Server (17 Kịch bản)',

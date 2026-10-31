@@ -222,6 +222,45 @@ $results['E2E-17: Trang chủ render đầy đủ Menu mới (Dịch vụ dropdo
     'detail' => "HTTP {$res['code']}, Cấu trúc Navigation chuẩn xác"
 ];
 
+// 18. Đăng nhập lại Admin để kiểm thử các route nghiệp vụ mới
+$loginData = [
+    'email' => 'nguyendoanduchieu16112006@gmail.com',
+    'password' => 'Password@123'
+];
+httpRequest('POST', "{$baseUrl}/login", $loginData, $cookieFile);
+
+// 18.1. Admin truy cập danh sách duyệt thẻ sinh viên /librarian/students (HTTP 200)
+$res = httpRequest('GET', "{$baseUrl}/librarian/students", [], $cookieFile);
+$results['E2E-18: Admin/Cán bộ truy cập /librarian/students duyệt thẻ thành công (HTTP 200)'] = [
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Duyệt thẻ sinh viên') && str_contains($res['body'], 'XÉT DUYỆT BẠN ĐỌC')),
+    'detail' => "HTTP {$res['code']}, Đã hiển thị giao diện duyệt thẻ"
+];
+
+// 19. Khách chưa đăng nhập truy cập /onboarding bị redirect sang /login
+$guestCookieFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'guest_empty_cookies.txt';
+$guestRes = httpRequest('GET', "{$baseUrl}/onboarding", [], $guestCookieFile);
+$results['E2E-19: Khách chưa đăng nhập truy cập /onboarding bị chuyển hướng sang /login (HTTP 302)'] = [
+    'pass' => ($guestRes['code'] === 302 && str_contains($guestRes['headers'], 'Location: /login')),
+    'detail' => "HTTP {$guestRes['code']}, Location: /login"
+];
+if (file_exists($guestCookieFile)) {
+    unlink($guestCookieFile);
+}
+
+// 20. Người dùng đăng nhập truy cập /onboarding thành công (HTTP 200)
+$userOnboardingRes = httpRequest('GET', "{$baseUrl}/onboarding", [], $cookieFile);
+$results['E2E-20: Người dùng truy cập trang hoàn thiện hồ sơ /onboarding thành công (HTTP 200)'] = [
+    'pass' => ($userOnboardingRes['code'] === 200 && str_contains($userOnboardingRes['body'], 'Kích hoạt Thẻ Thư viện') && str_contains($userOnboardingRes['body'], 'dropzone')),
+    'detail' => "HTTP {$userOnboardingRes['code']}, Giao diện Onboarding chuẩn xác"
+];
+
+// 21. Phục vụ tài nguyên ảnh tĩnh WebP nén từ /uploads/student_cards/... an toàn
+$imageRes = httpRequest('GET', "{$baseUrl}/uploads/student_cards/card_sample_sv22010899.webp");
+$results['E2E-21: Máy chủ phục vụ tệp ảnh thẻ WebP an toàn với MIME image/webp (HTTP 200)'] = [
+    'pass' => ($imageRes['code'] === 200 && str_contains($imageRes['headers'], 'image/webp')),
+    'detail' => "HTTP {$imageRes['code']}, Content-Type: image/webp"
+];
+
 // Dọn dẹp tệp cookie tạm
 if (file_exists($cookieFile)) {
     unlink($cookieFile);

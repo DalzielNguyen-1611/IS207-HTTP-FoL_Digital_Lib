@@ -134,6 +134,7 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian" aria-current="page">Tổng quan</a>
+            <a href="/librarian/students">Duyệt thẻ sinh viên</a>
             <a href="/librarian/books">Quản lý sách</a>
             <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms">Phòng đọc</a>
