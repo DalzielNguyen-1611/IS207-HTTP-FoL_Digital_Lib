@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Core\Session;
+use App\Repositories\UserRepository;
+use App\Services\AuditService;
 use App\Services\BookService;
 use App\Services\LibrarianDashboardService;
 
@@ -16,13 +18,19 @@ class LibrarianController
 {
     private LibrarianDashboardService $dashboardService;
     private BookService $bookService;
+    private UserRepository $userRepo;
+    private AuditService $auditService;
 
     public function __construct(
         ?LibrarianDashboardService $dashboardService = null,
-        ?BookService $bookService = null
+        ?BookService $bookService = null,
+        ?UserRepository $userRepo = null,
+        ?AuditService $auditService = null
     ) {
         $this->dashboardService = $dashboardService ?? new LibrarianDashboardService();
         $this->bookService = $bookService ?? new BookService();
+        $this->userRepo = $userRepo ?? new UserRepository();
+        $this->auditService = $auditService ?? new AuditService();
     }
 
     /**
@@ -216,6 +224,140 @@ class LibrarianController
     }
 
     /**
+     * Màn hình Duyệt thẻ Sinh viên (/librarian/students)
+     */
+    public function students(): void
+    {
+        $pendingStudents = $this->userRepo->getPendingStudents();
+        $message = isset($_GET['msg']) ? trim((string)$_GET['msg']) : null;
+        $error = isset($_GET['error']) ? trim((string)$_GET['error']) : null;
+
+        $viewPath = dirname(__DIR__, 2) . '/resources/views/librarian-students/index.php';
+        require $viewPath;
+    }
+
+    /**
+     * Phê duyệt kích hoạt thẻ sinh viên (POST /librarian/students/approve)
+     */
+    public function approveStudent(): void
+    {
+        $payload = $this->getRequestPayload();
+        $targetUserId = (int)($payload['user_id'] ?? 0);
+        $currentUserId = Session::getUserId();
+
+        $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
+            || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+        if ($targetUserId <= 0) {
+            $msg = 'Mã tài khoản sinh viên không hợp lệ.';
+            if ($isJson) {
+                http_response_code(422);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
+
+        $targetStudent = $this->userRepo->findById($targetUserId);
+        if ($targetStudent === null) {
+            $msg = 'Không tìm thấy hồ sơ sinh viên.';
+            if ($isJson) {
+                http_response_code(404);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
+
+        // Kích hoạt tài khoản
+        $this->userRepo->approveStudent($targetUserId);
+
+        // Ghi nhật ký kiểm toán
+        $this->auditService->log(
+            userId: $currentUserId ?? $targetUserId,
+            action: 'DuyetTheSinhVien',
+            targetTable: 'tai_khoan',
+            targetId: (string)$targetUserId,
+            description: "Cán bộ thư viện đã phê duyệt thẻ sinh viên cho {$targetStudent['mssv']} - {$targetStudent['ho_ten']}"
+        );
+
+        $successMsg = "Đã phê duyệt thành công thẻ sinh viên {$targetStudent['mssv']} ({$targetStudent['ho_ten']}).";
+        if ($isJson) {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['success' => true, 'message' => $successMsg], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        header('Location: /librarian/students?msg=' . urlencode($successMsg));
+        exit;
+    }
+
+    /**
+     * Yêu cầu chụp lại thẻ sinh viên (POST /librarian/students/reject)
+     */
+    public function rejectStudent(): void
+    {
+        $payload = $this->getRequestPayload();
+        $targetUserId = (int)($payload['user_id'] ?? 0);
+        $reason = trim((string)($payload['reason'] ?? 'Ảnh mờ hoặc không rõ nét, vui lòng chụp lại rõ thông tin thẻ.'));
+        $currentUserId = Session::getUserId();
+
+        $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
+            || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+        if ($targetUserId <= 0) {
+            $msg = 'Mã tài khoản sinh viên không hợp lệ.';
+            if ($isJson) {
+                http_response_code(422);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
+
+        $targetStudent = $this->userRepo->findById($targetUserId);
+        if ($targetStudent === null) {
+            $msg = 'Không tìm thấy hồ sơ sinh viên.';
+            if ($isJson) {
+                http_response_code(404);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
+
+        // Lưu lý do yêu cầu chụp lại
+        $this->userRepo->rejectStudent($targetUserId, $reason);
+
+        // Ghi nhật ký kiểm toán
+        $this->auditService->log(
+            userId: $currentUserId ?? $targetUserId,
+            action: 'TuChoiTheSinhVien',
+            targetTable: 'ho_so_nguoi_dung',
+            targetId: (string)$targetUserId,
+            description: "Cán bộ thư viện yêu cầu chụp lại thẻ cho sinh viên {$targetStudent['mssv']}. Lý do: {$reason}"
+        );
+
+        $infoMsg = "Đã gửi yêu cầu chụp lại thẻ cho sinh viên {$targetStudent['mssv']}.";
+        if ($isJson) {
+            header('Content-Type: application/json; charset=UTF-8');
+            echo json_encode(['success' => true, 'message' => $infoMsg], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
+        header('Location: /librarian/students?msg=' . urlencode($infoMsg));
+        exit;
+    }
+
+    /**
      * Trích xuất dữ liệu yêu cầu từ $_POST hoặc php://input (JSON)
      */
     private function getRequestPayload(): array
@@ -235,3 +377,4 @@ class LibrarianController
         return [];
     }
 }
+

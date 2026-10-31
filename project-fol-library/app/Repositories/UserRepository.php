@@ -27,10 +27,15 @@ class UserRepository
                 tk.`id_tai_khoan`, tk.`id_vai_tro`, tk.`email`, tk.`google_sub`,
                 tk.`trang_thai`, tk.`created_at`, tk.`updated_at`,
                 vt.`ma_vai_tro`, vt.`ten_vai_tro`,
-                hs.`ho_ten`, hs.`mssv`, hs.`so_dien_thoai`, hs.`anh_dai_dien`
+                hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
+                hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
+                hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
+                l.`ten_lop`, ng.`ten_nganh`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+             LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
+             LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
              WHERE tk.`id_tai_khoan` = :id
              LIMIT 1'
         );
@@ -47,10 +52,15 @@ class UserRepository
                 tk.`id_tai_khoan`, tk.`id_vai_tro`, tk.`email`, tk.`mat_khau`,
                 tk.`google_sub`, tk.`trang_thai`, tk.`created_at`, tk.`updated_at`,
                 vt.`ma_vai_tro`, vt.`ten_vai_tro`,
-                hs.`ho_ten`, hs.`mssv`, hs.`so_dien_thoai`, hs.`anh_dai_dien`
+                hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
+                hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
+                hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
+                l.`ten_lop`, ng.`ten_nganh`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+             LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
+             LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
              WHERE tk.`email` = :email
              LIMIT 1'
         );
@@ -95,10 +105,15 @@ class UserRepository
                 tk.`id_tai_khoan`, tk.`id_vai_tro`, tk.`email`, tk.`mat_khau`,
                 tk.`google_sub`, tk.`trang_thai`, tk.`created_at`, tk.`updated_at`,
                 vt.`ma_vai_tro`, vt.`ten_vai_tro`,
-                hs.`ho_ten`, hs.`mssv`, hs.`so_dien_thoai`, hs.`anh_dai_dien`
+                hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
+                hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
+                hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
+                l.`ten_lop`, ng.`ten_nganh`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+             LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
+             LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
              WHERE tk.`google_sub` = :sub
              LIMIT 1'
         );
@@ -124,14 +139,17 @@ class UserRepository
 
     public function createFromGoogle(array $profile, int $roleId = 3): int
     {
+        $status = ($roleId === 3) ? 'ChoDuyet' : 'HoatDong';
+
         $stmt = $this->db->prepare(
             'INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `google_sub`, `trang_thai`, `created_at`, `updated_at`)
-             VALUES (:role_id, :email, NULL, :sub, "HoatDong", NOW(), NOW())'
+             VALUES (:role_id, :email, NULL, :sub, :status, NOW(), NOW())'
         );
         $stmt->execute([
             ':role_id' => $roleId,
             ':email' => $profile['email'],
-            ':sub' => $profile['sub']
+            ':sub' => $profile['sub'],
+            ':status' => $status
         ]);
         $userId = (int)$this->db->lastInsertId();
 
@@ -212,5 +230,149 @@ class UserRepository
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
+
+    /**
+     * Sinh viên nộp thông tin hồ sơ và ảnh thẻ sinh viên chờ duyệt
+     */
+    public function submitStudentCardProfile(
+        int $userId,
+        string $mssv,
+        string $hoTen,
+        int $idLop,
+        string $gioiTinh,
+        string $ngaySinh,
+        string $soDienThoai,
+        ?string $anhTheSvUrl = null
+    ): bool {
+        $sql = 'UPDATE `ho_so_nguoi_dung`
+                SET `mssv` = :mssv,
+                    `ho_ten` = :ho_ten,
+                    `id_lop` = :id_lop,
+                    `gioi_tinh` = :gioi_tinh,
+                    `ngay_sinh` = :ngay_sinh,
+                    `so_dien_thoai` = :so_dien_thoai,
+                    `ngay_gui_duyet` = NOW(),
+                    `ghi_chu_duyet` = NULL';
+        $params = [
+            ':id' => $userId,
+            ':mssv' => $mssv,
+            ':ho_ten' => $hoTen,
+            ':id_lop' => $idLop,
+            ':gioi_tinh' => $gioiTinh,
+            ':ngay_sinh' => $ngaySinh,
+            ':so_dien_thoai' => $soDienThoai,
+        ];
+
+        if ($anhTheSvUrl !== null) {
+            $sql .= ', `anh_the_sv` = :anh_the_sv';
+            $params[':anh_the_sv'] = $anhTheSvUrl;
+        }
+
+        $sql .= ' WHERE `id_tai_khoan` = :id';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        $stmtAccount = $this->db->prepare(
+            'UPDATE `tai_khoan`
+             SET `trang_thai` = "ChoDuyet", `updated_at` = NOW()
+             WHERE `id_tai_khoan` = :id'
+        );
+        $stmtAccount->execute([':id' => $userId]);
+
+        return true;
+    }
+
+    /**
+     * Lấy danh sách sinh viên đang chờ duyệt thẻ
+     */
+    public function getPendingStudents(): array
+    {
+        $sql = 'SELECT 
+                    tk.`id_tai_khoan`, tk.`email`, tk.`trang_thai`, tk.`created_at`,
+                    hs.`mssv`, hs.`ho_ten`, hs.`gioi_tinh`, hs.`ngay_sinh`,
+                    hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
+                    hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
+                    l.`ten_lop`, ng.`ten_nganh`
+                FROM `tai_khoan` tk
+                INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
+                INNER JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+                LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
+                LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+                WHERE vt.`ma_vai_tro` = "STUDENT"
+                  AND tk.`trang_thai` = "ChoDuyet"
+                  AND hs.`anh_the_sv` IS NOT NULL
+                ORDER BY hs.`ngay_gui_duyet` ASC, tk.`id_tai_khoan` ASC';
+
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Đếm số lượng thẻ sinh viên đang chờ duyệt
+     */
+    public function countPendingStudents(): int
+    {
+        $sql = 'SELECT COUNT(*) 
+                FROM `tai_khoan` tk
+                INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
+                INNER JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
+                WHERE vt.`ma_vai_tro` = "STUDENT"
+                  AND tk.`trang_thai` = "ChoDuyet"
+                  AND hs.`anh_the_sv` IS NOT NULL';
+        $res = $this->db->query($sql);
+        return (int)($res ? $res->fetchColumn() : 0);
+    }
+
+    /**
+     * Cán bộ duyệt thẻ sinh viên -> Chuyển trạng thái sang HoatDong
+     */
+    public function approveStudent(int $userId): bool
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE `tai_khoan`
+             SET `trang_thai` = "HoatDong", `updated_at` = NOW()
+             WHERE `id_tai_khoan` = :id'
+        );
+        $ok = $stmt->execute([':id' => $userId]);
+
+        $stmtHs = $this->db->prepare(
+            'UPDATE `ho_so_nguoi_dung`
+             SET `ghi_chu_duyet` = NULL
+             WHERE `id_tai_khoan` = :id'
+        );
+        $stmtHs->execute([':id' => $userId]);
+
+        return $ok;
+    }
+
+    /**
+     * Cán bộ yêu cầu chụp lại thẻ sinh viên kèm lý do phản hồi
+     */
+    public function rejectStudent(int $userId, string $reason): bool
+    {
+        $stmt = $this->db->prepare(
+            'UPDATE `ho_so_nguoi_dung`
+             SET `ghi_chu_duyet` = :reason
+             WHERE `id_tai_khoan` = :id'
+        );
+        return $stmt->execute([
+            ':id' => $userId,
+            ':reason' => $reason
+        ]);
+    }
+
+    /**
+     * Lấy danh sách lớp và ngành để hiển thị select box
+     */
+    public function getClassesList(): array
+    {
+        $sql = 'SELECT l.`id_lop`, l.`ten_lop`, ng.`ten_nganh`
+                FROM `id_lop` l
+                INNER JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+                ORDER BY ng.`ten_nganh` ASC, l.`ten_lop` ASC';
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
 }
+
 

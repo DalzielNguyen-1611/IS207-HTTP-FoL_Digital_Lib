@@ -50,7 +50,7 @@ class AuthController
         }
 
         // Kiểm tra trạng thái tài khoản
-        if (($user['trang_thai'] ?? '') !== 'HoatDong') {
+        if (($user['trang_thai'] ?? '') === 'Khoa') {
             return ['success' => false, 'message' => 'Tài khoản của bạn đang bị khóa hoặc đình chỉ.'];
         }
 
@@ -82,7 +82,7 @@ class AuthController
         $redirectUrl = match ($user['ma_vai_tro'] ?? '') {
             'ADMIN' => '/admin/settings',
             'LIBRARIAN' => '/librarian',
-            default => '/profile',
+            default => (($user['trang_thai'] ?? '') === 'ChoDuyet') ? '/onboarding' : '/profile',
         };
 
         return [
@@ -190,7 +190,7 @@ class AuthController
             }
 
             // 6. Kiểm tra trạng thái hoạt động của tài khoản
-            if (($user['trang_thai'] ?? '') !== 'HoatDong') {
+            if (($user['trang_thai'] ?? '') === 'Khoa') {
                 header('Location: /login?error=' . urlencode('Tài khoản của bạn đang bị khóa hoặc đình chỉ.'));
                 exit;
             }
@@ -209,11 +209,11 @@ class AuthController
                 description: "Đăng nhập thành công qua Google OAuth với vai trò {$roleCode} ({$email})"
             );
 
-            // 9. Điều hướng theo vai trò (ADMIN -> /admin/settings, LIBRARIAN -> /librarian, STUDENT -> /profile)
+            // 9. Điều hướng theo vai trò (ADMIN -> /admin/settings, LIBRARIAN -> /librarian, STUDENT -> /profile hoặc /onboarding)
             $redirectUrl = match ($roleCode) {
                 'ADMIN' => '/admin/settings',
                 'LIBRARIAN' => '/librarian',
-                default => '/profile',
+                default => (($user['trang_thai'] ?? '') === 'ChoDuyet') ? '/onboarding' : '/profile',
             };
 
             Session::writeClose();

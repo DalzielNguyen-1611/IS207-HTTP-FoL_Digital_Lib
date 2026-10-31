@@ -57,6 +57,26 @@ if (PHP_SAPI === 'cli-server') {
     }
 }
 
+// Phục vụ tài nguyên tải lên (ảnh thẻ sinh viên, ảnh bìa) từ storage/uploads/ an toàn
+if (str_starts_with($path, '/uploads/')) {
+    $uploadRoot = realpath(dirname(__DIR__) . '/storage/uploads');
+    $subPath = substr($path, strlen('/uploads/'));
+    $targetFile = realpath(dirname(__DIR__) . '/storage/uploads/' . rawurldecode($subPath));
+
+    if (
+        $uploadRoot !== false
+        && $targetFile !== false
+        && str_starts_with($targetFile, $uploadRoot . DIRECTORY_SEPARATOR)
+        && is_file($targetFile)
+    ) {
+        $mime = mime_content_type($targetFile) ?: 'application/octet-stream';
+        header("Content-Type: {$mime}");
+        header('Cache-Control: public, max-age=86400');
+        readfile($targetFile);
+        exit;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // XỬ LÝ XÁC THỰC VÀ PHÂN QUYỀN RBAC TẠI BACKEND
 // -----------------------------------------------------------------------------
@@ -124,9 +144,14 @@ if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 $routeGuards = [
     // Trang dành riêng cho Sinh viên
     '/profile' => 'role:STUDENT',
+    '/onboarding' => 'role:STUDENT',
+    '/onboarding/submit' => 'role:STUDENT',
 
     // Trang nghiệp vụ Thủ thư
     '/librarian' => 'permission:loan.confirm',
+    '/librarian/students' => 'permission:loan.confirm',
+    '/librarian/students/approve' => 'permission:loan.confirm',
+    '/librarian/students/reject' => 'permission:loan.confirm',
     '/librarian/books' => 'permission:book.inventory',
     '/librarian/books/detail' => 'permission:book.view',
     '/librarian/books/next-id' => 'permission:book.view',
@@ -200,6 +225,39 @@ if ($path === '/librarian/books/delete' && $_SERVER['REQUEST_METHOD'] === 'POST'
     exit;
 }
 
+if ($path === '/librarian/students' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->students();
+    exit;
+}
+
+if ($path === '/librarian/students/approve' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->approveStudent();
+    exit;
+}
+
+if ($path === '/librarian/students/reject' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $librarianController = new \App\Controllers\LibrarianController();
+    $librarianController->rejectStudent();
+    exit;
+}
+
+// -----------------------------------------------------------------------------
+// ĐIỀU PHỐI ONBOARDING SINH VIÊN (ONBOARDING CONTROLLER)
+// -----------------------------------------------------------------------------
+if ($path === '/onboarding' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $onboardingController = new \App\Controllers\OnboardingController();
+    $onboardingController->index();
+    exit;
+}
+
+if ($path === '/onboarding/submit' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $onboardingController = new \App\Controllers\OnboardingController();
+    $onboardingController->submit();
+    exit;
+}
+
 // -----------------------------------------------------------------------------
 // ĐIỀU PHỐI CONTROLLER TRA CỨU SÁCH (BOOK CONTROLLER)
 // -----------------------------------------------------------------------------
@@ -225,7 +283,9 @@ $routes = [
     '/register' => dirname(__DIR__) . '/resources/views/register/index.php',
     '/reading-room' => dirname(__DIR__) . '/resources/views/reading-room/index.php',
     '/profile' => dirname(__DIR__) . '/resources/views/profile/index.php',
+    '/onboarding' => dirname(__DIR__) . '/resources/views/onboarding/index.php',
     '/librarian' => dirname(__DIR__) . '/resources/views/librarian/index.php',
+    '/librarian/students' => dirname(__DIR__) . '/resources/views/librarian-students/index.php',
     '/librarian/books' => dirname(__DIR__) . '/resources/views/librarian-books/index.php',
     '/librarian/counter' => dirname(__DIR__) . '/resources/views/librarian-counter/index.php',
     '/librarian/rooms' => dirname(__DIR__) . '/resources/views/librarian-rooms/index.php',

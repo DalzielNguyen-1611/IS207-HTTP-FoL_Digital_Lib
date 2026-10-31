@@ -41,9 +41,38 @@ class AuthenticationMiddleware
 
         // Kiểm tra trạng thái tài khoản thời gian thực trong CSDL
         $user = $this->userRepo->findById($userId);
-        if ($user === null || ($user['trang_thai'] ?? '') !== 'HoatDong') {
+        $status = $user['trang_thai'] ?? '';
+        if ($user === null || $status === 'Khoa') {
             Session::destroy();
             $this->unauthorized('Tài khoản của bạn đã bị khóa hoặc không tồn tại.');
+            return false;
+        }
+
+        // Nếu tài khoản sinh viên đang ở trạng thái chờ duyệt thẻ
+        if ($status === 'ChoDuyet' && ($user['ma_vai_tro'] ?? '') === 'STUDENT') {
+            $uri = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '';
+            $allowedPendingUris = ['/onboarding', '/onboarding/submit', '/logout'];
+            if (!in_array($uri, $allowedPendingUris, true)) {
+                $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
+                    || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+                if ($isJson) {
+                    http_response_code(403);
+                    header('Content-Type: application/json; charset=UTF-8');
+                    echo json_encode([
+                        'success' => false,
+                        'error' => 'Tài khoản của bạn đang trong trạng thái chờ xét duyệt thẻ sinh viên. Vui lòng hoàn tất hồ sơ tại trang Onboarding.',
+                        'redirect' => '/onboarding'
+                    ], JSON_UNESCAPED_UNICODE);
+                    exit;
+                }
+
+                header('Location: /onboarding');
+                exit;
+            }
+        } elseif ($status !== 'HoatDong') {
+            Session::destroy();
+            $this->unauthorized('Tài khoản không hợp lệ.');
             return false;
         }
 
