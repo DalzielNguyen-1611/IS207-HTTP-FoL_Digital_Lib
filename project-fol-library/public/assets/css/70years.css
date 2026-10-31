@@ -44,10 +44,8 @@ body::before {
 
 /* Thẻ sách, biểu mẫu và bảng lịch */
 .book-card,
-.catalog-item,
 .auth-card,
-.room-table-wrap,
-.detail-location {
+.room-table-wrap {
     background: rgba(255, 254, 250, 0.96);
     border-color: #e9dfbf;
 }

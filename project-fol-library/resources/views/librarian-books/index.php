@@ -275,7 +275,7 @@ $endItem = min($totalBooks, $currentPage * $perPage);
                                     $publishYear = $book['publishYear'] ?? $book['nam_xuat_ban'] ?? '—';
                                     $totalQty = (int)($book['totalQuantity'] ?? $book['tong_cuon'] ?? $book['so_luong'] ?? 0);
                                     $availQty = (int)($book['availableQuantity'] ?? $book['co_the_muon'] ?? $totalQty);
-                                    $location = (string)($book['location'] ?? $book['vi_tri'] ?? 'Kho lưu trữ');
+                                    $location = !empty($book['location']) ? (string)$book['location'] : (!empty($book['vi_tri']) ? (string)$book['vi_tri'] : '—');
                                 ?>
                                 <tr
                                     data-book-row
