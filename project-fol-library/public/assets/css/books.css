@@ -1,189 +1,507 @@
-/* Tiêu đề & số lượng tài liệu */
+/* ==========================================================================
+   Thư viện Khoa Văn học - USSH VNU-HANOI
+   Tra cứu sách & Danh mục tài liệu (Books Catalog)
+   Định hướng: Academic & Editorial Library, mở phẳng, thanh lịch, tối giản hình khối
+   ========================================================================== */
+
+/* Tiêu đề & Giới thiệu */
 .catalog-intro {
     display: block;
     min-height: auto;
     height: auto;
-    padding: 24px 0 12px;
+    margin-top: -10px;
+    padding: 0 0 16px;
 }
 
 .catalog-intro h1 {
-    margin: 16px 0;
+    margin: 0 0 16px;
     font-family: 'Literata', serif;
     font-size: 36px;
     font-weight: 500;
+    color: #24445c;
 }
 
-.catalog-intro p,
-.catalog-count {
-    color: #718695;
-    font-size: 13px;
-    line-height: 1.8;
-}
-
-/* Danh sách sách */
-.catalog-list {
-    display: grid;
-    gap: 16px;
-    margin-top: 20px;
-}
-
-.catalog-item {
+/* ==========================================================================
+   3. Tinh chỉnh Thanh tìm kiếm (Search Bar)
+   Khung gộp liền mạch, nút 'Tìm kiếm' sát mép phải không có khoảng hở thừa
+   ========================================================================== */
+#catalog-search.search-box {
     display: flex;
-    align-items: center;
-    gap: 28px;
-    padding: 24px;
-    border: 1px solid #e0e9ef;
-    border-radius: 14px;
-    background: white;
+    align-items: stretch;
+    gap: 0;
+    padding: 0;
+    border: 1px solid #d4cbb3;
+    border-radius: 6px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(36, 68, 92, 0.04);
+    overflow: hidden;
+    margin-bottom: 28px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-/* Bìa minh họa */
-.catalog-cover {
+#catalog-search.search-box:focus-within {
+    border-color: #1a5699;
+    box-shadow: 0 0 0 2px rgba(26, 86, 153, 0.12);
+}
+
+#catalog-search.search-box input {
+    flex: 1;
+    min-width: 0;
+    padding: 13px 18px;
+    border: none;
+    font-size: 15px;
+    color: #24445c;
+    background: transparent;
+}
+
+#catalog-search.search-box input::placeholder {
+    color: #7b8e9c;
+}
+
+#catalog-search.search-box button {
+    flex-shrink: 0;
+    padding: 0 28px;
+    border: none;
+    border-left: 1px solid #dec383;
+    border-radius: 0;
+    background: #efd097;
+    color: #24445c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+#catalog-search.search-box button:hover {
+    background: #e5c37f;
+    border-left-color: #d1b16e;
+}
+
+/* ==========================================================================
+   Bố cục 19 : 81
+   ========================================================================== */
+.catalog-layout {
+    display: grid;
+    grid-template-columns: 19fr 81fr;
+    gap: 36px;
+    align-items: start;
+    margin-bottom: 36px;
+}
+
+/* ==========================================================================
+   2. Mở phẳng khu vực Bộ lọc (Sidebar)
+   Bỏ khung nền trắng, ngăn cách bằng đường kẻ dọc mảnh bên phải
+   ========================================================================== */
+.catalog-sidebar {
+    min-width: 0;
+    border-right: 1px solid #e9dfbf;
+    padding-right: 32px;
+    position: sticky;
+    top: 105px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #d4cbb3 transparent;
+}
+
+.catalog-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.catalog-sidebar::-webkit-scrollbar-thumb {
+    background-color: #d4cbb3;
+    border-radius: 4px;
+}
+
+.filter-panel {
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    padding: 0 0 12px 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    flex-shrink: 0;
-    width: 120px;
-    min-height: 165px;
-    padding: 15px 12px;
-    border-left: 5px solid #ffffff30;
-    background: #345e76;
-    color: white;
-    text-align: center;
-    box-shadow: 5px 7px 12px #24445c18;
+    gap: 18px;
+    box-shadow: none;
 }
 
-.catalog-cover > span:first-child {
-    font-size: 7px;
-    letter-spacing: 1px;
+.filter-panel-header {
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e9dfbf;
 }
 
-.catalog-cover strong {
-    font-family: 'Literata', serif;
-    font-size: 15px;
-    line-height: 1.5;
-}
-
-.catalog-decoration {
-    color: #f3ce63;
-    font-size: 25px;
-}
-
-/* Thông tin sách */
-.catalog-information {
-    min-width: 0;
-}
-
-.catalog-information h2 {
-    margin: 0 0 10px;
-    font-size: 19px;
-    line-height: 1.5;
-}
-
-.catalog-location {
-    margin: 0 0 14px;
-    color: #718695;
+.filter-panel-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     font-size: 12px;
+    font-weight: 700;
+    color: #24445c;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-    .catalog-intro h1 {
-        font-size: 28px;
-    }
-
-    .catalog-item {
-        align-items: flex-start;
-        gap: 16px;
-        padding: 16px;
-    }
-
-    .catalog-cover {
-        width: 90px;
-        min-height: 140px;
-        padding: 12px 8px;
-    }
-
-    .catalog-cover strong {
-        font-size: 15px;
-    }
-
-    .catalog-information h2 {
-        font-size: 15px;
-    }
-
-    .catalog-information .book-author {
-        margin-bottom: 10px;
-    }
+.filter-panel-title svg {
+    color: #1a5699;
 }
 
-@media (max-width: 360px) {
-    .catalog-item {
-        flex-direction: column;
-    }
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-/* Tìm kiếm & Trạng thái ẩn */
-#catalog-search {
-    margin-bottom: 24px;
+.filter-label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #607888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Dropdown mở phẳng dạng gạch chân viền dưới */
+.filter-select {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 8px 2px;
+    border: none;
+    border-bottom: 1.5px solid #d4cbb3;
+    border-radius: 0;
+    background: transparent;
+    color: #24445c;
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.filter-select:focus {
+    outline: none;
+    border-bottom-color: #1a5699;
+}
+
+/* Nút làm mới mở phẳng dạng link thao tác nhanh */
+.catalog-reset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    width: auto;
+    margin-top: 4px;
+    padding: 6px 0;
+    border: none;
+    background: transparent;
+    color: #607888;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    transition: color 0.15s ease;
+}
+
+.catalog-reset:hover {
+    color: #1a5699;
+}
+
+/* ==========================================================================
+   Cột phải: Danh sách kết quả tìm kiếm (81%)
+   ========================================================================== */
+.catalog-content {
+    min-width: 0;
+    background: transparent;
+}
+
+.catalog-count {
+    margin: 0 0 16px;
+    color: #718695;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.catalog-count strong {
+    color: #24445c;
+}
+
+.catalog-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    background: transparent;
+}
+
+/* ==========================================================================
+   1. Gỡ bỏ khung của các thẻ sách (Book Cards)
+   Mặc định: background trong suốt trực tiếp trên nền giấy kem và họa tiết Khuê Văn Các
+   Khi hover: phủ lớp nền trắng mờ nhẹ (bg-white/60), tên sách chuyển xanh đậm, mũi tên dịch phải
+   ========================================================================== */
+.catalog-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    padding: 20px 16px;
+    margin: 0 -16px;
+    background: transparent !important;
+    border: none;
+    border-bottom: 1px solid #e9dfbf;
+    border-radius: 8px;
+    box-shadow: none;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    cursor: pointer;
+}
+
+.catalog-item:last-child {
+    border-bottom: none;
+}
+
+/* Trạng thái di chuột vào (Hover): 
+   Phủ một lớp nền trắng mờ nhẹ (hover:bg-white/65),
+   kèm hiệu ứng đổi màu tên sách sang xanh sâu và gạch chân nhẹ */
+.catalog-item:hover {
+    background: rgba(255, 255, 255, 0.65) !important;
+}
+
+/* Hover: Đường gạch chân mảnh thanh thoát (decoration-1), hạ thấp 4px (underline-offset-4) tránh dấu nặng Ọ, Ụ */
+.catalog-item:hover .book-title a {
+    color: #0c3b6d;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+}
+
+/* Khung ảnh sách cố định: tự co giãn vừa vặn */
+.catalog-cover-box {
+    flex-shrink: 0;
+    width: 80px;
+    height: 112px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #f1ebd8;
+    border: 1px solid #e2dac0;
+    box-shadow: 0 3px 8px rgba(36, 68, 92, 0.08);
+}
+
+.catalog-cover-box img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+/* Phần thông tin thẻ sách: Bố cục 3 dòng siêu gọn (chuẩn danh mục sách in) */
+.catalog-main-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    align-items: flex-start;
+    text-align: left;
+    padding-top: 0;
+}
+
+/* Dòng 1 (Ngang mép trên ảnh bìa): Tiêu đề sách (Serif màu xanh đậm #1a5699) */
+.book-title {
+    margin: 0;
+    padding: 0;
+    font-family: 'Literata', serif;
+    font-size: 17.5px;
+    font-weight: 600;
+    line-height: 1.35;
+}
+
+.book-title a {
+    color: #1a5699;
+    text-decoration: none;
+    transition: color 0.18s ease, text-decoration 0.18s ease;
+}
+
+.book-title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* Dòng 2 (Ở giữa): Tác giả / Đơn vị biên soạn */
+.book-author {
+    margin: 5px 0 0;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #475569;
+    line-height: 1.45;
+}
+
+/* Dòng 3 (Dưới cùng – Gom toàn bộ thông tin tra cứu): 
+   KV-ANT-0001 · NXB Đại học Quốc gia · 2005 · Tiếng Việt · Còn 1/1 bản
+   Dùng chung 1 cỡ chữ, ngăn cách đồng nhất bằng dấu chấm giữa ·, không ngoặc vuông, đồng màu thanh lịch */
+.catalog-card-footer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.catalog-card-footer .book-meta {
+    margin: 0;
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+}
+
+.catalog-card-footer .book-meta span {
+    font-size: 13px;
+    color: #64748b;
+    font-weight: 400;
+}
+
+.catalog-card-footer .book-meta .meta-dot {
+    margin: 0 6px;
+    color: #94a3b8;
+    user-select: none;
+    font-weight: 400;
+}
+
+/* Phân trang */
+.catalog-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 32px 0 16px;
+    flex-wrap: wrap;
+}
+
+.pagination-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 16px;
+    border: 1px solid #d4cbb3;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #24445c;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.pagination-btn:hover {
+    background: #eaf3f9;
+    border-color: #bcd5e6;
+    color: #1a5699;
+}
+
+.pagination-info {
+    font-size: 13px;
+    color: #475569;
+    margin: 0 10px;
+}
+
+/* Empty state */
+.books-empty {
+    padding: 40px 24px;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    background: transparent;
+    text-align: center;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Loading state phía Server */
+.catalog-content.is-loading {
+    opacity: 0.55;
+    pointer-events: none;
+    position: relative;
+    min-height: 200px;
+    transition: opacity 0.2s ease;
+}
+
+.catalog-content.is-loading::after {
+    content: '';
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(26, 86, 153, 0.15);
+    border-top-color: #1a5699;
+    border-radius: 50%;
+    animation: catalog-spin 0.7s linear infinite;
+    z-index: 10;
+}
+
+@keyframes catalog-spin {
+    to {
+        transform: translateX(-50%) rotate(360deg);
+    }
 }
 
 [hidden] {
     display: none !important;
 }
 
-/* Bộ lọc tài liệu */
-.cattalog-filters {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
-    align-items: end;
-    gap: 16px;
-    margin-bottom: 24px;
-}
-
-.cattalog-filter {
-    min-width: 0;
-}
-
-.cattalog-filter label {
-    display: block;
-    margin-bottom: 8px;
-    font-size: 12px;
-}
-
-.cattalog-filter select {
-    width: 100%;
-    min-width: 0;
-    padding: 12px;
-    border: 1px solid #d4e2ec;
-    border-radius: 8px;
-    background: white;
-    color: #24445c;
-    font: inherit;
-    font-size: 13px;
-}
-
-.catalog-reset {
-    padding: 12px 16px;
-    border: 1px solid #d4e2ec;
-    border-radius: 8px;
-    background: white;
-    color: #3476aa;
-}
-
-.catalog-reset:hover {
-    background: #eaf3f9;
-}
-
-/* Bộ lọc trên table & điện thoại */
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
 @media (max-width: 900px) {
-    .cattalog-filters {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .catalog-sidebar {
+        border-right: none;
+        border-bottom: 1px solid #e9dfbf;
+        padding-right: 0;
+        padding-bottom: 24px;
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+
+    .filter-panel {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+    }
+
+    .filter-panel-header {
+        grid-column: 1 / -1;
+    }
+
+    .catalog-reset {
+        grid-column: 1 / -1;
     }
 }
 
-@media (max-width: 400px) {
-    .cattalog-filters {
-        grid-template-columns: 1fr;
+@media (max-width: 640px) {
+    .catalog-item {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 16px 0;
+    }
+
+    .catalog-cover-box {
+        width: 68px;
+        height: 96px;
+    }
+
+    .catalog-card-header,
+    .catalog-card-footer {
+        flex-wrap: wrap;
+        gap: 6px;
     }
 }
