@@ -201,6 +201,15 @@ if ($path === '/librarian/books/delete' && $_SERVER['REQUEST_METHOD'] === 'POST'
 }
 
 // -----------------------------------------------------------------------------
+// ĐIỀU PHỐI CONTROLLER TRA CỨU SÁCH (BOOK CONTROLLER)
+// -----------------------------------------------------------------------------
+if ($path === '/books' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    $bookController = new \App\Controllers\BookController();
+    $bookController->index();
+    exit;
+}
+
+// -----------------------------------------------------------------------------
 // ÁNH XẠ GIAO DIỆN VIEWS
 // -----------------------------------------------------------------------------
 $routes = [

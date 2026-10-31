@@ -35,33 +35,79 @@ class BookRepository
      */
     public function getPaginated(
         int $page = 1,
-        int $perPage = 15,
+        int $perPage = 10,
         ?string $keyword = null,
-        ?string $prefix = null
+        ?string $prefix = null,
+        ?string $major = null,
+        ?string $author = null,
+        ?int $year = null,
+        ?string $status = null,
+        ?string $sort = null
     ): array {
         $page = max(1, $page);
-        $perPage = max(1, min(100, $perPage));
+        // Giới hạn limit hợp lệ: tối thiểu 5, tối đa 50, mặc định 10
+        $perPage = max(5, min(50, $perPage));
         $offset = ($page - 1) * $perPage;
 
         $conditions = [];
         $params = [];
 
+        // 1. Tìm kiếm từ khóa (tên sách, mã sách, tác giả, mô tả)
         if ($keyword !== null && trim($keyword) !== '') {
             $kw = '%' . trim($keyword) . '%';
-            $conditions[] = "(ds.`id_dau_sach` LIKE :kw1 OR ds.`tieu_de` LIKE :kw2 OR tg.`ten_tac_gia` LIKE :kw3)";
+            $conditions[] = "(ds.`id_dau_sach` LIKE :kw1 OR ds.`tieu_de` LIKE :kw2 OR tg.`ten_tac_gia` LIKE :kw3 OR ds.`mo_ta` LIKE :kw4)";
             $params[':kw1'] = $kw;
             $params[':kw2'] = $kw;
             $params[':kw3'] = $kw;
+            $params[':kw4'] = $kw;
         }
 
-        if ($prefix !== null && trim($prefix) !== '' && $prefix !== 'ALL') {
+        // 2. Lọc theo chuyên ngành / tiền tố mã sách
+        $majorMap = [
+            'Nhân học' => 'KV-ANT',
+            'Tiểu luận' => 'KV-ESS',
+            'Thơ ca' => 'KV-POE',
+            'Tuyển tập' => 'KV-REC',
+            'KV-ANT' => 'KV-ANT',
+            'KV-ESS' => 'KV-ESS',
+            'KV-POE' => 'KV-POE',
+            'KV-REC' => 'KV-REC',
+        ];
+        $resolvedPrefix = $prefix ?? ($major !== null && isset($majorMap[$major]) ? $majorMap[$major] : null);
+        if ($resolvedPrefix !== null && trim($resolvedPrefix) !== '' && strtoupper(trim($resolvedPrefix)) !== 'ALL') {
             $conditions[] = "ds.`id_dau_sach` LIKE :prefix";
-            $params[':prefix'] = trim($prefix) . '%';
+            $params[':prefix'] = trim($resolvedPrefix) . '%';
         }
+
+        // 3. Lọc theo tác giả cụ thể
+        if ($author !== null && trim($author) !== '') {
+            $conditions[] = "tg.`ten_tac_gia` LIKE :author";
+            $params[':author'] = '%' . trim($author) . '%';
+        }
+
+        // 4. Lọc theo năm xuất bản
+        if ($year !== null && $year > 0) {
+            $conditions[] = "ds.`nam_xuat_ban` = :year";
+            $params[':year'] = $year;
+        }
+
+        // 5. Lọc theo tình trạng sách: 'available' = chỉ lấy sách có bản sách sẵn sàng mượn
+        if ($status === 'available') {
+            $conditions[] = "EXISTS (SELECT 1 FROM `cuon_sach` cs_avail WHERE cs_avail.`id_dau_sach` = ds.`id_dau_sach` AND cs_avail.`trang_thai` = 'SanSang')";
+        }
+
+        // 6. Sắp xếp an toàn
+        $orderBy = match ($sort) {
+            'newest' => 'ds.`nam_xuat_ban` DESC, ds.`id_dau_sach` DESC',
+            'oldest' => 'ds.`nam_xuat_ban` ASC, ds.`id_dau_sach` ASC',
+            'title_asc' => 'ds.`tieu_de` ASC',
+            'title_desc' => 'ds.`tieu_de` DESC',
+            default => 'ds.`id_dau_sach` ASC',
+        };
 
         $whereClause = !empty($conditions) ? 'WHERE ' . implode(' AND ', $conditions) : '';
 
-        // 1. Đếm tổng số đầu sách khớp điều kiện
+        // 1. Đếm tổng số đầu sách khớp điều kiện (truy vấn tối ưu COUNT không JOIN dư thừa)
         $countSql = "SELECT COUNT(DISTINCT ds.`id_dau_sach`)
                      FROM `dau_sach` ds
                      LEFT JOIN `tac_gia_sach` tgs ON ds.`id_dau_sach` = tgs.`id_dau_sach`
@@ -70,7 +116,11 @@ class BookRepository
 
         $countStmt = $this->db->prepare($countSql);
         foreach ($params as $key => $val) {
-            $countStmt->bindValue($key, $val, PDO::PARAM_STR);
+            if ($key === ':year') {
+                $countStmt->bindValue($key, $val, PDO::PARAM_INT);
+            } else {
+                $countStmt->bindValue($key, $val, PDO::PARAM_STR);
+            }
         }
         $countStmt->execute();
         $total = (int)$countStmt->fetchColumn();
@@ -87,7 +137,7 @@ class BookRepository
             ];
         }
 
-        // 2. Lấy dữ liệu phân trang
+        // 2. Lấy dữ liệu phân trang (COUNT DISTINCT trong 1 truy vấn, chống N+1 queries)
         $dataSql = "SELECT 
                         ds.`id_dau_sach`,
                         ds.`tieu_de`,
@@ -100,11 +150,12 @@ class BookRepository
                         GROUP_CONCAT(DISTINCT tg.`ten_tac_gia` ORDER BY tg.`id` ASC SEPARATOR ', ') AS `tac_gia`,
                         COUNT(DISTINCT cs.`id_cuon_sach`) AS `tong_cuon`,
                         COUNT(DISTINCT CASE WHEN cs.`trang_thai` = 'SanSang' THEN cs.`id_cuon_sach` END) AS `co_the_muon`,
-                        CONCAT(
-                            'Kệ ',
-                            COALESCE(LPAD(ks.`ma_ke`, 2, '0'), '01'),
-                            ' · Ô ',
-                            COALESCE(LPAD(os.`ma_o`, 2, '0'), '01')
+                        MAX(
+                            CASE 
+                                WHEN ks.`ma_ke` IS NOT NULL AND os.`ma_o` IS NOT NULL 
+                                THEN CONCAT('Kệ ', LPAD(ks.`ma_ke`, 2, '0'), ' · Ô ', LPAD(os.`ma_o`, 2, '0'))
+                                ELSE NULL
+                            END
                         ) AS `vi_tri`
                     FROM `dau_sach` ds
                     LEFT JOIN `tac_gia_sach` tgs ON ds.`id_dau_sach` = tgs.`id_dau_sach`
@@ -114,12 +165,16 @@ class BookRepository
                     LEFT JOIN `ke_sach` ks ON os.`id_ke_sach` = ks.`id_ke_sach`
                     {$whereClause}
                     GROUP BY ds.`id_dau_sach`, ds.`tieu_de`, ds.`isbn`, ds.`mo_ta`, ds.`nam_xuat_ban`, ds.`lan_xuat_ban`, ds.`ngon_ngu`, ds.`so_luong`
-                    ORDER BY ds.`id_dau_sach` ASC
+                    ORDER BY {$orderBy}
                     LIMIT :offset, :limit";
 
         $dataStmt = $this->db->prepare($dataSql);
         foreach ($params as $key => $val) {
-            $dataStmt->bindValue($key, $val, PDO::PARAM_STR);
+            if ($key === ':year') {
+                $dataStmt->bindValue($key, $val, PDO::PARAM_INT);
+            } else {
+                $dataStmt->bindValue($key, $val, PDO::PARAM_STR);
+            }
         }
         $dataStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $dataStmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
@@ -133,6 +188,49 @@ class BookRepository
             'page' => $page,
             'perPage' => $perPage,
             'totalPages' => $totalPages,
+        ];
+    }
+
+    /**
+     * Lấy siêu dữ liệu cho các dropdown bộ lọc tra cứu
+     */
+    public function getFilterOptions(): array
+    {
+        $majors = ['Nhân học', 'Tiểu luận', 'Thơ ca', 'Tuyển tập'];
+
+        $authorsStmt = $this->db->query(
+            "SELECT DISTINCT tg.`ten_tac_gia` 
+             FROM `tac_gia` tg 
+             JOIN `tac_gia_sach` tgs ON tg.`id` = tgs.`id_tac_gia`
+             WHERE tg.`ten_tac_gia` IS NOT NULL AND tg.`ten_tac_gia` != '' 
+             ORDER BY tg.`ten_tac_gia` ASC 
+             LIMIT 150"
+        );
+        $authors = $authorsStmt ? $authorsStmt->fetchAll(PDO::FETCH_COLUMN) : [];
+
+        $yearsStmt = $this->db->query(
+            "SELECT DISTINCT `nam_xuat_ban` 
+             FROM `dau_sach` 
+             WHERE `nam_xuat_ban` IS NOT NULL AND `nam_xuat_ban` > 1800 
+             ORDER BY `nam_xuat_ban` DESC"
+        );
+        $years = $yearsStmt ? $yearsStmt->fetchAll(PDO::FETCH_COLUMN) : [];
+
+        return [
+            'majors' => $majors,
+            'authors' => $authors,
+            'years' => $years,
+            'statuses' => [
+                'all' => 'Tất cả tình trạng',
+                'available' => 'Còn sách có thể mượn'
+            ],
+            'sorts' => [
+                'id_asc' => 'Mã sách tăng dần (Mặc định)',
+                'newest' => 'Năm xuất bản: Mới nhất',
+                'oldest' => 'Năm xuất bản: Cũ nhất',
+                'title_asc' => 'Tên sách: A - Z',
+                'title_desc' => 'Tên sách: Z - A',
+            ]
         ];
     }
 
@@ -155,12 +253,21 @@ class BookRepository
                     nxb.`ten_nha_xuat_ban`,
                     GROUP_CONCAT(DISTINCT tg.`ten_tac_gia` ORDER BY tg.`id` ASC SEPARATOR ', ') AS `tac_gia`,
                     COUNT(DISTINCT cs.`id_cuon_sach`) AS `tong_cuon`,
-                    COUNT(DISTINCT CASE WHEN cs.`trang_thai` = 'SanSang' THEN cs.`id_cuon_sach` END) AS `co_the_muon`
+                    COUNT(DISTINCT CASE WHEN cs.`trang_thai` = 'SanSang' THEN cs.`id_cuon_sach` END) AS `co_the_muon`,
+                    MAX(
+                        CASE 
+                            WHEN ks.`ma_ke` IS NOT NULL AND os.`ma_o` IS NOT NULL 
+                            THEN CONCAT('Kệ ', LPAD(ks.`ma_ke`, 2, '0'), ' · Ô ', LPAD(os.`ma_o`, 2, '0'))
+                            ELSE NULL
+                        END
+                    ) AS `vi_tri`
                 FROM `dau_sach` ds
                 LEFT JOIN `nha_xuat_ban` nxb ON ds.`id_nha_xuat_ban` = nxb.`id`
                 LEFT JOIN `tac_gia_sach` tgs ON ds.`id_dau_sach` = tgs.`id_dau_sach`
                 LEFT JOIN `tac_gia` tg ON tgs.`id_tac_gia` = tg.`id`
                 LEFT JOIN `cuon_sach` cs ON ds.`id_dau_sach` = cs.`id_dau_sach`
+                LEFT JOIN `o_sach` os ON cs.`id_o_sach` = os.`id_o_sach`
+                LEFT JOIN `ke_sach` ks ON os.`id_ke_sach` = ks.`id_ke_sach`
                 WHERE ds.`id_dau_sach` = :id
                 GROUP BY ds.`id_dau_sach`, ds.`tieu_de`, ds.`isbn`, ds.`mo_ta`, ds.`nam_xuat_ban`, ds.`lan_xuat_ban`, ds.`ngon_ngu`, ds.`so_luong`, ds.`ngay_tao`, ds.`ngay_cap_nhat`, nxb.`ten_nha_xuat_ban`";
 

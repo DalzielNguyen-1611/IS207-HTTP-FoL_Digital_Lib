@@ -27,24 +27,55 @@ class BookService
     }
 
     /**
-     * Lấy danh sách đầu sách có phân trang và tìm kiếm
+     * Lấy danh sách đầu sách có phân trang và tìm kiếm đa tiêu chí phía server
      */
     public function getPaginatedBooks(
         int $page = 1,
-        int $perPage = 15,
+        int $perPage = 10,
         ?string $keyword = null,
-        ?string $prefix = null
+        ?string $prefix = null,
+        ?string $major = null,
+        ?string $author = null,
+        ?int $year = null,
+        ?string $status = null,
+        ?string $sort = null
     ): array {
         $result = $this->bookRepo->getPaginated(
             page: $page,
             perPage: $perPage,
             keyword: $keyword,
-            prefix: $prefix
+            prefix: $prefix,
+            major: $major,
+            author: $author,
+            year: $year,
+            status: $status,
+            sort: $sort
         );
 
         $bookModels = [];
         foreach ($result['items'] as $item) {
-            $bookModels[] = Book::fromArray($item)->toArray();
+            $majorName = match (substr($item['id_dau_sach'] ?? '', 0, 6)) {
+                'KV-ANT' => 'Nhân học',
+                'KV-ESS' => 'Tiểu luận',
+                'KV-POE' => 'Thơ ca',
+                'KV-REC' => 'Tuyển tập',
+                default => 'Khoa Văn học'
+            };
+            $category = match (substr($item['id_dau_sach'] ?? '', 0, 6)) {
+                'KV-ANT' => 'Nhân học / Dân tộc',
+                'KV-ESS' => 'Tiểu luận / Nghiên cứu',
+                'KV-POE' => 'Thơ ca / Văn vần',
+                'KV-REC' => 'Tuyển tập / Tổng hợp',
+                default => 'Văn học & Ngôn ngữ'
+            };
+
+            $arr = Book::fromArray($item)->toArray();
+            $arr['author'] = !empty($arr['authorNames']) ? $arr['authorNames'] : (!empty($arr['authors']) ? implode(', ', $arr['authors']) : 'Chưa rõ tác giả');
+            $arr['major'] = $majorName;
+            $arr['category'] = $category;
+            $arr['publisher'] = 'NXB Đại học Quốc gia';
+            $arr['cover_url'] = $item['coverUrl'] ?? $item['anh_bia'] ?? '/assets/images/default-book-cover.jpg';
+            $bookModels[] = $arr;
         }
 
         return [
@@ -54,6 +85,14 @@ class BookService
             'perPage' => $result['perPage'],
             'totalPages' => $result['totalPages'],
         ];
+    }
+
+    /**
+     * Lấy danh mục các giá trị bộ lọc khả dụng từ cơ sở dữ liệu
+     */
+    public function getFilterMetadata(): array
+    {
+        return $this->bookRepo->getFilterOptions();
     }
 
     /**

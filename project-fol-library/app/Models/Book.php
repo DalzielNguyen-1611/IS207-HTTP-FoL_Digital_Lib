@@ -60,7 +60,7 @@ class Book
             authorNames: $authorStr,
             authors: $authorsList,
             copies: $copiesList,
-            location: isset($data['vi_tri']) ? (string)$data['vi_tri'] : 'Kho lưu trữ Thư viện FoL',
+            location: !empty($data['location']) ? (string)$data['location'] : (!empty($data['vi_tri']) ? (string)$data['vi_tri'] : null),
             createdAt: isset($data['ngay_tao']) ? (string)$data['ngay_tao'] : null,
             updatedAt: isset($data['ngay_cap_nhat']) ? (string)$data['ngay_cap_nhat'] : null
         );
