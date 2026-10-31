@@ -21,7 +21,7 @@ function readFavorite() {
   )
 
   return Array.isArray(stored)
-    ? [...new Set(stored.filter(Number.isInteger))]
+    ? [...new Set(stored.map(String).filter(Boolean))]
     : []
 }
 
@@ -35,9 +35,9 @@ function updateFavoriteButton(selected) {
 
 //Lưu hoặc bỏ mã sách, không lưu thông tin cá nhân
 if (favoriteButton) {
-  const bookId = Number(favoriteButton.dataset.bookId)
+  const bookId = String(favoriteButton.dataset.bookId || '').trim()
 
-  if (Number.isInteger(bookId) && bookId > 0) {
+  if (bookId !== '') {
     try {
       updateFavoriteButton(readFavorite().includes(bookId))
     } catch {

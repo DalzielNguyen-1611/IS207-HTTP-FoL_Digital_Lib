@@ -11,20 +11,56 @@ if (is_string($rawId) && trim($rawId) !== '') {
         $bookService = new \App\Services\BookService();
         $found = $bookService->getBookDetail(trim($rawId));
         if ($found) {
+            $prefix = strtoupper(substr($found->id, 0, 6));
+            $category = match ($prefix) {
+                'KV-ANT' => 'Nhân học / Dân tộc',
+                'KV-ESS' => 'Tiểu luận / Nghiên cứu',
+                'KV-POE' => 'Thơ ca / Văn vần',
+                'KV-REC' => 'Tuyển tập / Tổng hợp',
+                default => 'Văn học & Ngôn ngữ'
+            };
+            $major = match ($prefix) {
+                'KV-ANT' => 'Nhân học',
+                'KV-ESS' => 'Tiểu luận',
+                'KV-POE' => 'Thơ ca',
+                'KV-REC' => 'Tuyển tập',
+                default => 'Khoa Văn học'
+            };
+
+            $shelf = null;
+            $cell = null;
+            if (!empty($found->copies)) {
+                foreach ($found->copies as $copy) {
+                    if (!empty($copy['ma_ke'])) {
+                        $shelf = (int)$copy['ma_ke'];
+                    }
+                    if (!empty($copy['ma_o'])) {
+                        $cell = (int)$copy['ma_o'];
+                    }
+                    if ($shelf !== null || $cell !== null) {
+                        break;
+                    }
+                }
+            }
+
             $book = [
                 'id' => $found->id,
                 'title' => $found->title,
                 'author' => $found->authorNames !== '' ? $found->authorNames : 'Chưa rõ tác giả',
-                'category' => 'Tài liệu Khoa Văn học',
-                'major' => 'Văn học',
-                'genre' => 'Giáo trình / Nghiên cứu',
+                'category' => $category,
+                'major' => $major,
+                'genre' => 'Sách chuyên khảo',
+                'publishYear' => $found->publishYear,
+                'language' => $found->language ?? 'Tiếng Việt',
+                'publisher' => 'NXB Đại học Quốc gia',
                 'available' => $found->availableQuantity,
                 'total' => $found->totalQuantity,
-                'shelf' => 1,
-                'cell' => 1,
-                'location' => $found->location ?? 'Kho lưu trữ Thư viện FoL',
+                'shelf' => $shelf,
+                'cell' => $cell,
+                'location' => $found->location ?? null,
                 'description' => $found->description ?: 'Tài liệu lưu trữ và phục vụ bạn đọc tại Thư viện Khoa Văn học.',
                 'copies' => $found->copies,
+                'cover_url' => $found->coverUrl ?? $found->anh_bia ?? '/assets/images/default-book-cover.jpg',
             ];
         }
     } catch (\Throwable $e) {
@@ -39,20 +75,18 @@ if ($book === null) {
     <!DOCTYPE html>
     <html lang="vi">
     <head>
-        <!-- Metadata trang không tìm thấy tài liệu -->
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>Không tìm thấy sách</title>
+        <title>Không tìm thấy sách · Thư viện Khoa Văn học</title>
         <link rel="stylesheet" href="/assets/css/base.css">
         <link rel="stylesheet" href="/assets/css/home.css">
         <link rel="stylesheet" href="/assets/css/70years.css">
     </head>
     <body>
-        <!-- Thông báo & Điều hướng về danh sách --> 
-        <main class="page">
-            <h1>Không tìm thấy sách</h1>
-            <p>Tài liệu này chưa có trong danh sách mẫu.</p>
-            <a href="/books">← Trở về tra cứu sách</a> 
+        <main class="page" style="padding-top: 60px; text-align: center;">
+            <h1 style="font-family: 'Literata', serif; font-size: 32px; color: #24445c;">Không tìm thấy tài liệu</h1>
+            <p style="color: #64748b; margin: 16px 0 24px;">Tài liệu bạn yêu cầu không tồn tại hoặc đã được chuyển khỏi danh mục phục vụ.</p>
+            <a href="/books" style="color: #1a5699; font-weight: 600; text-decoration: underline;">← Trở về tra cứu sách</a> 
         </main>
     </body>
     </html>
@@ -60,21 +94,22 @@ if ($book === null) {
     return;
 }
 
-//Các kệ và ô minh họa trong bản thử
+// Các kệ và ô minh họa trong bản thử
 $shelves = range(1, 6);
 $cells = range(1, 4);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <!-- Metadata & Tài nguyên giao diện -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?> · Thư viện</title>
+    <title><?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?> · Chi tiết tài liệu</title>
 
-    <link rel="stylesheet" href="assets/css/base.css">
-    <link rel="stylesheet" href="assets/css/home.css">
-    <link rel="stylesheet" href="assets/css/book-detail.css">
+    <link rel="stylesheet" href="/assets/css/base.css">
+    <link rel="stylesheet" href="/assets/css/home.css">
+    <link rel="stylesheet" href="/assets/css/books.css?v=<?= file_exists(__DIR__ . '/../../../public/assets/css/books.css') ? filemtime(__DIR__ . '/../../../public/assets/css/books.css') : time() ?>">
+    <link rel="stylesheet" href="/assets/css/book-detail.css?v=<?= file_exists(__DIR__ . '/../../../public/assets/css/book-detail.css') ? filemtime(__DIR__ . '/../../../public/assets/css/book-detail.css') : time() ?>">
+    <link rel="stylesheet" href="/assets/css/70years.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -82,7 +117,7 @@ $cells = range(1, 4);
         <a class="brand" href="/">
             <img
                 class="brand-logo"
-                src="assets/images/logo.jpg"
+                src="/assets/images/logo.jpg"
                 alt="Logo Khoa Văn học"
             >
             <span>
@@ -112,6 +147,7 @@ $cells = range(1, 4);
                     </a>
                     <a href="/reading-room" class="nav-dropdown-item" role="menuitem">
                         <span class="nav-dropdown-icon">🪑</span>
+                        <div class="nav-dropdown-text">
                             <span class="nav-dropdown-title">Phòng đọc & Chỗ ngồi</span>
                             <span class="nav-dropdown-desc">Đặt chỗ tự học theo ca, xem sơ đồ chỗ trống</span>
                         </div>
@@ -173,80 +209,79 @@ $cells = range(1, 4);
     </header>
 
     <main class="page">
-        <!-- Điều hướng trở về danh sách -->
-        <a class="detail-back" href="/books">← Trở về tra cứu sách</a>
+        <!-- Đường dẫn Breadcrumbs / Quay lại -->
+        <nav class="detail-breadcrumb" aria-label="Đường dẫn điều hướng">
+            <a class="detail-back-link" href="/books">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Trở về tra cứu sách
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current"><?= htmlspecialchars($book['id'], ENT_QUOTES, 'UTF-8') ?></span>
+        </nav>
 
-        <!-- Bìa minh họa & Thông tin sách -->
+        <!-- Khung chi tiết: Bìa sách & Thông tin -->
         <section class="detail-layout" aria-labelledby="book-title">
-            <div class="detail-cover-area">
-                <div class="detail-cover" aria-hidden="true">
-                    <span>TỦ SÁCH VĂN HỌC</span>
-                    <strong>
-                        <?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?>
-                    </strong>
-                    <span class="detail-decoration">❧</span>
-                </div>
-                <p>Bìa minh họa</p>
+            <!-- Cột trái: Khung bìa sách học thuật cố định -->
+            <div class="detail-cover-box">
+                <img
+                    src="<?= htmlspecialchars($book['cover_url'], ENT_QUOTES, 'UTF-8') ?>"
+                    alt="Bìa sách <?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?>"
+                >
             </div>
 
+            <!-- Cột phải: Thông tin chi tiết -->
             <div class="detail-information">
-                <!-- Phân loại & Tên tài liệu -->
-                <p class="eyebrow">
-                    <?= htmlspecialchars($book['category'], ENT_QUOTES, 'UTF-8') ?>
-                </p>
+                <!-- Dòng 1: Mã ký hiệu căn trái -->
+                <div class="detail-header-row">
+                    <span class="location-code">Ký hiệu: <?= htmlspecialchars($book['id'], ENT_QUOTES, 'UTF-8') ?></span>
+                </div>
 
-                <h1 id="book-title">
+                <h1 class="detail-title" id="book-title">
                     <?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?>
                 </h1>
 
-                <p class="detail-author">
-                    <?= htmlspecialchars($book['author'], ENT_QUOTES, 'UTF-8') ?>
+                <p class="detail-author-line">
+                    <span>Tác giả: <strong><?= htmlspecialchars($book['author'], ENT_QUOTES, 'UTF-8') ?></strong></span>
+                    <span class="meta-pipe" style="margin: 0 8px;">|</span>
+                    <span class="book-status-classic <?= $book['available'] > 0 ? 'is-available' : 'is-unavailable' ?>">
+                        [<?= $book['available'] > 0 ? 'Còn ' . (int)$book['available'] . '/' . (int)$book['total'] . ' bản sẵn sàng phục vụ' : 'Đang mượn hết' ?>]
+                    </span>
                 </p>
 
-                <!-- Tình trạng có thể mượn -->
-                <?php if ($book['available'] > 0): ?>
-                    <span class="book'status">
-                        Còn <?= htmlspecialchars(
-                            (string) $book['available'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?> bản 
-                    </span>
-                <?php else: ?>
-                    <span class="book-status unavailable">
-                        Đang được mượn hết
-                    </span>
-                <?php endif; ?>
-
-                <!-- Mô tả & Thuộc tính tài liệu -->
+                <!-- Tóm tắt tài liệu -->
                 <p class="detail-description">
-                    <?= htmlspecialchars($book['description'], ENT_QUOTES, 'UTF-8') ?> 
+                    <?= htmlspecialchars($book['description'], ENT_QUOTES, 'UTF-8') ?>
                 </p>
 
+                <!-- Bảng siêu dữ liệu unboxed với đường kẻ ngang mảnh -->
                 <dl class="detail-metadata">
-                    <div>
-                        <dt>Thể loại</dt>
-                        <dd><?= htmlspecialchars($book['genre'], ENT_QUOTES, 'UTF-8') ?></dd>
+                    <div class="metadata-row">
+                        <dt>Ký hiệu:</dt>
+                        <dd><span class="meta-code"><?= htmlspecialchars($book['id'], ENT_QUOTES, 'UTF-8') ?></span></dd>
                     </div>
-                    <div>
-                        <dt>Vị trí</dt>
+                    <div class="metadata-row">
+                        <dt>Xuất bản:</dt>
                         <dd>
-                            Kệ <?= htmlspecialchars(
-                                (string) $book['shelf'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?>
-                            · Ô <?= htmlspecialchars(
-
-                                (string) $book['cell'],
-                                ENT_QUOTES,
-                                'UTF-8'
-                            ) ?> 
-                        </dd> 
+                            <?= htmlspecialchars($book['publisher'], ENT_QUOTES, 'UTF-8') ?>
+                            <?php if (!empty($book['publishYear'])): ?>
+                                · Năm <?= htmlspecialchars((string)$book['publishYear'], ENT_QUOTES, 'UTF-8') ?>
+                            <?php endif; ?>
+                        </dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Ngôn ngữ:</dt>
+                        <dd><?= htmlspecialchars($book['language'], ENT_QUOTES, 'UTF-8') ?></dd>
+                    </div>
+                    <div class="metadata-row">
+                        <dt>Vị trí:</dt>
+                        <dd><?= !empty($book['location']) ? htmlspecialchars($book['location'], ENT_QUOTES, 'UTF-8') : '—' ?></dd>
                     </div>
                 </dl>
 
-                <!-- Các thao tác thử nghiệm -->
+                <!-- Nút thao tác mẫu -->
                 <div class="detail-actions">
                     <button
                         class="detail-primary"
@@ -254,58 +289,73 @@ $cells = range(1, 4);
                         type="button"
                         <?= $book['available'] > 0 ? '' : 'disabled' ?>
                     >
-                        Đăng ký mượn 
+                        Đăng ký mượn tài liệu
                     </button>
 
                     <button
                         class="detail-secondary"
                         id="favorite-demo"
                         type="button"
-                        aria-presses="false"
-                        data-book-id="<?= htmlspecialchars(
-                            (string) $book['id'],
-                            ENT_QUOTES,
-                            'UTF-8'
-                        ) ?>"
+                        aria-pressed="false"
+                        data-book-id="<?= htmlspecialchars((string)$book['id'], ENT_QUOTES, 'UTF-8') ?>"
                     >
-                        Thêm vào yêu thích 
+                        Thêm vào yêu thích
                     </button>
                 </div>
 
                 <p class="preview-note" id="detail-feedback" role="status">
-                    Bản thử giao diện · Chưa tạo phiếu mượn hoặc lưu yêu thích. 
+                    Bản thử giao diện · Chưa tạo phiếu mượn hoặc lưu yêu thích.
                 </p>
             </div>
         </section>
 
-        <!-- Sơ đồ minh họa vị trí kệ -->
+        <!-- Sơ đồ vị trí kệ trong thư viện (Mở phẳng trên nền giấy kem) -->
         <section class="detail-location" aria-labelledby="location-title">
-            <h2 id="location-title">Tìm sách trong thư viện</h2>
-            <p>Kệ được đánh dấu bên dưới là vị trí của tài liệu.</p>
-
-            <div class="shelf-map">
-                <?php foreach ($shelves as $shelf): ?>
-                    <div class="shelf-position <?= $shelf === $book['shelf'] ? 'is-selected' : '' ?>">
-                        Kệ <?= htmlspecialchars((string) $shelf, ENT_QUOTES, 'UTF-8') ?> 
-                    </div>
-                <?php endforeach; ?> 
+            <div class="location-header">
+                <h2 id="location-title">Vị trí lưu trữ trong thư viện</h2>
+                <?php if (!empty($book['location'])): ?>
+                    <p>Kệ và ô được tô màu nổi bật là vị trí lưu giữ bản sách vật lý của tài liệu này.</p>
+                <?php else: ?>
+                    <p>Tài liệu này hiện chưa được xếp vào kệ hoặc ô cụ thể trong kho.</p>
+                <?php endif; ?>
             </div>
 
-            <!-- Vị trí ô trong kệ đang chọn -->
-            <h3>Các ô trong kệ của sách</h3>
+            <!-- Dãy kệ -->
+            <div class="location-block">
+                <h3 class="location-subhead">Dãy Kệ sách</h3>
+                <div class="shelf-map">
+                    <?php foreach ($shelves as $shelf): ?>
+                        <?php $isSelected = ($book['shelf'] !== null && $shelf === $book['shelf']); ?>
+                        <div class="shelf-position <?= $isSelected ? 'is-selected' : '' ?>">
+                            <span>Kệ <?= htmlspecialchars((string) $shelf, ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php if ($isSelected): ?>
+                                <span class="selected-badge">Vị trí sách</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
 
-            <div class="cell-map">
-                <?php foreach($cells as $cell): ?>
-                    <div class="cell-position <?= $cell === $book['cell'] ? 'is-selected' : '' ?>">
-                        Ô <?= htmlspecialchars((string) $cell, ENT_QUOTES, 'UTF-8') ?>
-                    </div>
-                <?php endforeach; ?> 
+            <!-- Ngăn / Ô -->
+            <div class="location-block">
+                <h3 class="location-subhead">Ngăn / Ô lưu trữ</h3>
+                <div class="cell-map">
+                    <?php foreach ($cells as $cell): ?>
+                        <?php $isSelected = ($book['cell'] !== null && $cell === $book['cell']); ?>
+                        <div class="cell-position <?= $isSelected ? 'is-selected' : '' ?>">
+                            <span>Ô <?= htmlspecialchars((string) $cell, ENT_QUOTES, 'UTF-8') ?></span>
+                            <?php if ($isSelected): ?>
+                                <span class="selected-badge">Vị trí sách</span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
 
             <p class="preview-note">
-                Sơ đồ minh họa, chưa phải mặt bằng thực tế của thư viện. 
+                Sơ đồ bố cục phân bổ kho sách tầng 2 Thư viện Khoa Văn học.
             </p>
-        </selection>
+        </section>
     </main>
 
     <!-- Tương tác mẫu của trang chi tiết -->

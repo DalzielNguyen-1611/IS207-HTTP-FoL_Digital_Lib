@@ -1,216 +1,399 @@
-/* Điều hướng & Bố cục chi tiết */
-.detail-back {
-    display: inline-block;
-    margin-bottom: 28px;
-    color: #3476aa;
-    font-size: 13px;
-}
+/* ==========================================================================
+   Book Detail Page - Thư viện Khoa Văn học
+   Thiết kế mở phẳng, đồng bộ hoàn toàn với trang Tra cứu sách (books.css)
+   ========================================================================== */
 
-.detail-layout {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr);
-    gap: 48px;
-}
-
-/* Bìa sách minh họa */
-.detail-cover-area {
+/* Điều hướng Breadcrumb / Back Link */
+.detail-breadcrumb {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 32px;
-    border-radius: 16px;
-    background: #eaf1f5;
+    gap: 8px;
+    margin-bottom: 24px;
+    font-size: 13.5px;
 }
 
-.detail-cover {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 190px;
-    min-height: 260px;
-    padding: 24px 18px;
-    border-left: 7px solid #ffffff30;
-    background: #526e60;
-    color: white;
-    text-align: center;
-    box-shadow: 8px 12px 20px #24445c25;
+.detail-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1a5699;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.15s ease;
 }
 
-.detail-cover > span:first-child {
-    font-size: 9px;
-    letter-spacing: 1px;
+.detail-back-link:hover {
+    color: #24445c;
+    text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
-.detail-cover strong {
-    font-family: 'Literata', serif;
-    font-size: 28px;
+.detail-back-link svg {
+    flex-shrink: 0;
+    transition: transform 0.15s ease;
 }
 
-.detail-decoration {
-    color: #f3ce36;
-    font-size: 38px;
+.detail-back-link:hover svg {
+    transform: translateX(-3px);
 }
 
-.detail-cover-area > p {
-    margin: 22px 0 0;
+.breadcrumb-sep {
+    color: #cbd5e1;
+    user-select: none;
+}
+
+.breadcrumb-current {
     color: #718695;
-    font-size: 11px;
-}
-
-/* Nội dung & Thuộc tính sách */
-.detail-information {
-    min-width: 0;
-}
-
-.detail-information h1 {
-    margin: 14px 0;
-    font-family: 'Literata', serif;
-    font-size: 38px;
     font-weight: 500;
 }
 
-.detail-author {
-    margin-bottom: 20px;
-    color: #718695;
-}
-
-.detail-description {
-    margin: 24px 0;
-    color: #607888;
-    line-height: 1.9;
-}
-
-.detail-metadata {
-    margin: 0 0 24px;
-}
-
-.detail-metadata > div {
+/* ==========================================================================
+   Bố cục chi tiết: Bìa sách (trái) & Nội dung (phải)
+   ========================================================================== */
+.detail-layout {
     display: grid;
-    grid-template-columns: 90px minmax(0, 1fr);
-    gap: 16px;
-    padding: 12px 0;
-    border-bottom: 1px solid #e0e9ef;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+    padding-bottom: 36px;
+    border-bottom: 1px solid #e9dfbf;
+    background: transparent;
 }
 
-.detail-metadata dt {
-    color: #718695;
+/* Khung bìa sách cố định: tỷ lệ chuẩn sách học thuật */
+.detail-cover-box {
+    width: 220px;
+    height: 310px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f1ebd8;
+    border: 1px solid #e2dac0;
+    box-shadow: 0 4px 16px rgba(36, 68, 92, 0.10);
+    flex-shrink: 0;
 }
 
-.detail-metadata dd {
-    margin: 0;
+.detail-cover-box img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
-/* Thao tác giao diện mẫu */
-.detail-actions {
+/* ==========================================================================
+   Phần thông tin chi tiết đầu sách
+   ========================================================================== */
+.detail-information {
+    min-width: 0;
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
+}
+
+/* Dòng ký hiệu đầu trang căn trái */
+.detail-header-row {
+    display: flex;
+    align-items: center;
     gap: 12px;
+    margin-bottom: 4px;
 }
 
-.detail-actions button {
-    padding: 13px 20px;
-    border-radius: 8px;
+.detail-information .location-code {
+    display: inline-block;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #55697d;
 }
 
-.detail-primary {
-    border: 1px solid #f3ce36;
-    background: #f3ce36;
+.detail-title {
+    margin: 4px 0 10px;
+    font-family: 'Literata', serif;
+    font-size: 28px;
+    font-weight: 600;
+    line-height: 1.36;
     color: #24445c;
 }
 
+.detail-author-line {
+    margin: 0 0 14px;
+    font-size: 14.5px;
+    color: #475569;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.detail-author-line strong {
+    color: #24445c;
+    font-weight: 600;
+}
+
+.meta-pipe {
+    color: #cbd5e1;
+    font-weight: 300;
+}
+
+/* Trạng thái mục lục cổ điển: xanh rêu trầm #2E5A44 trên nền giấy kem */
+.book-status-classic {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.2px;
+}
+
+.book-status-classic.is-available {
+    color: #2E5A44;
+}
+
+.book-status-classic.is-unavailable {
+    color: #8B3A2B;
+}
+
+/* Mô tả tóm tắt */
+.detail-description {
+    margin: 0 0 22px;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #556c7d;
+}
+
+/* ==========================================================================
+   Bảng siêu dữ liệu (Metadata Grid) - Mở phẳng với đường kẻ mảnh
+   ========================================================================== */
+.detail-metadata {
+    margin: 0 0 28px;
+    display: flex;
+    flex-direction: column;
+}
+
+.metadata-row {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9dfbf;
+    font-size: 13.5px;
+    align-items: baseline;
+}
+
+.metadata-row:last-child {
+    border-bottom: none;
+}
+
+.metadata-row dt {
+    color: #718695;
+    font-weight: 500;
+}
+
+.metadata-row dd {
+    margin: 0;
+    color: #24445c;
+    line-height: 1.5;
+}
+
+.meta-code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #1a5699;
+    background: #f1ebd8;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid #e2dac0;
+}
+
+/* ==========================================================================
+   Thao tác hành động (Nút chính & phụ)
+   ========================================================================== */
+.detail-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* Nút chính: Đăng ký mượn (Đồng bộ vàng đồng #efd097 toàn trang) */
+.detail-primary {
+    padding: 11px 24px;
+    border: 1px solid #dec383;
+    border-radius: 6px;
+    background: #efd097;
+    color: #24445c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.detail-primary:hover:not(:disabled) {
+    background: #e5c37f;
+    border-color: #d1b16e;
+}
+
+.detail-primary:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.detail-primary:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: #e2dac0;
+    border-color: #d4cbb3;
+    color: #718695;
+}
+
+/* Nút phụ: Thêm vào yêu thích (Đồng bộ nút phụ viền mảnh) */
 .detail-secondary {
-    border: 1px solid #cbdde9;
-    background: white;
-    color: #3476aa;
+    padding: 11px 20px;
+    border: 1px solid #d4cbb3;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #24445c;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.detail-secondary:hover {
+    background: #fdfbf7;
+    border-color: #c9ab67;
+    color: #1a5699;
 }
 
 .detail-secondary[aria-pressed="true"] {
     background: #eaf3f9;
+    border-color: #bcd5e6;
+    color: #1a5699;
 }
 
-.detail-primary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.preview-note {
+    margin: 8px 0 0;
+    font-size: 12px;
+    color: #8b9baa;
+    line-height: 1.6;
 }
 
-/* Sơ đồ vị trí kệ & Ô */
+/* ==========================================================================
+   Khu vực vị trí lưu trữ (Unboxed, trực tiếp trên nền trang)
+   ========================================================================== */
 .detail-location {
-    margin-top: 36px;
-    padding: 28px;
-    border: 1px solid #e0e9ef;
-    border-radius: 16px;
-    background: white;
+    margin-top: 32px;
+    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.detail-location h2 {
-    margin: 0;
+.location-header h2 {
+    margin: 0 0 6px;
     font-family: 'Literata', serif;
-    font-weight: 500;
+    font-size: 22px;
+    font-weight: 600;
+    color: #24445c;
 }
 
-.detail-location > p {
+.location-header p {
+    margin: 0 0 22px;
+    font-size: 13.5px;
     color: #718695;
-    line-height: 1.8;
 }
 
-.shelf-map,
-.cell-map {
-    display: grid;
-    gap: 12px;
+.location-block {
+    margin-bottom: 22px;
+}
+
+.location-subhead {
+    margin: 0 0 10px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #607888;
 }
 
 .shelf-map {
+    display: grid;
     grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .cell-map {
+    display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
 }
 
 .shelf-position,
 .cell-position {
-    padding: 20px 10px;
-    border: 1px solid #dce7ef;
-    border-radius: 8px;
-    background: #f1f6f9;
+    padding: 14px 10px;
+    border: 1px solid #d4cbb3;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.7);
+    color: #24445c;
+    font-size: 13px;
+    font-weight: 600;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.15s ease;
 }
 
-.is-selected {
-    border-color: #d4aa39;
-    background: #fff4f6;
+.shelf-position.is-selected,
+.cell-position.is-selected {
+    background: #efd097;
+    border-color: #dec383;
+    color: #24445c;
+    font-weight: 700;
+    box-shadow: 0 2px 6px rgba(36, 68, 92, 0.08);
 }
 
-.is-selected strong {
-    display: block;
-    margin-top: 8px;
+.selected-badge {
     font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #1a5699;
+    text-transform: uppercase;
 }
 
-/* Responsive */
-@media (max-width: 800px) {
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 860px) {
     .detail-layout {
         grid-template-columns: 1fr;
         gap: 28px;
     }
 
+    .detail-cover-box {
+        width: 180px;
+        height: 254px;
+    }
+
     .shelf-map {
-        grid-template-columns: repeat(3 minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
 @media (max-width: 480px) {
-    .detail-information h1 {
-        font-size: 30px;
+    .detail-title {
+        font-size: 24px;
     }
 
     .detail-actions {
         flex-direction: column;
+        align-items: stretch;
     }
 
-    .detail-location {
-        padding: 20px;
+    .detail-primary,
+    .detail-secondary {
+        width: 100%;
+        text-align: center;
     }
 
     .cell-map {
