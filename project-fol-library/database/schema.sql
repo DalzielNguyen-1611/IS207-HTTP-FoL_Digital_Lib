@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS `tai_khoan` (
     `email` VARCHAR(255) NOT NULL UNIQUE,
     `google_sub` VARCHAR(255) NULL UNIQUE COMMENT 'Dinh danh Google neu dang nhap Google',
     `mat_khau` VARCHAR(255) NULL COMMENT 'Password hash; NULL neu chi dung Google',
-    `trang_thai` ENUM('HoatDong', 'Khoa') NOT NULL DEFAULT 'HoatDong',
+    `trang_thai` ENUM('ChoDuyet', 'HoatDong', 'Khoa') NOT NULL DEFAULT 'ChoDuyet',
     `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     CONSTRAINT `fk_1` FOREIGN KEY (`id_vai_tro`) REFERENCES `vai_tro` (`id_vai_tro`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -76,6 +76,9 @@ CREATE TABLE IF NOT EXISTS `ho_so_nguoi_dung` (
     `ngay_sinh` DATE NOT NULL,
     `so_dien_thoai` VARCHAR(20) NOT NULL,
     `anh_dai_dien` VARCHAR(255) NULL COMMENT 'mặc định sẽ là 1 ảnh nào đấy',
+    `anh_the_sv` VARCHAR(255) NULL COMMENT 'Đường dẫn file ảnh thẻ sinh viên đã nén WebP',
+    `ngay_gui_duyet` DATETIME NULL COMMENT 'Thời điểm sinh viên gửi hồ sơ chờ duyệt',
+    `ghi_chu_duyet` VARCHAR(255) NULL COMMENT 'Lý do từ chối hoặc ghi chú yêu cầu chụp lại thẻ',
     CONSTRAINT `fk_52` FOREIGN KEY (`id_tai_khoan`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_44` FOREIGN KEY (`id_lop`) REFERENCES `id_lop` (`id_lop`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
