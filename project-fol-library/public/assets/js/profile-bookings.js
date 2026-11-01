@@ -1,126 +1,126 @@
-//Các thành phần lịch đặt phòng trong profile
-const bookingsKey = 'fol-demo-bookings-v1'
 const bookingsList = document.querySelector('#bookings-list')
 const bookingsEmpty = document.querySelector('#bookings-empty')
 const bookingsFeedback = document.querySelector('#bookings-feedback')
-const cancellationWindow = 72 * 60 * 60 * 1000
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content ?? ''
 
-//Đọc lịch mẫu
-function readBookings() {
-    const records = JSON.parse(
-        localStorage.getItem(bookingsKey) ?? '[]'
-    )
-
-    if (!Array.isArray(records)) {
-        throw new Error('Dữ liệu lịch không hợp lệ')
-    }
-
-    return records
+function formatBookingDate(date) {
+    const parsedDate = new Date(`${date}T00:00:00+07:00`)
+    return new Intl.DateTimeFormat('vi-VN', {
+        weekday: 'long',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        timeZone: 'Asia/Ho_Chi_Minh',
+    }).format(parsedDate)
 }
 
-//Hiển thị lịch bằng textContent để không chèn HTML từ dữ liệu lưu trữ
-function renderBookings() {
+function bookingStatus(booking) {
+    if (booking.status === 'Huy') return 'Đã hủy'
+    if (booking.status === 'DaNhanCho') return 'Đã check-in'
+    if (booking.status === 'QuaHanKhongDen') return 'Không đến'
+
+    const startsAt = Date.parse(booking.starts_at)
+    return Number.isFinite(startsAt) && startsAt <= Date.now()
+        ? 'Đã qua ca đọc'
+        : 'Đã đặt'
+}
+
+async function loadBookings() {
+    const response = await fetch('/api/reading-room/bookings', {
+        headers: {
+            Accept: 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+    })
+    const result = await response.json()
+
+    if (!response.ok || result.success !== true || !Array.isArray(result.bookings)) {
+        throw new Error(result.error ?? 'Không tải được lịch phòng đọc.')
+    }
+
+    return result.bookings
+}
+
+async function cancelBooking(bookingId) {
+    const response = await fetch('/api/reading-room/bookings/cancel', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-Token': csrfToken,
+        },
+        body: JSON.stringify({ booking_id: bookingId }),
+    })
+    const result = await response.json()
+
+    if (!response.ok || result.success !== true) {
+        throw new Error(result.error ?? 'Không thể hủy lượt đặt.')
+    }
+}
+
+async function renderBookings() {
     if (!bookingsList || !bookingsEmpty || !bookingsFeedback) return
 
     bookingsList.replaceChildren()
 
     try {
-        const bookings = readBookings()
+        const bookings = await loadBookings()
         bookingsEmpty.hidden = bookings.length !== 0
 
-        bookings.forEach((booking, index) => {
-            const startsAt = Date.parse(booking.start)
-            const cancelled = booking.status === 'cancelled'
-            const validDate = Number.isFinite(startsAt)
-            const completed = validDate && startsAt <= Date.now()
-            const canCancel = 
-                !cancelled &&
-                booking.status === 'active' &&
-                validDate &&
-                startsAt - Date.now() >= cancellationWindow
-            
+        bookings.forEach((booking) => {
             const card = document.createElement('article')
             card.className = 'profile-booking'
 
             const title = document.createElement('h3')
-            title.textContent = String(booking.label ?? 'Lịch đọc')
-            
-            const status = document.createElement('p')
-            status.textContent = cancelled
-                ? 'Đã hủy'
-                : !validDate
-                    ? 'Ngày ca đọc không hợp lệ'
-                    : completed
-                        ? 'Ca đã kết thúc thời gian bắt đầu'
-                        : 'Đã đặt mẫu'
-            
-            card.append(title, status)
+            title.textContent = `${booking.shift} · ${formatBookingDate(booking.date)}`
 
-            if (!cancelled && !completed && validDate) {
+            const details = document.createElement('p')
+            details.textContent = `${booking.start.slice(0, 5)}–${booking.end.slice(0, 5)} · Ghế ${booking.seat}`
+
+            const status = document.createElement('p')
+            status.textContent = bookingStatus(booking)
+
+            card.append(title, details, status)
+
+            if (booking.status === 'DaDat') {
                 const cancelButton = document.createElement('button')
                 cancelButton.type = 'button'
                 cancelButton.className = 'profile-reset'
                 cancelButton.textContent = 'Hủy lịch'
-                cancelButton.disabled = !canCancel
+                cancelButton.disabled = !booking.can_cancel
+                cancelButton.addEventListener('click', async () => {
+                    if (!window.confirm('Bạn muốn hủy lịch phòng đọc này?')) return
 
-                cancelButton.addEventListener('click', () => {
-                    cancelBooking(index)
+                    cancelButton.disabled = true
+                    try {
+                        await cancelBooking(Number(booking.id))
+                        bookingsFeedback.textContent = 'Đã hủy lượt đặt chỗ.'
+                        await renderBookings()
+                    } catch (error) {
+                        bookingsFeedback.textContent = error instanceof Error
+                            ? error.message
+                            : 'Không thể hủy lượt đặt chỗ.'
+                        cancelButton.disabled = false
+                    }
                 })
-
                 card.append(cancelButton)
-
-                if (!canCancel) {
+                if (!booking.can_cancel) {
                     const note = document.createElement('p')
-                    note.textContent = 'Không thể hủy vì còn dưới 72 giờ trước ca đọc'
+                    note.textContent = 'Chỉ có thể hủy trước ca đọc ít nhất 24 giờ.'
                     card.append(note)
                 }
             }
 
             bookingsList.append(card)
         })
-    } catch {
+    } catch (error) {
         bookingsEmpty.hidden = true
-        bookingsFeedback.textContent = 'Không đọc được lịch phòng đọc trên trình duyệt'
+        bookingsFeedback.textContent = error instanceof Error
+            ? error.message
+            : 'Không tải được lịch phòng đọc.'
     }
 }
 
-//Kiểm tra lại thời gian ngay lúc này
-function cancelBooking(index) {
-    if (!window.confirm('Bạn muốn hủy lịch phòng đọc này?')) return
-
-    try {
-        const bookings = readBookings()
-        const booking = bookings[index]
-        const startsAt = Date.parse(booking?.start)
-
-        if (
-            !booking ||
-            booking.status !== 'active' ||
-            !Number.isFinite(startsAt) ||
-            startsAt - Date.now() < cancellationWindow
-        ) {
-            bookingsFeedback.textContent = 'Lịch không còn đủ điều kiện hủy'
-            renderBookings()
-            return
-        }
-
-        booking.status = 'cancelled'
-        booking.cancelledAt = new Date().toISOString()
-
-        localStorage.setItem(bookingsKey, JSON.stringify(bookings))
-        renderBookings()
-        bookingsFeedback.textContent = 'Đã hủy lịch mẫu'
-    } catch {
-        bookingsFeedback.textContent = 'Không cập nhật được lịch'
-    }
-}
-
-//Khôi phục dữ liệu và đồng bộ giữa các tab
 window.addEventListener('pageshow', renderBookings)
-window.addEventListener('storage', (event) => {
-    if (event.key === bookingsKey || event.key === null) {
-        renderBookings()
-    }
-})
-
 renderBookings()

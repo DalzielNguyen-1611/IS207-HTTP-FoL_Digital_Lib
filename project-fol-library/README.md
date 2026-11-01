@@ -129,6 +129,16 @@ project-fol-library/
    ```
    Truy cập tại: `http://localhost:8000`
 
+### 4.3. Đặt chỗ phòng đọc
+- Cần đăng nhập bằng tài khoản sinh viên đang hoạt động; mỗi tài khoản chỉ được đặt một ghế trong cùng ca và ngày.
+- Lịch có thể chuyển qua các tuần để xem; chỉ tuần kế tiếp mới mở đặt chỗ. Khi sang tuần mới, lịch và phạm vi đặt sẽ tự chuyển theo tuần kế tiếp.
+- Hệ thống tự động phân bổ ghế còn trống và lưu lượt đặt vào bảng `dat_cho`.
+- Phòng đọc có 3 ca mỗi ngày: sáng 07:30–11:30, chiều 13:00–17:00, tối 17:30–21:00.
+- Có thể xem hoặc hủy lượt đặt tại **Trang cá nhân → Phòng đọc** hoặc ngay trên lịch phòng đọc; chỉ được hủy trước ca ít nhất 24 giờ.
+- API: `GET /api/reading-room/bookings?week=YYYY-MM-DD` (ngày đầu tuần, thứ Hai), `POST /api/reading-room/bookings/create` (`date`, `shift_id`) và `POST /api/reading-room/bookings/cancel` (`booking_id`). Các yêu cầu ghi dữ liệu cần session đăng nhập và CSRF token.
+- Với cơ sở dữ liệu đã tạo trước đó, chạy migration `database/migrations/2026_11_01_000006_reading_room_booking_indexes.sql`; cơ sở dữ liệu mới sẽ có index qua `database/schema.sql`.
+- Cập nhật các ca đã có sang lịch 3 ca và hạn hủy 24 giờ bằng migration `database/migrations/2026_11_01_000007_three_reading_shifts_24_hour_cancellation.sql`. Ca cũ được ngừng hoạt động để giữ nguyên tham chiếu lịch sử.
+
 ---
 
 ## 📜 5. NGUYÊN TẮC PHÁT TRIỂN & KIỂM THỬ

@@ -33,6 +33,14 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
     <meta charset='UTF-8'>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Trang cá nhân · Thư viện Khoa Văn học</title>
+    <?php
+    $csrfToken = \App\Core\Session::get('csrf_token');
+    if (!is_string($csrfToken) || $csrfToken === '') {
+        $csrfToken = bin2hex(random_bytes(32));
+        \App\Core\Session::set('csrf_token', $csrfToken);
+    }
+    ?>
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Favicon biểu trưng Khoa Văn học -->
     <link rel="icon" type="image/png" href="/assets/images/logo.png">
@@ -391,7 +399,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
                     </div>
                 </section>
 
-                <!-- Lịch đặt phòng đọc lưu trên trình duyệt -->
+                <!-- Lịch đặt phòng đọc của tài khoản -->
                 <section
                     class="profile-panel"
                     id="panel-bookings"
@@ -401,8 +409,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
                     <h2 id="bookings-title">Lịch phòng đọc</h2>
 
                     <p class="preview-note">
-                        Lịch mẫu trên trình duyệt này, chưa gắn với tài khoản.
-                        Có thể hủy khi còn ít nhất 72 giờ trước ca đọc.
+                        Lịch đặt của tài khoản. Có thể hủy khi còn ít nhất 24 giờ trước ca đọc.
                     </p>
 
                     <!-- Thông báo thao tác -->
@@ -426,8 +433,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
     <!-- Tương tác hồ sơ mẫu -->
     <script src="/assets/js/profile.js" defer></script>
 
-    <!-- Quản lý phòng đọc mẫu -->
+    <!-- Quản lý phòng đọc -->
     <script src="/assets/js/profile-bookings.js" defer></script>
 </body>
 </html>
-

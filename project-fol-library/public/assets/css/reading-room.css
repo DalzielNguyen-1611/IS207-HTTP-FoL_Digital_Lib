@@ -42,6 +42,25 @@
   font-size: 11px;
 }
 
+.room-week-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+  color: #24445c;
+  font-size: 13px;
+}
+
+.room-week-navigation a {
+  color: #3476aa;
+  text-decoration: none;
+}
+
+.room-week-navigation a:hover {
+  text-decoration: underline;
+}
+
 /* ===== Bảng lịch có thể cuộn ngang ===== */
 .room-table-wrap {
   overflow-x: auto;
@@ -118,6 +137,26 @@
   border-color: #d4aa39;
   background: #fff4d6;
   color: #80611f;
+}
+
+.room-booking-cancel {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e6b8b8;
+  border-radius: 7px;
+  background: #fff;
+  color: #a33b3b;
+  font-size: 11px;
+}
+
+.room-booking-cancel:hover:not(:disabled) {
+  border-color: #b94a48;
+  background: #fff4f2;
+}
+
+.room-booking-cancel:disabled {
+  color: #7a8790;
+  cursor: not-allowed;
 }
 
 /* ===== Hộp xác nhận ===== */

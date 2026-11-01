@@ -147,6 +147,9 @@ CREATE TABLE IF NOT EXISTS `dat_cho` (
     `thoi_gian_huy` DATETIME NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DaDat' COMMENT 'DaDat, DaNhanCho, Huy, QuaHanKhongDen',
     `ghi_chu` VARCHAR(500) NULL,
+    INDEX `idx_booking_slot_status` (`ngay_dat`, `id_ca_doc`, `trang_thai`),
+    INDEX `idx_booking_user_slot_status` (`id_nguoi_dung`, `ngay_dat`, `id_ca_doc`, `trang_thai`),
+    INDEX `idx_booking_seat_slot_status` (`id_cho_ngoi`, `id_ca_doc`, `ngay_dat`, `trang_thai`),
     CONSTRAINT `fk_19` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_20` FOREIGN KEY (`id_cho_ngoi`) REFERENCES `cho_ngoi` (`id_cho_ngoi`) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT `fk_21` FOREIGN KEY (`id_ca_doc`) REFERENCES `ca_doc` (`id_ca_doc`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -466,4 +469,3 @@ END //
 DELIMITER ;
 
 SET FOREIGN_KEY_CHECKS = 1;
-

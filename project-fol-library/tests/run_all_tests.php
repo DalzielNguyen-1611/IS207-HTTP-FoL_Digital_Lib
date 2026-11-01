@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * MASTER TEST RUNNER - HỆ THỐNG THƯ VIỆN KHOA VĂN HỌC (FoL Library System)
- * Tự động quét và thực thi toàn bộ 102 bài kiểm thử (Unit & Integration)
+ * Tự động thực thi các bộ kiểm thử Unit & Integration
  * Cách chạy: php tests/run_all_tests.php
  */
 
@@ -15,6 +15,7 @@ $testSuites = [
         'tests/Unit/GoogleAuthServiceTest.php' => 'Xác thực Google OAuth 2.0 & Giới hạn Domain trường',
         'tests/Unit/ImageOptimizerServiceTest.php' => 'Tự động Thu nhỏ & Nén ảnh WebP (GD Library)',
         'tests/Unit/StudentCardApprovalTest.php' => 'Quy trình Xét duyệt Thẻ Sinh viên & Luồng Chờ duyệt',
+        'tests/Unit/RoomBookingServiceTest.php' => 'Nghiệp vụ đặt chỗ phòng đọc và phân bổ ghế',
     ],
     'Integration Tests' => [
         'tests/Integration/ViewsDbIntegrationTest.php' => 'Tích hợp 15 Giao diện Views kết nối CSDL thực',
@@ -103,7 +104,6 @@ foreach ($suiteResults as $res) {
 echo str_repeat('-', 80) . PHP_EOL;
 echo "Tổng số Test Suites: {$totalSuites} | Đạt: {$passedSuites} | Thất bại: {$failedSuites}" . PHP_EOL;
 echo "Tỷ lệ thành công:    " . round(($passedSuites / $totalSuites) * 100, 1) . "%" . PHP_EOL;
-echo "Tổng số Test Cases:  102 / 102 test cases PASS 100%" . PHP_EOL;
 echo "================================================================================" . PHP_EOL . PHP_EOL;
 
 exit($failedSuites === 0 ? 0 : 1);
