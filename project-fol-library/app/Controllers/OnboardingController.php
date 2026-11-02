@@ -53,6 +53,8 @@ class OnboardingController
         }
 
         $classes = $this->userRepo->getClassesList();
+        $faculties = $this->userRepo->getFacultiesList();
+        $majors = $this->userRepo->getMajorsList();
         $error = isset($_GET['error']) ? trim((string)$_GET['error']) : null;
         $success = isset($_GET['success']) && $_GET['success'] === '1';
 
@@ -86,14 +88,16 @@ class OnboardingController
         // 1. Trích xuất và chuẩn hóa dữ liệu biểu mẫu
         $mssv = strtoupper(trim((string)($_POST['mssv'] ?? '')));
         $hoTen = trim((string)($_POST['ho_ten'] ?? ''));
-        $idLop = (int)($_POST['id_lop'] ?? 0);
+        $tenLop = trim((string)($_POST['ten_lop'] ?? $_POST['lop'] ?? ''));
+        $idNganh = (int)($_POST['id_nganh'] ?? $_POST['nganh'] ?? 1);
+        $khoa = trim((string)($_POST['khoa'] ?? 'Khoa Văn học'));
         $gioiTinh = trim((string)($_POST['gioi_tinh'] ?? 'Nam'));
         $ngaySinh = trim((string)($_POST['ngay_sinh'] ?? ''));
         $soDienThoai = trim((string)($_POST['so_dien_thoai'] ?? ''));
 
         // 2. Kiểm tra tính hợp lệ (Validation)
         if ($mssv === '') {
-            $this->redirectWithError('Mã số sinh viên (MSSV) không được để trống.');
+            $this->redirectWithError('Mã số sinh viên không được để trống.');
             return;
         }
         if (!preg_match('/^[A-Z0-9_\-\.]{4,20}$/i', $mssv)) {
@@ -104,8 +108,16 @@ class OnboardingController
             $this->redirectWithError('Họ và tên sinh viên phải có ít nhất 2 ký tự.');
             return;
         }
-        if ($idLop <= 0) {
-            $this->redirectWithError('Vui lòng chọn Lớp - Ngành học hợp lệ.');
+        if ($tenLop === '') {
+            $this->redirectWithError('Vui lòng nhập tên Lớp sinh hoạt của bạn.');
+            return;
+        }
+        if ($soDienThoai === '') {
+            $this->redirectWithError('Số điện thoại liên hệ là bắt buộc, vui lòng không để trống.');
+            return;
+        }
+        if (!preg_match('/^[0-9]{9,12}$/', $soDienThoai)) {
+            $this->redirectWithError('Số điện thoại không hợp lệ (phải từ 9-12 chữ số).');
             return;
         }
         if (!in_array($gioiTinh, ['Nam', 'Nu', 'Khac'], true)) {
@@ -115,29 +127,38 @@ class OnboardingController
             $this->redirectWithError('Ngày sinh không hợp lệ.');
             return;
         }
-        if ($soDienThoai !== '' && !preg_match('/^[0-9]{9,12}$/', $soDienThoai)) {
-            $this->redirectWithError('Số điện thoại không hợp lệ (phải từ 9-12 chữ số).');
-            return;
-        }
 
-        // 3. Xử lý tải lên và tự động tối ưu / nén ảnh thẻ sinh viên sang WebP
+        // Tự động tìm hoặc tạo lớp theo tên lớp tự điền và ngành học đã chọn
+        $idLop = $this->userRepo->findOrCreateClass($tenLop, $idNganh);
+
+        // 3. Xử lý tải lên và tối ưu ảnh thẻ sinh viên lưu dưới tên {mssv}.jpg
         $cardUrl = null;
-        if (isset($_FILES['anh_the_sv']) && $_FILES['anh_the_sv']['error'] === UPLOAD_ERR_OK) {
-            $optResult = $this->optimizer->optimizeUploadedFile(
-                file: $_FILES['anh_the_sv'],
-                subDir: 'student_cards',
-                filenamePrefix: 'card_' . $userId,
-                maxWidth: 1000,
-                maxHeight: 1000,
-                quality: 80
-            );
+        $cleanMssv = preg_replace('/[^a-zA-Z0-9_-]/', '', $mssv);
+        $cardFilename = "{$cleanMssv}.jpg";
 
-            if (!$optResult['success']) {
-                $this->redirectWithError($optResult['error'] ?? 'Lỗi xử lý nén ảnh thẻ sinh viên.');
+        if (isset($_FILES['anh_the_sv']) && $_FILES['anh_the_sv']['error'] === UPLOAD_ERR_OK) {
+            try {
+                $optResult = $this->optimizer->optimizeUploadedFile(
+                    file: $_FILES['anh_the_sv'],
+                    subDir: 'student_cards',
+                    prefix: 'card_' . $userId,
+                    maxWidth: 1000,
+                    maxHeight: 1000,
+                    quality: 85,
+                    customFilename: $cardFilename
+                );
+
+                if (!$optResult['success']) {
+                    $this->redirectWithError($optResult['error'] ?? 'Lỗi xử lý ảnh thẻ sinh viên.');
+                    return;
+                }
+
+                // Lưu tên file mssv.jpg vào cơ sở dữ liệu theo yêu cầu
+                $cardUrl = $cardFilename;
+            } catch (\Throwable $e) {
+                $this->redirectWithError('Lỗi xử lý ảnh: ' . $e->getMessage());
                 return;
             }
-
-            $cardUrl = $optResult['url'];
         } else {
             // Nếu không upload ảnh mới, kiểm tra xem đã có ảnh thẻ trước đó chưa
             if (!empty($user['anh_the_sv'])) {

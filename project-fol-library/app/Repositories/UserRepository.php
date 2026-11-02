@@ -30,12 +30,13 @@ class UserRepository
                 hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
                 hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
                 hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
-                l.`ten_lop`, ng.`ten_nganh`
+                l.`ten_lop`, ng.`id_nganh`, ng.`ten_nganh`, k.`id_khoa`, k.`ten_khoa`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
              LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
              LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+             LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
              WHERE tk.`id_tai_khoan` = :id
              LIMIT 1'
         );
@@ -55,12 +56,13 @@ class UserRepository
                 hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
                 hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
                 hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
-                l.`ten_lop`, ng.`ten_nganh`
+                l.`ten_lop`, ng.`id_nganh`, ng.`ten_nganh`, k.`id_khoa`, k.`ten_khoa`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
              LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
              LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+             LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
              WHERE tk.`email` = :email
              LIMIT 1'
         );
@@ -108,12 +110,13 @@ class UserRepository
                 hs.`ho_ten`, hs.`mssv`, hs.`id_lop`, hs.`gioi_tinh`, hs.`ngay_sinh`,
                 hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
                 hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
-                l.`ten_lop`, ng.`ten_nganh`
+                l.`ten_lop`, ng.`id_nganh`, ng.`ten_nganh`, k.`id_khoa`, k.`ten_khoa`
              FROM `tai_khoan` tk
              INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
              LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
              LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
              LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+             LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
              WHERE tk.`google_sub` = :sub
              LIMIT 1'
         );
@@ -292,12 +295,13 @@ class UserRepository
                     hs.`mssv`, hs.`ho_ten`, hs.`gioi_tinh`, hs.`ngay_sinh`,
                     hs.`so_dien_thoai`, hs.`anh_dai_dien`, hs.`anh_the_sv`,
                     hs.`ngay_gui_duyet`, hs.`ghi_chu_duyet`,
-                    l.`ten_lop`, ng.`ten_nganh`
+                    l.`ten_lop`, ng.`id_nganh`, ng.`ten_nganh`, k.`id_khoa`, k.`ten_khoa`
                 FROM `tai_khoan` tk
                 INNER JOIN `vai_tro` vt ON tk.`id_vai_tro` = vt.`id_vai_tro`
                 INNER JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
                 LEFT JOIN `id_lop` l ON hs.`id_lop` = l.`id_lop`
                 LEFT JOIN `nganh` ng ON l.`id_nganh` = ng.`id_nganh`
+                LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
                 WHERE vt.`ma_vai_tro` = "STUDENT"
                   AND tk.`trang_thai` = "ChoDuyet"
                   AND hs.`anh_the_sv` IS NOT NULL
@@ -372,6 +376,71 @@ class UserRepository
                 ORDER BY ng.`ten_nganh` ASC, l.`ten_lop` ASC';
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Lấy danh sách các Khoa / Viện đào tạo trong trường
+     */
+    public function getFacultiesList(): array
+    {
+        $sql = 'SELECT `id_khoa`, `ten_khoa` FROM `khoa` ORDER BY `id_khoa` ASC';
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Lấy danh mục các chuyên ngành đào tạo, kèm id_khoa và ten_khoa
+     */
+    public function getMajorsList(?int $idKhoa = null): array
+    {
+        if ($idKhoa !== null && $idKhoa > 0) {
+            $stmt = $this->db->prepare(
+                'SELECT ng.`id_nganh`, ng.`ten_nganh`, ng.`id_khoa`, k.`ten_khoa`
+                 FROM `nganh` ng
+                 LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
+                 WHERE ng.`id_khoa` = :id_khoa
+                 ORDER BY ng.`id_nganh` ASC'
+            );
+            $stmt->execute([':id_khoa' => $idKhoa]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+        }
+
+        $sql = 'SELECT ng.`id_nganh`, ng.`ten_nganh`, ng.`id_khoa`, k.`ten_khoa`
+                FROM `nganh` ng
+                LEFT JOIN `khoa` k ON ng.`id_khoa` = k.`id_khoa`
+                ORDER BY k.`id_khoa` ASC, ng.`id_nganh` ASC';
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Tìm mã lớp hiện có hoặc tự động thêm lớp mới khi sinh viên tự điền
+     */
+    public function findOrCreateClass(string $tenLop, int $idNganh = 1): int
+    {
+        $trimmed = trim($tenLop);
+        if ($trimmed === '') {
+            $trimmed = 'VH2024.1';
+        }
+
+        $stmt = $this->db->prepare(
+            'SELECT `id_lop` FROM `id_lop` WHERE LOWER(TRIM(`ten_lop`)) = LOWER(:ten_lop) LIMIT 1'
+        );
+        $stmt->execute([':ten_lop' => $trimmed]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($existing && !empty($existing['id_lop'])) {
+            return (int)$existing['id_lop'];
+        }
+
+        $insert = $this->db->prepare(
+            'INSERT INTO `id_lop` (`ten_lop`, `id_nganh`) VALUES (:ten_lop, :id_nganh)'
+        );
+        $insert->execute([
+            ':ten_lop' => $trimmed,
+            ':id_nganh' => $idNganh > 0 ? $idNganh : 1
+        ]);
+
+        return (int)$this->db->lastInsertId();
     }
 }
 
