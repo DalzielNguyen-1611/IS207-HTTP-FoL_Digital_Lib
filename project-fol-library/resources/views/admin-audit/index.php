@@ -255,27 +255,27 @@ if (empty($actions)) {
                                 <!-- Bản ghi nhật ký hệ thống -->
                                 <tr
                                     data-audit-row
-                                    data-date="<?= htmlspecialchars($log['date'], ENT_QUOTES, 'UTF-8') ?>"
-                                    data-action="<?= htmlspecialchars($log['action'], ENT_QUOTES, 'UTF-8') ?>"
+                                    data-date="<?= htmlspecialchars((string)($log['date'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
+                                    data-action="<?= htmlspecialchars((string)($log['action'] ?? ''), ENT_QUOTES, 'UTF-8') ?>"
                                     data-search="<?= htmlspecialchars(
-                                        $log['staff'] . ' ' . $log['target'] . ' ' .
-                                        $log['detail'] . ' ' . $actionLabel,
+                                        (string)($log['staff'] ?? '') . ' ' . (string)($log['target'] ?? '') . ' ' .
+                                        (string)($log['detail'] ?? '') . ' ' . $actionLabel,
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?>"
                                 >
                                     <td class="audit-time">
                                         <?= htmlspecialchars(
-                                            implode('/', array_reverse(explode('-', $log['date']))),
+                                            implode('/', array_reverse(explode('-', (string)($log['date'] ?? '')))),
                                             ENT_QUOTES,
                                             'UTF-8'
                                         ) ?>
                                         <br>
-                                        <?= htmlspecialchars($log['time'], ENT_QUOTES, 'UTF-8') ?>
+                                        <?= htmlspecialchars((string)($log['time'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
                                     </td>
 
                                     <td><?= htmlspecialchars(
-                                        $log['staff'],
+                                        (string)($log['staff'] ?? ''),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?></td>
@@ -287,13 +287,13 @@ if (empty($actions)) {
                                     ) ?></td>
 
                                     <td><?= htmlspecialchars(
-                                        $log['target'],
+                                        (string)($log['target'] ?? ''),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?></td>
 
                                     <td><?= htmlspecialchars(
-                                        $log['detail'],
+                                        (string)($log['detail'] ?? ''),
                                         ENT_QUOTES,
                                         'UTF-8'
                                     ) ?></td>
