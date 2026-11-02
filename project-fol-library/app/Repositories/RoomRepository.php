@@ -139,7 +139,7 @@ class RoomRepository
                     END AS `attendance`,
                     (CASE WHEN dc.`trang_thai` = 'QuaHanKhongDen' THEN 1 ELSE 0 END) AS `violation`
                 FROM `dat_cho` dc
-                INNER JOIN `tai_khoan` tk ON dc.`id_nguoi_dung` = tk.`id_tai_khoan`
+                LEFT JOIN `tai_khoan` tk ON dc.`id_nguoi_dung` = tk.`id_tai_khoan`
                 LEFT JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan`
                 INNER JOIN `ca_doc` cd ON dc.`id_ca_doc` = cd.`id_ca_doc`
                 LEFT JOIN `cho_ngoi` cn ON dc.`id_cho_ngoi` = cn.`id_cho_ngoi`

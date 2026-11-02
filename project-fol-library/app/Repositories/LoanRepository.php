@@ -149,6 +149,7 @@ class LoanRepository
                     COALESCE(hs.`ho_ten`, tk.`email`) AS `student_name`,
                     ds.`tieu_de` AS `book_title`,
                     cs.`id_cuon_sach` AS `book_copy`,
+                    ctm.`han_tra`,
                     ctm.`trang_thai`,
                     pm.`ngay_dang_ky`
                 FROM `phieu_muon` pm
@@ -170,25 +171,43 @@ class LoanRepository
      */
     public function getReportsSummary(): array
     {
-        // 6 mốc thời gian thực tế: Hôm nay (0), Hôm qua (-1), 7 ngày trước (-7), 35 ngày (-35), 100 ngày (-100), 1 năm (-365)
-        $offsets = [0, -1, -7, -35, -100, -365];
+        // Thu thập các mốc ngày có hoạt động mượn hoặc trả thực tế từ CSDL
+        $datesStmt = $this->db->query("
+            SELECT DISTINCT `ngay_muon` AS `dt` FROM `chi_tiet_muon` WHERE `ngay_muon` IS NOT NULL
+            UNION
+            SELECT DISTINCT `ngay_tra_thuc_te` AS `dt` FROM `chi_tiet_muon` WHERE `ngay_tra_thuc_te` IS NOT NULL
+        ");
+        $existingDates = $datesStmt ? ($datesStmt->fetchAll(PDO::FETCH_COLUMN) ?: []) : [];
+
+        // Đảm bảo luôn có các mốc tham chiếu gần nhất
+        $standardOffsets = [0, -1, -7, -20, -35, -100, -365];
+        foreach ($standardOffsets as $off) {
+            $d = date('Y-m-d', strtotime("{$off} days"));
+            if (!in_array($d, $existingDates, true)) {
+                $existingDates[] = $d;
+            }
+        }
+
+        // Sắp xếp ngày giảm dần
+        rsort($existingDates);
+
+        $todayTs = strtotime('today');
         $reports = [];
 
-        foreach ($offsets as $offset) {
-            $date = date('Y-m-d', strtotime("{$offset} days"));
-
-            // Đếm số cuốn sách mượn trong ngày đó
+        foreach (array_slice($existingDates, 0, 15) as $date) {
             $borrowStmt = $this->db->prepare("SELECT COUNT(*) FROM `chi_tiet_muon` WHERE `ngay_muon` = :dt");
             $borrowStmt->execute([':dt' => $date]);
             $borrowed = (int)$borrowStmt->fetchColumn();
 
-            // Đếm số cuốn sách trả trong ngày đó
             $returnStmt = $this->db->prepare("SELECT COUNT(*) FROM `chi_tiet_muon` WHERE `ngay_tra_thuc_te` = :dt");
             $returnStmt->execute([':dt' => $date]);
             $returned = (int)$returnStmt->fetchColumn();
 
+            $diffDays = (int)round((strtotime($date) - $todayTs) / 86400);
+
             $reports[] = [
-                'offset' => $offset,
+                'date' => $date,
+                'offset' => $diffDays,
                 'borrowed' => $borrowed,
                 'returned' => $returned,
             ];

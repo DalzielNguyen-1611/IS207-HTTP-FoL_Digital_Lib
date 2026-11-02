@@ -33,6 +33,11 @@ class LibrarianDashboardService
 
         $statistics = [
             [
+                'label' => 'Thẻ chờ duyệt',
+                'value' => number_format($rawStats['pending_count']),
+                'note' => $rawStats['pending_count'] > 0 ? 'Cần kiểm tra và kích hoạt' : 'Đã duyệt toàn bộ bạn đọc',
+            ],
+            [
                 'label' => 'Sách đang mượn',
                 'value' => number_format($rawStats['borrowed_count']),
                 'note' => 'Tổng cuốn sách đang phục vụ mượn',
@@ -74,6 +79,7 @@ class LibrarianDashboardService
             'statistics' => $statistics,
             'readingShifts' => $shifts,
             'attentionLoans' => $attentionLoans,
+            'pendingCount' => $rawStats['pending_count'],
         ];
     }
 }

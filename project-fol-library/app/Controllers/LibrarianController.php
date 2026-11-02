@@ -46,6 +46,7 @@ class LibrarianController
         $statistics = $data['statistics'];
         $readingShifts = $data['readingShifts'];
         $attentionLoans = $data['attentionLoans'];
+        $pendingCount = $data['pendingCount'];
 
         // 3. Render View
         $viewPath = dirname(__DIR__, 2) . '/resources/views/librarian/index.php';

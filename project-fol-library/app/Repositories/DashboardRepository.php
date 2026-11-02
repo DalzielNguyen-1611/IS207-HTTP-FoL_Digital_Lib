@@ -45,12 +45,19 @@ class DashboardRepository
         $stmtCopies = $this->db->query("SELECT COUNT(*) FROM `cuon_sach`");
         $copyCount = (int)($stmtCopies ? $stmtCopies->fetchColumn() : 0);
 
+        // 6. Số lượng thẻ sinh viên đang chờ duyệt
+        $stmtPending = $this->db->query("SELECT COUNT(*) FROM `tai_khoan` tk 
+                                         INNER JOIN `ho_so_nguoi_dung` hs ON tk.`id_tai_khoan` = hs.`id_tai_khoan` 
+                                         WHERE tk.`trang_thai` = 'ChoDuyet' AND hs.`anh_the_sv` IS NOT NULL");
+        $pendingCount = (int)($stmtPending ? $stmtPending->fetchColumn() : 0);
+
         return [
             'borrowed_count' => $borrowCount,
             'overdue_count' => $overdueCount,
             'booking_today_count' => $bookingTodayCount,
             'total_titles' => $titleCount,
             'total_copies' => $copyCount,
+            'pending_count' => $pendingCount,
         ];
     }
 
