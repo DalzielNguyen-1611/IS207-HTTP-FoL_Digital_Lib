@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 // Dữ liệu thời gian thực được cung cấp từ LibrarianController
 // Tự động khởi tạo qua LibrarianDashboardService nếu được truy cập hoặc require độc lập
-if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || !isset($today)) {
+if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || !isset($today) || !isset($pendingCount)) {
     $dashboardService = new \App\Services\LibrarianDashboardService();
     $overviewData = $dashboardService->getOverviewData();
     $today = $overviewData['today'];
     $statistics = $overviewData['statistics'];
     $readingShifts = $overviewData['readingShifts'];
     $attentionLoans = $overviewData['attentionLoans'];
+    $pendingCount = $overviewData['pendingCount'] ?? 0;
 }
 ?>
 <!DOCTYPE html>
@@ -102,22 +103,7 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
-            <?php
-                $currentUser = \App\Core\Session::getAuthUser();
-                $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Người dùng', ENT_QUOTES, 'UTF-8');
-                $dashboardUrl = match ($navRole) {
-                    'ADMIN' => '/admin/settings',
-                    'LIBRARIAN' => '/librarian',
-                    default => '/profile',
-                };
-            ?>
             <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
-                <?php if ($navRole !== 'ADMIN'): ?>
-                    <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
-                        <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
-                        <span><?= $userName ?></span>
-                    </a>
-                <?php endif; ?>
                 <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
                     Đăng xuất
                 </a>
@@ -130,19 +116,24 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
     </header>
 
     <main class="staff-layout">
-        <!-- Điều hướng nghiệp vụ, các mục chưa xây dựng được đánh dấu rõ -->
+        <!-- Điều hướng nghiệp vụ cán bộ thư viện -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
-            <a href="/librarian" aria-current="page">Tổng quan</a>
-            <a href="/librarian/students">Duyệt thẻ sinh viên</a>
-            <a href="/librarian/books">Quản lý sách</a>
-            <a href="/librarian/counter">Mượn / trả</a>
-            <a href="/librarian/rooms">Phòng đọc</a>
-            <a href="/librarian/reports">Báo cáo</a>
+            <a href="/librarian" aria-current="page"><span>Tổng quan</span></a>
+            <a href="/librarian/students">
+                <span>Duyệt thẻ sinh viên</span>
+                <?php if (($pendingCount ?? 0) > 0): ?>
+                    <span class="staff-nav-badge"><?= $pendingCount ?></span>
+                <?php endif; ?>
+            </a>
+            <a href="/librarian/books"><span>Quản lý sách</span></a>
+            <a href="/librarian/counter"><span>Mượn / trả</span></a>
+            <a href="/librarian/rooms"><span>Phòng đọc</span></a>
+            <a href="/librarian/reports"><span>Báo cáo</span></a>
             <?php if (\App\Core\Session::getRoleCode() === 'ADMIN'): ?>
                 <span class="staff-menu-label" style="margin-top:16px;">CHUYỂN VAI TRÒ TEST</span>
-                <a href="/admin/settings">Về trang quản trị</a>
-                <a href="/profile">Về trang cá nhân (SV)</a>
+                <a href="/admin/settings"><span>Về trang quản trị</span></a>
+                <a href="/profile"><span>Về trang cá nhân (SV)</span></a>
             <?php endif; ?>
         </nav>
 

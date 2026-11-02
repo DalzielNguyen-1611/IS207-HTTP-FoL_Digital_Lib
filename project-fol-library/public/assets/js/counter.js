@@ -8,9 +8,9 @@ const counterFeedback = document.querySelector('#counter-feedback')
 const counterRows = document.querySelector('#counter-loans')
 const counterEmpty = document.querySelector('#counter-empty')
 
-// Phiếu mẫu chỉ giữ trong bộ nhớ của trang.
-const counterLoans = []
-let loanSequence = 1
+// Phiếu mượn thực tế từ CSDL Thư viện FoL
+const counterLoans = Array.isArray(window.__INITIAL_COUNTER_LOANS__) ? [...window.__INITIAL_COUNTER_LOANS__] : []
+let loanSequence = counterLoans.length + 1
 
 // Định dạng ngày từ giá trị YYYY-MM-DD.
 function formatCounterDate(value) {
@@ -317,3 +317,6 @@ returnDialog.addEventListener('close', () => {
   processingCode = null
   processingMode = null
 })
+
+// Khởi tạo hiển thị phiếu mượn thời gian thực từ CSDL
+renderCounterLoans()

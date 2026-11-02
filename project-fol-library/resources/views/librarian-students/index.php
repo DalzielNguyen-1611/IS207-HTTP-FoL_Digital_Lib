@@ -29,40 +29,41 @@ $pendingCount = count($pendingStudents);
 
     <style>
         .student-table-wrapper {
-            background: #ffffff;
-            border: 1px solid #e5dfd3;
-            border-radius: 8px;
+            background: rgba(255, 254, 250, 0.97);
+            border: 1px solid #e9dfbf;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(36, 68, 92, 0.05);
+            box-shadow: 0 1px 3px rgba(36, 68, 92, 0.03);
             margin-top: 20px;
         }
 
         .student-table {
             width: 100%;
+            min-width: 860px;
             border-collapse: collapse;
-            font-size: 14px;
+            font-size: 13px;
             text-align: left;
         }
 
         .student-table th {
-            background: #f8fafc;
-            color: #475569;
+            background: #f5f0e1;
+            color: #24445c;
             font-weight: 700;
-            padding: 14px 16px;
-            border-bottom: 2px solid #e2e8f0;
+            padding: 12px 10px;
+            border-bottom: 2px solid #e9dfbf;
             text-transform: uppercase;
-            font-size: 12px;
+            font-size: 11px;
             letter-spacing: 0.05em;
         }
 
         .student-table td {
-            padding: 16px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 12px 10px;
+            border-bottom: 1px solid #e9dfbf;
             vertical-align: middle;
         }
 
         .student-table tr:hover {
-            background: #fbfdfe;
+            background: #fbf7ec;
         }
 
         .student-info-cell {
@@ -134,7 +135,9 @@ $pendingCount = count($pendingStudents);
         .action-btns {
             display: flex;
             align-items: center;
+            justify-content: flex-end;
             gap: 8px;
+            flex-wrap: nowrap;
         }
 
         .btn-approve {
@@ -142,13 +145,14 @@ $pendingCount = count($pendingStudents);
             color: #ffffff;
             border: none;
             padding: 8px 14px;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
             transition: background 0.15s ease;
         }
 
@@ -161,13 +165,14 @@ $pendingCount = count($pendingStudents);
             color: #dc2626;
             border: 1px solid #fecaca;
             padding: 8px 12px;
-            border-radius: 5px;
+            border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            white-space: nowrap;
             transition: all 0.15s ease;
         }
 
@@ -279,9 +284,9 @@ $pendingCount = count($pendingStudents);
         .empty-state {
             padding: 60px 20px;
             text-align: center;
-            background: #ffffff;
-            border: 1px solid #e5dfd3;
-            border-radius: 8px;
+            background: rgba(255, 254, 250, 0.97);
+            border: 1px solid #e9dfbf;
+            border-radius: 12px;
             margin-top: 20px;
         }
 
@@ -339,59 +344,100 @@ $pendingCount = count($pendingStudents);
 
         <nav class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
-            <a href="/books">Tra cứu sách</a>
-            <a href="/librarian" class="active" aria-current="page">Cán bộ</a>
-            <?php if (\App\Core\Session::getRoleCode() === 'ADMIN'): ?>
-                <a href="/admin/settings">Quản trị</a>
+
+            <!-- Menu thả xuống: Dịch vụ thư viện -->
+            <div class="nav-dropdown">
+                <button type="button" class="nav-dropdown-trigger" aria-expanded="false" aria-haspopup="true">
+                    <span>Dịch vụ</span>
+                    <svg class="nav-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
+                </button>
+                <div class="nav-dropdown-menu" role="menu">
+                    <a href="/books" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">📚</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Tra cứu sách</span>
+                            <span class="nav-dropdown-desc">Kho 1.200+ giáo trình, chuyên khảo & luận văn</span>
+                        </div>
+                    </a>
+                    <a href="/reading-room" class="nav-dropdown-item" role="menuitem">
+                        <span class="nav-dropdown-icon">🪑</span>
+                        <div class="nav-dropdown-text">
+                            <span class="nav-dropdown-title">Phòng đọc & Chỗ ngồi</span>
+                            <span class="nav-dropdown-desc">Đặt chỗ tự học theo ca, xem sơ đồ chỗ trống</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <?php 
+                $isAuthenticated = \App\Core\Session::isAuthenticated();
+                $navRole = $isAuthenticated ? \App\Core\Session::getRoleCode() : null;
+            ?>
+
+            <?php if ($navRole !== 'ADMIN' && $navRole !== 'LIBRARIAN'): ?>
+                <a href="/about">Giới thiệu</a>
+                <a href="/rules">Nội quy</a>
+                <a href="/feedback">Góp ý</a>
+                <a href="/contact">Liên hệ</a>
+            <?php endif; ?>
+
+            <?php if ($isAuthenticated): ?>
+                <?php if ($navRole === 'ADMIN'): ?>
+                    <a href="/librarian" class="active" aria-current="page">Cán bộ</a>
+                    <a href="/admin/settings">Quản trị</a>
+                <?php elseif ($navRole === 'LIBRARIAN'): ?>
+                    <a href="/librarian" class="active" aria-current="page">Cán bộ</a>
+                <?php else: ?>
+                    <a href="/profile">Cá nhân</a>
+                <?php endif; ?>
             <?php endif; ?>
         </nav>
 
-        <?php
-            $currentUser = \App\Core\Session::getAuthUser();
-            $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Cán bộ', ENT_QUOTES, 'UTF-8');
-        ?>
-        <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
-            <a href="/librarian" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;">
-                <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
-                <span><?= $userName ?></span>
+        <!-- Trạng thái xác thực người dùng / Đăng xuất -->
+        <?php if ($isAuthenticated): ?>
+            <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
+                <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
+                    Đăng xuất
+                </a>
+            </div>
+        <?php else: ?>
+            <a class="login-button" href="/login">
+                Đăng nhập
             </a>
-            <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất">
-                Đăng xuất
-            </a>
-        </div>
+        <?php endif; ?>
     </header>
 
     <main class="staff-layout">
         <!-- Sidebar cán bộ -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
-            <a href="/librarian">Tổng quan</a>
-            <a href="/librarian/students" aria-current="page" style="display:flex;align-items:center;justify-content:space-between;">
+            <a href="/librarian"><span>Tổng quan</span></a>
+            <a href="/librarian/students" aria-current="page">
                 <span>Duyệt thẻ sinh viên</span>
                 <?php if ($pendingCount > 0): ?>
-                    <span style="background:#dc2626;color:#ffffff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:10px;"><?= $pendingCount ?></span>
+                    <span class="staff-nav-badge"><?= $pendingCount ?></span>
                 <?php endif; ?>
             </a>
-            <a href="/librarian/books">Quản lý sách</a>
-            <a href="/librarian/counter">Mượn / trả</a>
-            <a href="/librarian/rooms">Phòng đọc</a>
-            <a href="/librarian/reports">Báo cáo</a>
+            <a href="/librarian/books"><span>Quản lý sách</span></a>
+            <a href="/librarian/counter"><span>Mượn / trả</span></a>
+            <a href="/librarian/rooms"><span>Phòng đọc</span></a>
+            <a href="/librarian/reports"><span>Báo cáo</span></a>
 
             <?php if (\App\Core\Session::getRoleCode() === 'ADMIN'): ?>
                 <span class="staff-menu-label" style="margin-top:16px;">CHUYỂN VAI TRÒ TEST</span>
-                <a href="/admin/settings">Về trang quản trị</a>
-                <a href="/profile">Về trang cá nhân (SV)</a>
+                <a href="/admin/settings"><span>Về trang quản trị</span></a>
+                <a href="/profile"><span>Về trang cá nhân (SV)</span></a>
             <?php endif; ?>
         </nav>
 
         <!-- Nội dung chính -->
         <div class="staff-content">
             <section class="staff-intro">
-                <span class="staff-eyebrow">XÉT DUYỆT BẠN ĐỌC</span>
+                <span class="staff-eyebrow">XÉT DUYỆT THẺ SINH VIÊN</span>
                 <h1>Duyệt thẻ sinh viên</h1>
-                <p>
-                    Kiểm tra và đối chiếu ảnh chụp thẻ sinh viên do người dùng tải lên để kích hoạt quyền mượn tài liệu và đặt phòng đọc.
-                </p>
+                <p>Kiểm tra và đối chiếu ảnh chụp thẻ sinh viên gửi trực tuyến để kích hoạt tài khoản.</p>
             </section>
 
             <!-- Thông báo flash -->
@@ -409,25 +455,33 @@ $pendingCount = count($pendingStudents);
                 </div>
             <?php endif; ?>
 
-            <?php if ($pendingCount === 0): ?>
-                <div class="empty-state">
-                    <div class="empty-icon">🎉</div>
-                    <h3 class="empty-title">Không có thẻ sinh viên nào đang chờ duyệt</h3>
-                    <p class="empty-desc">Toàn bộ hồ sơ sinh viên đã được cán bộ xử lý hoặc chưa có lượt đăng ký mới nào.</p>
+            <section class="staff-panel" aria-labelledby="student-list-title" style="min-height: 480px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <h2 id="student-list-title" style="margin:0;">Danh sách hồ sơ chờ duyệt</h2>
+                    <span style="font-size:13px;color:#607888;">
+                        <?= $pendingCount > 0 ? "Hiện có <strong>{$pendingCount}</strong> hồ sơ cần xử lý" : "Toàn bộ hồ sơ đã xử lý xong" ?>
+                    </span>
                 </div>
-            <?php else: ?>
-                <div class="student-table-wrapper">
-                    <table class="student-table">
-                        <thead>
-                            <tr>
-                                <th>Sinh viên</th>
-                                <th>Thông tin liên hệ</th>
-                                <th>Lớp & Chuyên ngành</th>
-                                <th>Thời gian nộp</th>
-                                <th>Ảnh thẻ SV</th>
-                                <th>Thao tác</th>
-                            </tr>
-                        </thead>
+
+                <?php if ($pendingCount === 0): ?>
+                    <div class="empty-state" style="border:none;background:transparent;box-shadow:none;padding:80px 20px;">
+                        <div class="empty-icon">🎉</div>
+                        <h3 class="empty-title">Không có thẻ sinh viên nào đang chờ duyệt</h3>
+                        <p class="empty-desc">Toàn bộ hồ sơ sinh viên đã được cán bộ xử lý hoặc chưa có lượt đăng ký mới nào.</p>
+                    </div>
+                <?php else: ?>
+                    <div class="staff-table-wrap" style="border: 1px solid #e9dfbf; border-radius: 8px; overflow: hidden;">
+                        <table class="student-table" style="margin:0;">
+                            <thead>
+                                <tr>
+                                    <th>Sinh viên</th>
+                                    <th>Thông tin liên hệ</th>
+                                    <th>Lớp & Chuyên ngành</th>
+                                    <th>Thời gian nộp</th>
+                                    <th>Ảnh thẻ SV</th>
+                                    <th style="min-width: 240px; text-align: right;">Thao tác</th>
+                                </tr>
+                            </thead>
                         <tbody>
                             <?php foreach ($pendingStudents as $s): ?>
                                 <?php
@@ -440,7 +494,12 @@ $pendingCount = count($pendingStudents);
                                     $sNganh = htmlspecialchars($s['ten_nganh'] ?? '', ENT_QUOTES, 'UTF-8');
                                     $sTime = htmlspecialchars($s['ngay_gui_duyet'] ?? $s['created_at'] ?? '', ENT_QUOTES, 'UTF-8');
                                     $sAvatar = !empty($s['anh_dai_dien']) ? htmlspecialchars($s['anh_dai_dien'], ENT_QUOTES, 'UTF-8') : '/assets/images/logo.png';
-                                    $sCard = htmlspecialchars($s['anh_the_sv'] ?? '', ENT_QUOTES, 'UTF-8');
+                                    $sCardRaw = $s['anh_the_sv'] ?? '';
+                                    $sCard = '';
+                                    if (!empty($sCardRaw)) {
+                                        $sCard = str_starts_with($sCardRaw, '/') ? $sCardRaw : '/uploads/student_cards/' . $sCardRaw;
+                                    }
+                                    $sCard = htmlspecialchars($sCard, ENT_QUOTES, 'UTF-8');
                                 ?>
                                 <tr>
                                     <td>
@@ -495,6 +554,7 @@ $pendingCount = count($pendingStudents);
                     </table>
                 </div>
             <?php endif; ?>
+            </section>
         </div>
     </main>
 

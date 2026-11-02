@@ -10,6 +10,8 @@ $today = new DateTimeImmutable(
 
 // Tổng hợp số liệu mượn và trả thực tế từ CSDL
 $loanRepo = new \App\Repositories\LoanRepository();
+$userRepo = new \App\Repositories\UserRepository();
+$pendingCount = $userRepo->countPendingStudents();
 $reports = $loanRepo->getReportsSummary();
 
 $periods = [
@@ -110,22 +112,7 @@ $periods = [
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
-            <?php
-                $currentUser = \App\Core\Session::getAuthUser();
-                $userName = htmlspecialchars($currentUser['ho_ten'] ?? $currentUser['email'] ?? 'Người dùng', ENT_QUOTES, 'UTF-8');
-                $dashboardUrl = match ($navRole) {
-                    'ADMIN' => '/admin/settings',
-                    'LIBRARIAN' => '/librarian',
-                    default => '/profile',
-                };
-            ?>
             <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
-                <?php if ($navRole !== 'ADMIN'): ?>
-                    <a href="<?= $dashboardUrl ?>" class="login-button" style="display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;padding:8px 16px;text-decoration:none;" title="Tài khoản của bạn">
-                        <span style="display:inline-block;width:8px;height:8px;background:#10b981;border-radius:50%;box-shadow:0 0 0 2px rgba(16,185,129,0.2);"></span>
-                        <span><?= $userName ?></span>
-                    </a>
-                <?php endif; ?>
                 <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:8px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất khỏi hệ thống">
                     Đăng xuất
                 </a>
@@ -142,6 +129,12 @@ $periods = [
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
             <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian">Tổng quan</a>
+            <a href="/librarian/students">
+                <span>Duyệt thẻ sinh viên</span>
+                <?php if ($pendingCount > 0): ?>
+                    <span class="staff-nav-badge"><?= $pendingCount ?></span>
+                <?php endif; ?>
+            </a>
             <a href="/librarian/books">Quản lý sách</a>
             <a href="/librarian/counter">Mượn / trả</a>
             <a href="/librarian/rooms">Phòng đọc</a>
@@ -261,7 +254,7 @@ $periods = [
                         <tbody>
                             <?php foreach ($reports as $report): ?>
                                 <?php
-                                $date = $today
+                                $date = $report['date'] ?? $today
                                     ->modify($report['offset'] . ' days')
                                     ->format('Y-m-d');
                                 ?>
