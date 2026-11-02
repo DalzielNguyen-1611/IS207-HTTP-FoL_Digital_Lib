@@ -118,18 +118,40 @@ project-fol-library/
    Copy-Item .env.example .env
    ```
 
-2. **Cập nhật Composer Autoload**:
+2. **Khởi tạo Cơ sở Dữ liệu & Tài khoản Mặc định**:
+   - Mở MySQL / MariaDB (ví dụ qua XAMPP Control Panel bấm Start MySQL).
+   - Tạo CSDL tên `fol_library_db`:
+     ```sql
+     CREATE DATABASE IF NOT EXISTS fol_library_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+     ```
+   - Nạp dữ liệu cấu trúc và tài khoản:
+     - Cách 1 (Khuyên dùng): Chạy script khởi tạo nhanh qua lệnh:
+       ```bash
+       php database/seed.php --with-books
+       ```
+     - Cách 2: Import trực tiếp tệp `database/schema.sql` vào phpMyAdmin hoặc MySQL CLI (tệp đã tích hợp sẵn toàn bộ dữ liệu mẫu tài khoản Admin, Cán bộ, Sinh viên, phòng đọc và ca đọc).
+
+3. **Cập nhật Composer Autoload**:
    ```bash
    composer dump-autoload
    ```
 
-3. **Khởi chạy máy chủ phát triển (Development Server)**:
-   ```bash
-   php -S localhost:8000 -t public
-   ```
+4. **Khởi chạy máy chủ phát triển (Development Server)**:
+   - Cách 1: Chạy trực tiếp tệp `start-server.bat` (Windows).
+   - Cách 2: Chạy lệnh terminal:
+     ```bash
+     php -S localhost:8000 -t public
+     ```
    Truy cập tại: `http://localhost:8000`
 
-### 4.3. Đặt chỗ phòng đọc
+### 4.3. Danh sách Tài khoản Kiểm thử Mặc định (Tất cả dùng mật khẩu: Password@123)
+| Vai trò | Email đăng nhập | Mật khẩu | Trang quản lý chính |
+|---|---|---|---|
+| **Quản trị viên (ADMIN)** | `admin@fol.uit.edu.vn`<br>*(hoặc `nguyendoanduchieu16112006@gmail.com`)* | `Password@123` | [http://localhost:8000/admin/settings](http://localhost:8000/admin/settings) |
+| **Cán bộ thư viện (LIBRARIAN)** | `librarian@fol.uit.edu.vn` | `Password@123` | [http://localhost:8000/librarian](http://localhost:8000/librarian) |
+| **Sinh viên (STUDENT)** | `student@gm.uit.edu.vn`<br>*(hoặc `24520500@gm.uit.edu.vn`)* | `Password@123` | [http://localhost:8000/profile](http://localhost:8000/profile) |
+
+### 4.4. Đặt chỗ phòng đọc
 - Cần đăng nhập bằng tài khoản sinh viên đang hoạt động; mỗi tài khoản chỉ được đặt một ghế trong cùng ca và ngày.
 - Lịch có thể chuyển qua các tuần để xem; chỉ tuần kế tiếp mới mở đặt chỗ. Khi sang tuần mới, lịch và phạm vi đặt sẽ tự chuyển theo tuần kế tiếp.
 - Hệ thống tự động phân bổ ghế còn trống và lưu lượt đặt vào bảng `dat_cho`.
