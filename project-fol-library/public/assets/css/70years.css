@@ -175,3 +175,30 @@ body {
 .header {
   background: #fffdf6;
 }
+
+/* Nút đăng nhập trên thanh điều hướng */
+.header .login-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 0 24px;
+    border: 1px solid #e5c66f;
+    border-radius: 10px;
+    background: #f1d27d;
+    color: #24465b;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 160ms ease, transform 160ms ease;
+}
+
+.header .login-button:hover {
+    background: #e9c35e;
+    transform: translateY(-1px);
+}
+
+.header .login-button:focus-visible {
+    outline: 3px solid #2c78a8;
+    outline-offset: 3px;
+}
