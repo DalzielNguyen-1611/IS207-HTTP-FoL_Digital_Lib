@@ -7,7 +7,9 @@ namespace App\Repositories;
 use App\Core\Database;
 use DateTimeImmutable;
 use DateTimeZone;
+use DomainException;
 use PDO;
+use Throwable;
 
 /**
  * Tầng truy vấn dữ liệu Phòng đọc & Ca đọc (Room Repository)
@@ -49,8 +51,7 @@ class RoomRepository
     public function getTotalCapacity(): int
     {
         $stmt = $this->db->query("SELECT COUNT(*) FROM `cho_ngoi` WHERE `trang_thai` = 'HoatDong'");
-        $cap = (int)($stmt ? $stmt->fetchColumn() : 40);
-        return $cap > 0 ? $cap : 40;
+        return (int)$stmt->fetchColumn();
     }
 
     /**
@@ -80,17 +81,24 @@ class RoomRepository
         $capacity = $this->getTotalCapacity();
 
         // Lấy số lượng đặt chỗ thực tế theo từng ca và từng ngày
+        $datePlaceholders = [];
+        $dateParams = [];
+        foreach ($dates as $index => $date) {
+            $placeholder = ':date' . $index;
+            $datePlaceholders[] = $placeholder;
+            $dateParams[$placeholder] = $date;
+        }
+
         $bookingCountsSql = "SELECT `id_ca_doc`, `ngay_dat`, COUNT(*) AS `booked`
                              FROM `dat_cho`
-                             WHERE `ngay_dat` IN ('" . implode("','", $dates) . "') 
-                               AND `trang_thai` != 'Huy'
+                             WHERE `ngay_dat` IN (" . implode(', ', $datePlaceholders) . ")
+                               AND `trang_thai` IN ('DaDat', 'DaNhanCho')
                              GROUP BY `id_ca_doc`, `ngay_dat`";
-        $bookingStmt = $this->db->query($bookingCountsSql);
+        $bookingStmt = $this->db->prepare($bookingCountsSql);
+        $bookingStmt->execute($dateParams);
         $bookedMap = [];
-        if ($bookingStmt) {
-            while ($row = $bookingStmt->fetch(PDO::FETCH_ASSOC)) {
-                $bookedMap[$row['id_ca_doc'] . '_' . $row['ngay_dat']] = (int)$row['booked'];
-            }
+        while ($row = $bookingStmt->fetch(PDO::FETCH_ASSOC)) {
+            $bookedMap[$row['id_ca_doc'] . '_' . $row['ngay_dat']] = (int)$row['booked'];
         }
 
         $formattedShifts = [];
@@ -115,6 +123,248 @@ class RoomRepository
             'shifts' => $formattedShifts,
             'capacity' => $capacity,
         ];
+    }
+
+    /**
+     * Tạo lượt đặt và tự động gán ghế còn trống trong một giao dịch.
+     */
+    public function createBooking(
+        int $userId,
+        string $date,
+        int $shiftId,
+        DateTimeImmutable $now
+    ): array {
+        $ownsTransaction = !$this->db->inTransaction();
+        if ($ownsTransaction) {
+            $this->db->beginTransaction();
+        }
+
+        try {
+            $lockSuffix = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+                ? ' FOR UPDATE'
+                : '';
+
+            $shiftStmt = $this->db->prepare(
+                "SELECT `id_ca_doc`, `ten_ca`, `gio_bat_dau`, `gio_ket_thuc`
+                 FROM `ca_doc`
+                 WHERE `id_ca_doc` = :shift_id AND `trang_thai` = 'HoatDong'"
+                 . $lockSuffix
+            );
+            $shiftStmt->execute([':shift_id' => $shiftId]);
+            $shift = $shiftStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($shift === false) {
+                throw new DomainException('Ca đọc không tồn tại hoặc đã ngừng hoạt động.');
+            }
+
+            $timeZone = new DateTimeZone('Asia/Ho_Chi_Minh');
+            $startAt = new DateTimeImmutable($date . ' ' . $shift['gio_bat_dau'], $timeZone);
+            if ($startAt <= $now) {
+                throw new DomainException('Ca đọc này đã bắt đầu hoặc đã qua.');
+            }
+
+            $existingStmt = $this->db->prepare(
+                "SELECT 1
+                 FROM `dat_cho`
+                 WHERE `id_nguoi_dung` = :user_id
+                   AND `ngay_dat` = :booking_date
+                   AND `id_ca_doc` = :shift_id
+                   AND `trang_thai` IN ('DaDat', 'DaNhanCho')
+                 LIMIT 1"
+            );
+            $existingStmt->execute([
+                ':user_id' => $userId,
+                ':booking_date' => $date,
+                ':shift_id' => $shiftId,
+            ]);
+            if ($existingStmt->fetchColumn() !== false) {
+                throw new DomainException('Bạn đã có lượt đặt cho ca đọc này.');
+            }
+
+            $seatStmt = $this->db->prepare(
+                "SELECT cn.`id_cho_ngoi`, cn.`ma_cho_ngoi`
+                 FROM `cho_ngoi` cn
+                 WHERE cn.`trang_thai` = 'HoatDong'
+                   AND NOT EXISTS (
+                       SELECT 1
+                       FROM `dat_cho` dc
+                       WHERE dc.`id_cho_ngoi` = cn.`id_cho_ngoi`
+                         AND dc.`id_ca_doc` = :shift_id
+                         AND dc.`ngay_dat` = :booking_date
+                         AND dc.`trang_thai` IN ('DaDat', 'DaNhanCho')
+                   )
+                 ORDER BY cn.`id_cho_ngoi` ASC
+                 LIMIT 1"
+                 . $lockSuffix
+            );
+            $seatStmt->execute([
+                ':shift_id' => $shiftId,
+                ':booking_date' => $date,
+            ]);
+            $seat = $seatStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($seat === false) {
+                throw new DomainException('Ca đọc đã hết chỗ. Vui lòng chọn ca khác.');
+            }
+
+            $bookingCode = 'DC-' . strtoupper(bin2hex(random_bytes(8)));
+            $createdAt = $now->setTimezone($timeZone)->format('Y-m-d H:i:s');
+            $insertStmt = $this->db->prepare(
+                "INSERT INTO `dat_cho`
+                    (`ma_dat_cho`, `id_cho_ngoi`, `id_ca_doc`, `id_nguoi_dung`,
+                     `ngay_dat`, `thoi_gian_tao`, `trang_thai`)
+                 VALUES
+                    (:booking_code, :seat_id, :shift_id, :user_id,
+                     :booking_date, :created_at, 'DaDat')"
+            );
+            $insertStmt->execute([
+                ':booking_code' => $bookingCode,
+                ':seat_id' => (int)$seat['id_cho_ngoi'],
+                ':shift_id' => $shiftId,
+                ':user_id' => $userId,
+                ':booking_date' => $date,
+                ':created_at' => $createdAt,
+            ]);
+
+            $booking = [
+                'id' => (int)$this->db->lastInsertId(),
+                'code' => $bookingCode,
+                'date' => $date,
+                'shift_id' => $shiftId,
+                'shift' => $shift['ten_ca'],
+                'start' => $shift['gio_bat_dau'],
+                'end' => $shift['gio_ket_thuc'],
+                'seat' => $seat['ma_cho_ngoi'],
+                'status' => 'DaDat',
+                'created_at' => $createdAt,
+            ];
+
+            if ($ownsTransaction) {
+                $this->db->commit();
+            }
+
+            return $booking;
+        } catch (Throwable $exception) {
+            if ($ownsTransaction && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
+    }
+
+    /**
+     * Lấy lịch đặt chỗ của một tài khoản, mới nhất trước.
+     */
+    public function getBookingsByUser(int $userId): array
+    {
+        $stmt = $this->db->prepare(
+            "SELECT dc.`id_dat_cho` AS `id`,
+                    dc.`ma_dat_cho` AS `code`,
+                    dc.`ngay_dat` AS `date`,
+                    dc.`trang_thai` AS `status`,
+                    dc.`thoi_gian_tao` AS `created_at`,
+                    dc.`thoi_gian_huy` AS `cancelled_at`,
+                    cn.`ma_cho_ngoi` AS `seat`,
+                    cd.`id_ca_doc` AS `shift_id`,
+                    cd.`ten_ca` AS `shift`,
+                    cd.`gio_bat_dau` AS `start`,
+                    cd.`gio_ket_thuc` AS `end`
+             FROM `dat_cho` dc
+             INNER JOIN `ca_doc` cd ON cd.`id_ca_doc` = dc.`id_ca_doc`
+             INNER JOIN `cho_ngoi` cn ON cn.`id_cho_ngoi` = dc.`id_cho_ngoi`
+             WHERE dc.`id_nguoi_dung` = :user_id
+             ORDER BY dc.`ngay_dat` DESC, cd.`gio_bat_dau` DESC, dc.`id_dat_cho` DESC"
+        );
+        $stmt->execute([':user_id' => $userId]);
+
+        $timeZone = new DateTimeZone('Asia/Ho_Chi_Minh');
+        $now = new DateTimeImmutable('now', $timeZone);
+        $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+
+        foreach ($bookings as &$booking) {
+            $startAt = new DateTimeImmutable(
+                $booking['date'] . ' ' . $booking['start'],
+                $timeZone
+            );
+            $booking['can_cancel'] = $booking['status'] === 'DaDat'
+                && $startAt->getTimestamp() - $now->getTimestamp() >= 24 * 60 * 60;
+            $booking['starts_at'] = $startAt->format(DateTimeImmutable::ATOM);
+        }
+        unset($booking);
+
+        return $bookings;
+    }
+
+    /**
+     * Hủy lượt đặt của chính tài khoản khi còn tối thiểu 24 giờ trước ca.
+     */
+    public function cancelBooking(int $userId, int $bookingId, DateTimeImmutable $now): void
+    {
+        $ownsTransaction = !$this->db->inTransaction();
+        if ($ownsTransaction) {
+            $this->db->beginTransaction();
+        }
+
+        try {
+            $lockSuffix = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+                ? ' FOR UPDATE'
+                : '';
+            $stmt = $this->db->prepare(
+                "SELECT dc.`id_dat_cho`, dc.`trang_thai`, dc.`ngay_dat`,
+                        cd.`gio_bat_dau`
+                 FROM `dat_cho` dc
+                 INNER JOIN `ca_doc` cd ON cd.`id_ca_doc` = dc.`id_ca_doc`
+                 WHERE dc.`id_dat_cho` = :booking_id
+                   AND dc.`id_nguoi_dung` = :user_id"
+                 . $lockSuffix
+            );
+            $stmt->execute([
+                ':booking_id' => $bookingId,
+                ':user_id' => $userId,
+            ]);
+            $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($booking === false) {
+                throw new DomainException('Không tìm thấy lượt đặt chỗ của bạn.');
+            }
+            if ($booking['trang_thai'] !== 'DaDat') {
+                throw new DomainException('Lượt đặt này không còn ở trạng thái có thể hủy.');
+            }
+
+            $timeZone = new DateTimeZone('Asia/Ho_Chi_Minh');
+            $startAt = new DateTimeImmutable(
+                $booking['ngay_dat'] . ' ' . $booking['gio_bat_dau'],
+                $timeZone
+            );
+            if ($startAt->getTimestamp() - $now->getTimestamp() < 24 * 60 * 60) {
+                throw new DomainException('Chỉ có thể hủy trước ca đọc ít nhất 24 giờ.');
+            }
+
+            $updateStmt = $this->db->prepare(
+                "UPDATE `dat_cho`
+                 SET `trang_thai` = 'Huy', `thoi_gian_huy` = :cancelled_at
+                 WHERE `id_dat_cho` = :booking_id
+                   AND `id_nguoi_dung` = :user_id
+                   AND `trang_thai` = 'DaDat'"
+            );
+            $updateStmt->execute([
+                ':cancelled_at' => $now->setTimezone($timeZone)->format('Y-m-d H:i:s'),
+                ':booking_id' => $bookingId,
+                ':user_id' => $userId,
+            ]);
+            if ($updateStmt->rowCount() !== 1) {
+                throw new DomainException('Lượt đặt đã được cập nhật bởi thao tác khác.');
+            }
+
+            if ($ownsTransaction) {
+                $this->db->commit();
+            }
+        } catch (Throwable $exception) {
+            if ($ownsTransaction && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $exception;
+        }
     }
 
     /**

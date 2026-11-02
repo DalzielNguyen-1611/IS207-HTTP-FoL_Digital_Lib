@@ -2,13 +2,34 @@
 
 declare(strict_types=1);
 
-// Đọc lịch phòng đọc và số chỗ trống thực tế từ CSDL
-$roomRepo = new \App\Repositories\RoomRepository();
-$schedule = $roomRepo->getWeeklySchedule();
+// Đọc lịch của tuần được chọn; chỉ tuần kế tiếp được phép đặt chỗ.
+$bookingService = new \App\Services\RoomBookingService();
+try {
+    $schedule = $bookingService->getSchedule(
+        isset($_GET['week']) ? (string)$_GET['week'] : null
+    );
+} catch (\DomainException $exception) {
+    http_response_code(400);
+    echo htmlspecialchars($exception->getMessage(), ENT_QUOTES, 'UTF-8');
+    exit;
+}
 
 $days = $schedule['days'];
 $shifts = $schedule['shifts'];
 $capacity = $schedule['capacity'];
+$selectedWeek = new \DateTimeImmutable($days[0]['date'], new \DateTimeZone('Asia/Ho_Chi_Minh'));
+$nextBookableWeek = (new \DateTimeImmutable('today', new \DateTimeZone('Asia/Ho_Chi_Minh')))
+    ->modify('next monday');
+$isBookableWeek = $selectedWeek->format('Y-m-d') === $nextBookableWeek->format('Y-m-d');
+$previousWeek = $selectedWeek->modify('-7 days')->format('Y-m-d');
+$nextWeek = $selectedWeek->modify('+7 days')->format('Y-m-d');
+$csrfToken = \App\Core\Session::get('csrf_token');
+if (!is_string($csrfToken) || $csrfToken === '') {
+    $csrfToken = bin2hex(random_bytes(32));
+    \App\Core\Session::set('csrf_token', $csrfToken);
+}
+$canBook = \App\Core\Session::isAuthenticated()
+    && in_array(\App\Core\Session::getRoleCode(), ['STUDENT', 'ADMIN'], true);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -17,6 +38,7 @@ $capacity = $schedule['capacity'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Phòng đọc · Thư viện Khoa Văn học</title>
+    <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
@@ -105,7 +127,12 @@ $capacity = $schedule['capacity'];
         <?php endif; ?>
     </header>
 
-    <main class="page">
+    <main
+        class="page"
+        data-can-book="<?= $canBook ? 'true' : 'false' ?>"
+        data-bookable-week="<?= $isBookableWeek ? 'true' : 'false' ?>"
+        data-week-start="<?= htmlspecialchars($selectedWeek->format('Y-m-d'), ENT_QUOTES, 'UTF-8') ?>"
+    >
         <!-- Giới thiệu & hướng dẫn đặt chỗ -->
         <section class="room-intro">
             <span class="eyebrow">KHÔNG GIAN DÀNH CHO SỰ TẬP TRUNG</span>
@@ -114,16 +141,31 @@ $capacity = $schedule['capacity'];
         </section>
 
         <p class="room-notice">
-            Lịch mẫu cho tuần kế tiếp · Mỗi ca có 40 chỗ.
-            Bản thử chưa yêu cầu đăng nhập hoặc lưu đặt chỗ thật.
+            Ghế được hệ thống tự động phân bổ. Chỉ có thể đặt chỗ cho tuần kế tiếp.
+            Bạn cần đăng nhập bằng tài khoản sinh viên để đặt.
         </p>
 
         <!-- Lịch phòng đọc theo ngày và ca -->
         <section aria-labelledby="schedule-title">
             <div class="room-heading">
                 <h2 id="schedule-title">Lịch phòng đọc</h2>
-                <span>Còn chỗ · Hết chỗ · Đã chọn đặt</span>
+                <span><?= $isBookableWeek ? 'Tuần đang mở đặt chỗ' : 'Chỉ xem lịch · Chưa mở đặt chỗ' ?></span>
             </div>
+
+            <nav class="room-week-navigation" aria-label="Chuyển tuần lịch phòng đọc">
+                <a href="/reading-room?week=<?= htmlspecialchars($previousWeek, ENT_QUOTES, 'UTF-8') ?>">
+                    ← Tuần trước
+                </a>
+                <strong>
+                    <?= htmlspecialchars($days[0]['display'], ENT_QUOTES, 'UTF-8') ?>
+                    –
+                    <?= htmlspecialchars($days[array_key_last($days)]['display'], ENT_QUOTES, 'UTF-8') ?>
+                    <?= htmlspecialchars($selectedWeek->format('Y'), ENT_QUOTES, 'UTF-8') ?>
+                </strong>
+                <a href="/reading-room?week=<?= htmlspecialchars($nextWeek, ENT_QUOTES, 'UTF-8') ?>">
+                    Tuần sau →
+                </a>
+            </nav>
 
             <p class="room-help" id="schedule-help">
                 Trên điện thoại, vuốt ngang bảng để xem đủ các ngày.
@@ -159,7 +201,7 @@ $capacity = $schedule['capacity'];
                     </thead>
 
                     <tbody>
-                        <?php foreach ($shifts as $shiftIndex => $shift): ?>
+                        <?php foreach ($shifts as $shift): ?>
                             <!-- Một ca đọc trong tuần -->
                             <tr>
                                 <th scope="row">
@@ -180,36 +222,45 @@ $capacity = $schedule['capacity'];
                                         <button
                                             class="room-slot"
                                             type="button"
-                                            data-slot="<?= htmlspecialchars(
-                                                $day['date'] . '-' . $shiftIndex,
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>"
+                                            data-date="<?= htmlspecialchars($day['date'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-shift-id="<?= htmlspecialchars((string)$shift['id_ca_doc'], ENT_QUOTES, 'UTF-8') ?>"
                                             data-label="<?= htmlspecialchars($slotLabel, ENT_QUOTES, 'UTF-8') ?>"
                                             data-free="<?= htmlspecialchars((string) $free, ENT_QUOTES, 'UTF-8') ?>"
+                                            data-capacity="<?= htmlspecialchars((string) $capacity, ENT_QUOTES, 'UTF-8') ?>"
                                             aria-label="<?= htmlspecialchars(
-                                                $slotLabel . ' · Còn ' . $free . ' chỗ',
+                                                $slotLabel . ' · Đã đặt ' . ($capacity - $free) . ' trên ' . $capacity . ' chỗ',
                                                 ENT_QUOTES,
                                                 'UTF-8'
                                             ) ?>"
-                                            <?= $free === 0 ? 'disabled' : '' ?>
+                                            <?= ($free === 0 || !$isBookableWeek) ? 'disabled' : '' ?>
                                             data-start="<?= htmlspecialchars(
                                                 $day['date'] . 'T' . $shift['start'] . ':00+07:00',
                                                 ENT_QUOTES,
                                                 'UTF-8'
                                             ) ?>"
                                         >
-                                            <?php if ($free > 0): ?>
-                                                <strong>
-                                                    <?= htmlspecialchars((string) $free, ENT_QUOTES, 'UTF-8') ?>
-                                                    / <?= htmlspecialchars((string) $capacity, ENT_QUOTES, 'UTF-8') ?>
-                                                    chỗ
-                                                </strong>
+                                            <strong>
+                                                <?= htmlspecialchars((string) ($capacity - $free), ENT_QUOTES, 'UTF-8') ?>
+                                                / <?= htmlspecialchars((string) $capacity, ENT_QUOTES, 'UTF-8') ?>
+                                                chỗ đã đặt
+                                            </strong>
+                                            <?php if (!$isBookableWeek): ?>
+                                                <span>Chỉ đặt được tuần kế tiếp</span>
+                                            <?php elseif ($free > 0): ?>
                                                 <span>Đặt chỗ +</span>
                                             <?php else: ?>
-                                                <strong>Hết chỗ</strong>
                                                 <span>Chọn ca khác</span>
                                             <?php endif; ?>
+                                        </button>
+                                        <button
+                                            class="room-booking-cancel"
+                                            type="button"
+                                            data-date="<?= htmlspecialchars($day['date'], ENT_QUOTES, 'UTF-8') ?>"
+                                            data-shift-id="<?= htmlspecialchars((string)$shift['id_ca_doc'], ENT_QUOTES, 'UTF-8') ?>"
+                                            aria-label="<?= htmlspecialchars('Hủy đặt chỗ ' . $slotLabel, ENT_QUOTES, 'UTF-8') ?>"
+                                            hidden
+                                        >
+                                            Hủy đặt chỗ
                                         </button>
                                     </td>
                                 <?php endforeach; ?>
@@ -220,7 +271,7 @@ $capacity = $schedule['capacity'];
             </div>
         </section>
 
-        <!-- Kết quả thao tác đặt chỗ mẫu -->
+        <!-- Kết quả thao tác đặt chỗ -->
         <p class="room-feedback" id="room-feedback" role="status"></p>
     </main>
 
@@ -232,7 +283,7 @@ $capacity = $schedule['capacity'];
 
             <p class="room-notice">
                 Vui lòng đến đúng giờ và giữ yên lặng trong phòng đọc.
-                Thao tác này chỉ mô phỏng đặt chỗ.
+                Ghế sẽ được hệ thống tự động chọn nếu còn chỗ.
             </p>
 
             <!-- Điều khiển đóng hoặc xác nhận -->
@@ -247,7 +298,7 @@ $capacity = $schedule['capacity'];
         </form>
     </dialog>
 
-    <!-- Tương tác đặt chỗ mẫu -->
+    <!-- Tương tác đặt chỗ -->
     <script src="/assets/js/reading-room.js" defer></script>
 </body>
 </html>

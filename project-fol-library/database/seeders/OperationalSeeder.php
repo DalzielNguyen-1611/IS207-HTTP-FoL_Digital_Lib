@@ -36,13 +36,13 @@ class OperationalSeeder
             implode(",\n", $seatValues) .
             "\nON DUPLICATE KEY UPDATE `trang_thai` = VALUES(`trang_thai`);");
 
-        // 3. Ca đọc trong ngày
+        // 3. Ba ca đọc theo nội quy phòng đọc
         $db->exec("INSERT INTO `ca_doc` (`id_ca_doc`, `ten_ca`, `gio_bat_dau`, `gio_ket_thuc`, `trang_thai`) VALUES
-            (1, 'Ca 1', '07:30:00', '09:30:00', 'HoatDong'),
-            (2, 'Ca 2', '09:45:00', '11:45:00', 'HoatDong'),
-            (3, 'Ca 3', '13:00:00', '15:00:00', 'HoatDong'),
-            (4, 'Ca 4', '15:15:00', '17:15:00', 'HoatDong')
+            (1, 'Ca sáng', '07:30:00', '11:30:00', 'HoatDong'),
+            (2, 'Ca chiều', '13:00:00', '17:00:00', 'HoatDong'),
+            (3, 'Ca tối', '17:30:00', '21:00:00', 'HoatDong')
             ON DUPLICATE KEY UPDATE `gio_bat_dau` = VALUES(`gio_bat_dau`), `gio_ket_thuc` = VALUES(`gio_ket_thuc`), `trang_thai` = VALUES(`trang_thai`);");
+        $db->exec("UPDATE `ca_doc` SET `trang_thai` = 'NgungHoatDong' WHERE `id_ca_doc` > 3 AND `trang_thai` = 'HoatDong';");
 
         if ($withSampleTransactions) {
             // Đảm bảo có bạn đọc sinh viên mẫu hoạt động (user 3 & user 4)

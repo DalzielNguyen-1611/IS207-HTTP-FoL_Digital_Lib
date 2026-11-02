@@ -158,6 +158,9 @@ $routeGuards = [
     '/profile' => 'role:STUDENT',
     '/onboarding' => 'role:STUDENT',
     '/onboarding/submit' => 'role:STUDENT',
+    '/api/reading-room/bookings' => 'role:STUDENT',
+    '/api/reading-room/bookings/create' => 'role:STUDENT',
+    '/api/reading-room/bookings/cancel' => 'role:STUDENT',
 
     // Trang nghiệp vụ Thủ thư
     '/librarian' => 'permission:loan.confirm',
@@ -195,6 +198,21 @@ if (isset($routeGuards[$path])) {
 // -----------------------------------------------------------------------------
 // ĐIỀU PHỐI CONTROLLERS
 // -----------------------------------------------------------------------------
+if ($path === '/api/reading-room/bookings' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    (new \App\Controllers\RoomBookingController())->index();
+    exit;
+}
+
+if ($path === '/api/reading-room/bookings/create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    (new \App\Controllers\RoomBookingController())->create();
+    exit;
+}
+
+if ($path === '/api/reading-room/bookings/cancel' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    (new \App\Controllers\RoomBookingController())->cancel();
+    exit;
+}
+
 if ($path === '/librarian' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     $librarianController = new \App\Controllers\LibrarianController();
     $librarianController->index();

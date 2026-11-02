@@ -64,10 +64,9 @@ class LibrarianDashboardService
         if (empty($shifts)) {
             // Dự phòng nếu chưa có ca đọc trong CSDL
             $shifts = [
-                ['name' => 'Ca 1', 'time' => '07:30 – 09:30', 'booked' => 0, 'capacity' => 40],
-                ['name' => 'Ca 2', 'time' => '09:45 – 11:45', 'booked' => 0, 'capacity' => 40],
-                ['name' => 'Ca 3', 'time' => '13:00 – 15:00', 'booked' => 0, 'capacity' => 40],
-                ['name' => 'Ca 4', 'time' => '15:15 – 17:15', 'booked' => 0, 'capacity' => 40],
+                ['name' => 'Ca sáng', 'time' => '07:30 – 11:30', 'booked' => 0, 'capacity' => 40],
+                ['name' => 'Ca chiều', 'time' => '13:00 – 17:00', 'booked' => 0, 'capacity' => 40],
+                ['name' => 'Ca tối', 'time' => '17:30 – 21:00', 'booked' => 0, 'capacity' => 40],
             ];
         }
 
