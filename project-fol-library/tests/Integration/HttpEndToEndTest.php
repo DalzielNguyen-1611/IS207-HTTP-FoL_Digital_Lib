@@ -10,6 +10,39 @@ declare(strict_types=1);
 $baseUrl = 'http://localhost:8000';
 $cookieFile = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'fol_test_cookies_' . uniqid() . '.txt';
 
+// Tự động khởi động máy chủ thử nghiệm nếu chưa mở trên cổng 8000
+$startedServer = false;
+$serverProcess = null;
+$serverPipes = [];
+
+$checkConnection = @fsockopen('localhost', 8000, $errno, $errstr, 0.5);
+if (!is_resource($checkConnection)) {
+    $publicDir = realpath(__DIR__ . '/../../public');
+    $phpBin = PHP_BINARY ?: 'E:\\xampp\\php\\php.exe';
+    $cmd = "\"{$phpBin}\" -S localhost:8000 -t \"{$publicDir}\"";
+    $nullDevice = strtoupper(substr(PHP_OS, 0, 3)) === 'WIN' ? 'NUL' : '/dev/null';
+    $descriptors = [
+        0 => ['file', $nullDevice, 'r'],
+        1 => ['file', $nullDevice, 'w'],
+        2 => ['file', $nullDevice, 'w']
+    ];
+    $serverProcess = proc_open($cmd, $descriptors, $serverPipes, realpath(__DIR__ . '/../..'));
+    if (is_resource($serverProcess)) {
+        $startedServer = true;
+        // Chờ máy chủ sẵn sàng
+        for ($i = 0; $i < 15; $i++) {
+            usleep(200000);
+            $sock = @fsockopen('localhost', 8000, $errno, $errstr, 0.5);
+            if (is_resource($sock)) {
+                fclose($sock);
+                break;
+            }
+        }
+    }
+} else {
+    fclose($checkConnection);
+}
+
 function httpRequest(string $method, string $url, array $data = [], ?string $cookieFile = null, array $headers = []): array
 {
     $ch = curl_init();
@@ -286,5 +319,17 @@ if ($allPass) {
     echo "\033[31mKẾT QUẢ: CÓ TÌNH HUỐNG CHƯA ĐẠT!\033[0m\n";
 }
 echo "========================================================================================\n\n";
+
+if ($startedServer && is_resource($serverProcess)) {
+    $status = proc_get_status($serverProcess);
+    if (!empty($status['running']) && !empty($status['pid'])) {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            exec("taskkill /F /T /PID " . (int)$status['pid'] . " > NUL 2>&1");
+        } else {
+            proc_terminate($serverProcess);
+        }
+    }
+    proc_close($serverProcess);
+}
 
 exit($allPass ? 0 : 1);

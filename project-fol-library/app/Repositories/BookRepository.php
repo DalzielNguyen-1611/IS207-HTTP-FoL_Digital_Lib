@@ -404,8 +404,10 @@ class BookRepository
             // 3. Bổ sung cuốn sách mới nếu người dùng yêu cầu tăng số lượng
             $additionalCopies = (int)($data['additional_copies'] ?? 0);
             if ($additionalCopies > 0) {
-                // Tìm chỉ số cuốn sách lớn nhất hiện tại
-                $maxStmt = $this->db->prepare("SELECT `id_cuon_sach` FROM `cuon_sach` WHERE `id_dau_sach` = :id ORDER BY `id_cuon_sach` DESC");
+                // Tìm chỉ số cuốn sách lớn nhất hiện tại (có khóa FOR UPDATE chống Race Condition)
+                $maxStmt = $this->db->prepare(
+                    "SELECT `id_cuon_sach` FROM `cuon_sach` WHERE `id_dau_sach` = :id ORDER BY `id_cuon_sach` DESC FOR UPDATE"
+                );
                 $maxStmt->execute([':id' => $id]);
                 $allCopies = $maxStmt->fetchAll(PDO::FETCH_COLUMN);
 
@@ -460,17 +462,23 @@ class BookRepository
             throw new RuntimeException("Không thể xóa đầu sách {$id} vì hiện có {$activeLoans} cuốn sách đang trong trạng thái được mượn.");
         }
 
+        // 2. Bảo tồn nhật ký kiểm toán và lịch sử mượn trả: không cho phép xóa vĩnh viễn sách đã có lịch sử giao dịch
+        $historyStmt = $this->db->prepare(
+            "SELECT COUNT(*) 
+             FROM `chi_tiet_muon` ctm
+             INNER JOIN `cuon_sach` cs ON ctm.`id_cuon_sach` = cs.`id_cuon_sach`
+             WHERE cs.`id_dau_sach` = :id"
+        );
+        $historyStmt->execute([':id' => $id]);
+        $totalLoans = (int)$historyStmt->fetchColumn();
+
+        if ($totalLoans > 0) {
+            throw new RuntimeException("Không thể xóa đầu sách {$id} vì đã tồn tại {$totalLoans} lượt mượn trong lịch sử hệ thống (bảo vệ toàn vẹn dữ liệu). Vui lòng chuyển trạng thái sách sang thanh lý.");
+        }
+
         $this->db->beginTransaction();
 
         try {
-            // Xóa chi tiết mượn và phiếu mượn liên quan tới cuốn sách này nếu có (lịch sử đã hoàn tất)
-            $delCtmStmt = $this->db->prepare(
-                "DELETE ctm FROM `chi_tiet_muon` ctm
-                 INNER JOIN `cuon_sach` cs ON ctm.`id_cuon_sach` = cs.`id_cuon_sach`
-                 WHERE cs.`id_dau_sach` = :id"
-            );
-            $delCtmStmt->execute([':id' => $id]);
-
             // Xóa cuốn sách
             $delCopiesStmt = $this->db->prepare("DELETE FROM `cuon_sach` WHERE `id_dau_sach` = :id");
             $delCopiesStmt->execute([':id' => $id]);

@@ -151,6 +151,15 @@ class LibrarianController
     {
         header('Content-Type: application/json; charset=UTF-8');
 
+        if (!$this->validateCsrf()) {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Mã bảo mật CSRF không hợp lệ hoặc phiên làm việc đã hết hạn. Vui lòng tải lại trang.',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+
         $input = $this->getRequestPayload();
         $userId = Session::getUserId();
 
@@ -170,6 +179,15 @@ class LibrarianController
     public function updateBook(): void
     {
         header('Content-Type: application/json; charset=UTF-8');
+
+        if (!$this->validateCsrf()) {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Mã bảo mật CSRF không hợp lệ hoặc phiên làm việc đã hết hạn. Vui lòng tải lại trang.',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         $input = $this->getRequestPayload();
         $id = trim((string)($input['id_dau_sach'] ?? $input['id'] ?? ''));
@@ -200,6 +218,15 @@ class LibrarianController
     public function deleteBook(): void
     {
         header('Content-Type: application/json; charset=UTF-8');
+
+        if (!$this->validateCsrf()) {
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'message' => 'Mã bảo mật CSRF không hợp lệ hoặc phiên làm việc đã hết hạn. Vui lòng tải lại trang.',
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
 
         $input = $this->getRequestPayload();
         $id = trim((string)($input['id_dau_sach'] ?? $input['id'] ?? ''));
@@ -248,6 +275,18 @@ class LibrarianController
 
         $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
             || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+        if (!$this->validateCsrf()) {
+            $msg = 'Mã bảo mật CSRF không hợp lệ hoặc phiên làm việc đã hết hạn.';
+            if ($isJson) {
+                http_response_code(403);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
 
         if ($targetUserId <= 0) {
             $msg = 'Mã tài khoản sinh viên không hợp lệ.';
@@ -309,6 +348,18 @@ class LibrarianController
 
         $isJson = (!empty($_SERVER['HTTP_ACCEPT']) && str_contains($_SERVER['HTTP_ACCEPT'], 'application/json'))
             || (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+        if (!$this->validateCsrf()) {
+            $msg = 'Mã bảo mật CSRF không hợp lệ hoặc phiên làm việc đã hết hạn.';
+            if ($isJson) {
+                http_response_code(403);
+                header('Content-Type: application/json; charset=UTF-8');
+                echo json_encode(['success' => false, 'message' => $msg], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            header('Location: /librarian/students?error=' . urlencode($msg));
+            exit;
+        }
 
         if ($targetUserId <= 0) {
             $msg = 'Mã tài khoản sinh viên không hợp lệ.';
@@ -376,6 +427,22 @@ class LibrarianController
         }
 
         return [];
+    }
+
+    /**
+     * Xác thực CSRF token từ POST body hoặc HTTP Header X-CSRF-TOKEN
+     */
+    private function validateCsrf(): bool
+    {
+        $token = $_POST['csrf_token'] ?? null;
+        if ($token === null && isset($_SERVER['HTTP_X_CSRF_TOKEN'])) {
+            $token = $_SERVER['HTTP_X_CSRF_TOKEN'];
+        }
+        if ($token === null) {
+            $payload = $this->getRequestPayload();
+            $token = $payload['csrf_token'] ?? null;
+        }
+        return Session::validateCsrfToken(is_string($token) ? $token : null);
     }
 }
 

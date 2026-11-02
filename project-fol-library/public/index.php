@@ -137,11 +137,28 @@ if (($path === '/login' || $path === '/register') && $_SERVER['REQUEST_METHOD'] 
 
 // 3. Xử lý Đăng nhập POST thật
 if ($path === '/login' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $ip = \App\Core\RateLimiter::getClientIp();
+    $rateKey = "login:ip:{$ip}";
+    if (\App\Core\RateLimiter::tooManyAttempts($rateKey, 5)) {
+        $wait = \App\Core\RateLimiter::availableIn($rateKey);
+        $email = urlencode($_POST['email'] ?? '');
+        header("Location: /login?error=" . urlencode("Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau {$wait} giây.") . "&email={$email}");
+        exit;
+    }
+
+    if (isset($_POST['csrf_token']) && !\App\Core\Session::validateCsrfToken((string)$_POST['csrf_token'])) {
+        $email = urlencode($_POST['email'] ?? '');
+        header("Location: /login?error=" . urlencode("Mã bảo mật phiên làm việc (CSRF) không hợp lệ hoặc đã hết hạn.") . "&email={$email}");
+        exit;
+    }
+
     $authController = new \App\Controllers\AuthController();
     $result = $authController->login($_POST);
     if ($result['success']) {
+        \App\Core\RateLimiter::clear($rateKey);
         header('Location: ' . $result['redirect']);
     } else {
+        \App\Core\RateLimiter::hit($rateKey, 60);
         $msg = $result['message'] ?? (!empty($result['errors']) ? reset($result['errors']) : 'Đăng nhập thất bại.');
         $email = urlencode($_POST['email'] ?? '');
         header("Location: /login?error=" . urlencode($msg) . "&email={$email}");

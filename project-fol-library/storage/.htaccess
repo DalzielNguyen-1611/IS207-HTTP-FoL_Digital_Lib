@@ -1,0 +1,8 @@
+# Ngăn chặn truy cập trực tiếp vào thư mục lưu trữ hệ thống
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+</IfModule>

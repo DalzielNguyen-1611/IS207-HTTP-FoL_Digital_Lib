@@ -57,17 +57,24 @@ class OperationalSeeder
                            ON DUPLICATE KEY UPDATE `ho_ten` = VALUES(`ho_ten`);");
             }
 
-            $db->exec("DELETE FROM `dat_cho` WHERE `ngay_dat` = CURDATE();");
-            $bookingValues = [];
-            for ($s = 1; $s <= 12; $s++) {
-                $user = ($s % 2 === 0) ? 3 : 4;
-                $bookingValues[] = sprintf(
-                    "('DC-TODAY-1-%02d', %d, 1, %d, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động')",
-                    $s, $s, $user
-                );
-            }
+            $db->exec("DELETE FROM `dat_cho` WHERE `ma_dat_cho` LIKE 'DC-TODAY-%' OR `ngay_dat` = CURDATE();");
+            // Cài đặt các lượt đặt mẫu hợp lệ tuân thủ ràng buộc 1 sinh viên / 1 ca đọc / 1 ngày
+            $sampleBookings = [
+                // Ca sáng (id_ca_doc = 1)
+                "('DC-TODAY-1-01', 1, 1, 3, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 1')",
+                "('DC-TODAY-1-02', 2, 1, 4, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 1')",
+                // Ca chiều (id_ca_doc = 2)
+                "('DC-TODAY-2-03', 3, 2, 3, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 2')",
+                "('DC-TODAY-2-04', 4, 2, 4, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 2')",
+                // Ca tối (id_ca_doc = 3)
+                "('DC-TODAY-3-05', 5, 3, 3, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 3')",
+                "('DC-TODAY-3-06', 6, 3, 4, CURDATE(), NOW(), NOW(), NULL, NULL, 'DaDat', 'Đặt chỗ tự động Ca 3')",
+                // Lịch sử hủy/quá hạn mẫu không chiếm giữ chỗ
+                "('DC-TODAY-1-07', 7, 1, 3, CURDATE(), NOW(), NULL, NULL, NOW(), 'Huy', 'Người dùng hủy')",
+                "('DC-TODAY-1-08', 8, 1, 4, CURDATE(), NOW(), NULL, NULL, NULL, 'QuaHanKhongDen', 'Quá hạn checkin')"
+            ];
             $db->exec("INSERT INTO `dat_cho` (`ma_dat_cho`, `id_cho_ngoi`, `id_ca_doc`, `id_nguoi_dung`, `ngay_dat`, `thoi_gian_tao`, `thoi_gian_xac_nhan`, `thoi_gian_checkin`, `thoi_gian_huy`, `trang_thai`, `ghi_chu`) VALUES \n" .
-                implode(",\n", $bookingValues) . ";");
+                implode(",\n", $sampleBookings) . ";");
 
             $db->exec("DELETE FROM `chi_tiet_muon`;");
             $db->exec("DELETE FROM `phieu_muon`;");

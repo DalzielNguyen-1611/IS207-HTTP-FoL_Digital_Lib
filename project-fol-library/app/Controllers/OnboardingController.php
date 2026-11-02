@@ -79,6 +79,22 @@ class OnboardingController
             return;
         }
 
+        // Kiểm tra mã bảo mật chống tấn công CSRF
+        $csrfToken = $_POST['csrf_token'] ?? null;
+        if (!Session::validateCsrfToken(is_string($csrfToken) ? $csrfToken : null)) {
+            $this->redirectWithError('Mã bảo mật phiên làm việc (CSRF) không hợp lệ hoặc đã hết hạn. Vui lòng tải lại trang.');
+            return;
+        }
+
+        // Điều tiết tốc độ gửi hồ sơ (Rate Limiting: tối đa 5 lần / phút)
+        $rateKey = "onboarding:user:{$userId}";
+        if (\App\Core\RateLimiter::tooManyAttempts($rateKey, 5)) {
+            $wait = \App\Core\RateLimiter::availableIn($rateKey);
+            $this->redirectWithError("Bạn đã gửi hồ sơ quá nhiều lần. Vui lòng thử lại sau {$wait} giây.");
+            return;
+        }
+        \App\Core\RateLimiter::hit($rateKey, 60);
+
         $user = $this->userRepo->findById($userId);
         if ($user === null) {
             $this->redirectWithError('Tài khoản không tồn tại trong hệ thống.');

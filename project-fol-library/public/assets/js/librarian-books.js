@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.querySelector('#staff-book-keyword')
   const tableBody = document.querySelector('#staff-book-tbody')
   const feedback = document.querySelector('#staff-edit-feedback')
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
 
   // Thành phần hộp thoại Thêm/Sửa
   const bookDialog = document.querySelector('#edit-book-dialog')
@@ -228,6 +229,7 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
+          'X-CSRF-TOKEN': csrfToken,
         },
         body: JSON.stringify({ id_dau_sach: bookId }),
       })
@@ -337,6 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: {
             'Content-Type': 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRF-TOKEN': csrfToken,
           },
           body: JSON.stringify(payload),
         })

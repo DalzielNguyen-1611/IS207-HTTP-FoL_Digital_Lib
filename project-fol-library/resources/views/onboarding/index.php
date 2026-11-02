@@ -700,6 +700,7 @@ if (!isset($majors) || empty($majors)) {
 
                 <!-- Biểu mẫu gửi hồ sơ -->
                 <form id="onboardingForm" action="/onboarding/submit" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                     <div class="form-grid">
                         <!-- Email sinh viên -->
                         <div class="form-group">

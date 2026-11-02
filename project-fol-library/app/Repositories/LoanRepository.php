@@ -168,6 +168,7 @@ class LoanRepository
 
     /**
      * Tổng hợp báo cáo số liệu mượn và trả theo các mốc thời gian cho /librarian/reports
+     * Đã tối ưu hóa loại bỏ hoàn toàn lỗi N+1 queries (chỉ chạy 2 batch aggregate query thay vì 30 query lặp)
      */
     public function getReportsSummary(): array
     {
@@ -190,29 +191,352 @@ class LoanRepository
 
         // Sắp xếp ngày giảm dần
         rsort($existingDates);
+        $topDates = array_slice($existingDates, 0, 15);
+
+        if (empty($topDates)) {
+            return [];
+        }
+
+        // Truy vấn gộp (Batch Aggregation) thay cho vòng lặp lồng nhau
+        $placeholders = implode(',', array_fill(0, count($topDates), '?'));
+
+        $borrowSql = "SELECT `ngay_muon` AS `dt`, COUNT(*) AS `cnt` 
+                      FROM `chi_tiet_muon` 
+                      WHERE `ngay_muon` IN ({$placeholders}) 
+                      GROUP BY `ngay_muon`";
+        $borrowStmt = $this->db->prepare($borrowSql);
+        $borrowStmt->execute($topDates);
+        $borrowMap = $borrowStmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
+
+        $returnSql = "SELECT `ngay_tra_thuc_te` AS `dt`, COUNT(*) AS `cnt` 
+                      FROM `chi_tiet_muon` 
+                      WHERE `ngay_tra_thuc_te` IN ({$placeholders}) 
+                      GROUP BY `ngay_tra_thuc_te`";
+        $returnStmt = $this->db->prepare($returnSql);
+        $returnStmt->execute($topDates);
+        $returnMap = $returnStmt->fetchAll(PDO::FETCH_KEY_PAIR) ?: [];
 
         $todayTs = strtotime('today');
         $reports = [];
 
-        foreach (array_slice($existingDates, 0, 15) as $date) {
-            $borrowStmt = $this->db->prepare("SELECT COUNT(*) FROM `chi_tiet_muon` WHERE `ngay_muon` = :dt");
-            $borrowStmt->execute([':dt' => $date]);
-            $borrowed = (int)$borrowStmt->fetchColumn();
-
-            $returnStmt = $this->db->prepare("SELECT COUNT(*) FROM `chi_tiet_muon` WHERE `ngay_tra_thuc_te` = :dt");
-            $returnStmt->execute([':dt' => $date]);
-            $returned = (int)$returnStmt->fetchColumn();
-
+        foreach ($topDates as $date) {
             $diffDays = (int)round((strtotime($date) - $todayTs) / 86400);
 
             $reports[] = [
                 'date' => $date,
                 'offset' => $diffDays,
-                'borrowed' => $borrowed,
-                'returned' => $returned,
+                'borrowed' => (int)($borrowMap[$date] ?? 0),
+                'returned' => (int)($returnMap[$date] ?? 0),
             ];
         }
 
         return $reports;
+    }
+
+    /**
+     * Kiểm tra số lượng sách đang mượn của một độc giả (Tối đa 3 cuốn theo Rule 19)
+     */
+    public function getActiveLoansCount(int $userId): int
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) 
+             FROM `chi_tiet_muon` ctm
+             INNER JOIN `phieu_muon` pm ON ctm.`id_phieu_muon` = pm.`id`
+             WHERE pm.`id_nguoi_dung` = :user_id 
+               AND ctm.`trang_thai` IN ('DangMuon', 'ChoNhan')"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        return (int)$stmt->fetchColumn();
+    }
+
+    /**
+     * Kiểm tra xem độc giả có cuốn sách nào đang bị quá hạn không
+     */
+    public function hasOverdueLoans(int $userId): bool
+    {
+        $stmt = $this->db->prepare(
+            "SELECT COUNT(*) 
+             FROM `chi_tiet_muon` ctm
+             INNER JOIN `phieu_muon` pm ON ctm.`id_phieu_muon` = pm.`id`
+             WHERE pm.`id_nguoi_dung` = :user_id 
+               AND ctm.`trang_thai` = 'DangMuon' 
+               AND ctm.`han_tra` < CURDATE()"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        return ((int)$stmt->fetchColumn()) > 0;
+    }
+
+    /**
+     * Tạo phiếu mượn và chi tiết mượn sách mới (Rule 19, 20, 22)
+     * - Khóa bản ghi cuốn sách bằng SELECT ... FOR UPDATE
+     * - Ngăn chặn mượn vượt quá 3 cuốn
+     * - Ngăn chặn mượn trùng cuốn sách đang có người mượn
+     * - Tính hạn trả chuẩn 14 ngày
+     */
+    public function createLoan(int $userId, string $copyId, int $durationDays = 14, ?int $librarianId = null): array
+    {
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
+
+        try {
+            // 1. Kiểm tra tài khoản sinh viên
+            $userStmt = $this->db->prepare("SELECT `id_tai_khoan`, `trang_thai` FROM `tai_khoan` WHERE `id_tai_khoan` = :id");
+            $userStmt->execute([':id' => $userId]);
+            $user = $userStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$user) {
+                throw new \DomainException('Tài khoản sinh viên không tồn tại.');
+            }
+            if ($user['trang_thai'] !== 'HoatDong') {
+                throw new \DomainException('Tài khoản sinh viên chưa được kích hoạt hoặc đang bị tạm khóa.');
+            }
+
+            // 2. Kiểm tra giới hạn mượn (Borrow Limit Violation - tối đa 3 cuốn)
+            if ($this->getActiveLoansCount($userId) >= 3) {
+                throw new \DomainException('Độc giả đã mượn tối đa 3 cuốn sách theo quy chế thư viện.');
+            }
+
+            // 3. Kiểm tra sách quá hạn
+            if ($this->hasOverdueLoans($userId)) {
+                throw new \DomainException('Độc giả có sách quá hạn chưa hoàn trả. Vui lòng thanh toán và trả sách trước khi mượn tiếp.');
+            }
+
+            // 4. Khóa và kiểm tra cuốn sách (SELECT ... FOR UPDATE chống Race Condition / Duplicate Active Loan)
+            $copyStmt = $this->db->prepare(
+                "SELECT `id_cuon_sach`, `id_dau_sach`, `trang_thai` 
+                 FROM `cuon_sach` 
+                 WHERE `id_cuon_sach` = :copy_id 
+                 FOR UPDATE"
+            );
+            $copyStmt->execute([':copy_id' => $copyId]);
+            $copy = $copyStmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$copy) {
+                throw new \DomainException("Không tìm thấy cuốn sách có mã {$copyId}.");
+            }
+            if ($copy['trang_thai'] !== 'SanSang') {
+                throw new \DomainException("Cuốn sách {$copyId} hiện không sẵn sàng cho mượn (Trạng thái: {$copy['trang_thai']}).");
+            }
+
+            // 5. Kiểm tra ràng buộc không có giao dịch mượn dở dang của cuốn sách này
+            $activeLoanStmt = $this->db->prepare(
+                "SELECT COUNT(*) FROM `chi_tiet_muon` 
+                 WHERE `id_cuon_sach` = :copy_id AND `trang_thai` IN ('DangMuon', 'ChoNhan')"
+            );
+            $activeLoanStmt->execute([':copy_id' => $copyId]);
+            if (((int)$activeLoanStmt->fetchColumn()) > 0) {
+                throw new \DomainException("Cuốn sách {$copyId} đang có giao dịch mượn chưa hoàn tất.");
+            }
+
+            // 6. Tạo phiếu mượn
+            $loanCode = 'PM-' . strtoupper(bin2hex(random_bytes(6)));
+            if ($librarianId !== null) {
+                $createPmStmt = $this->db->prepare(
+                    "INSERT INTO `phieu_muon` (`ma_phieu`, `id_nguoi_dung`, `id_can_bo`, `ngay_dang_ky`, `ngay_duyet`, `trang_thai`, `ghi_chu`)
+                     VALUES (:code, :user_id, :staff_id, NOW(), NOW(), 'DaDuyet', 'Mượn trực tiếp tại quầy')"
+                );
+                $createPmStmt->bindValue(':code', $loanCode, PDO::PARAM_STR);
+                $createPmStmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+                $createPmStmt->bindValue(':staff_id', $librarianId, PDO::PARAM_INT);
+            } else {
+                $createPmStmt = $this->db->prepare(
+                    "INSERT INTO `phieu_muon` (`ma_phieu`, `id_nguoi_dung`, `ngay_dang_ky`, `ngay_duyet`, `trang_thai`, `ghi_chu`)
+                     VALUES (:code, :user_id, NOW(), NOW(), 'DaDuyet', 'Mượn trực tiếp tại quầy')"
+                );
+                $createPmStmt->bindValue(':code', $loanCode, PDO::PARAM_STR);
+                $createPmStmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+            }
+            $createPmStmt->execute();
+            $pmId = (int)$this->db->lastInsertId();
+
+            // 7. Tạo chi tiết mượn (Hạn trả chuẩn: 14 ngày)
+            $dueDate = date('Y-m-d', strtotime("+{$durationDays} days"));
+            $createCtmStmt = $this->db->prepare(
+                "INSERT INTO `chi_tiet_muon` (`id_phieu_muon`, `id_cuon_sach`, `ngay_muon`, `han_tra`, `trang_thai`, `ghi_chu`)
+                 VALUES (:pm_id, :copy_id, CURDATE(), :due_date, 'DangMuon', 'Mượn 14 ngày')"
+            );
+            $createCtmStmt->execute([
+                ':pm_id' => $pmId,
+                ':copy_id' => $copyId,
+                ':due_date' => $dueDate,
+            ]);
+            $ctmId = (int)$this->db->lastInsertId();
+
+            // 8. Cập nhật trạng thái cuốn sách thành 'DangMuon'
+            $updateCopyStmt = $this->db->prepare(
+                "UPDATE `cuon_sach` SET `trang_thai` = 'DangMuon' WHERE `id_cuon_sach` = :copy_id"
+            );
+            $updateCopyStmt->execute([':copy_id' => $copyId]);
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return [
+                'success' => true,
+                'loan_id' => $pmId,
+                'detail_id' => $ctmId,
+                'code' => $loanCode,
+                'copy_id' => $copyId,
+                'due_date' => $dueDate,
+            ];
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Xử lý trả sách và tính phí trễ hạn nếu có (Rule 21: Invalid Book Return)
+     */
+    public function returnBook(int $detailId, ?int $librarianId = null): array
+    {
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
+
+        try {
+            // 1. Khóa bản ghi chi tiết mượn
+            $stmt = $this->db->prepare(
+                "SELECT ctm.*, pm.`id_nguoi_dung` 
+                 FROM `chi_tiet_muon` ctm
+                 INNER JOIN `phieu_muon` pm ON ctm.`id_phieu_muon` = pm.`id`
+                 WHERE ctm.`id` = :id 
+                 FOR UPDATE"
+            );
+            $stmt->execute([':id' => $detailId]);
+            $ctm = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$ctm) {
+                throw new \DomainException('Không tìm thấy bản ghi chi tiết mượn sách.');
+            }
+            if ($ctm['trang_thai'] === 'DaTra') {
+                throw new \DomainException('Cuốn sách này đã được trả trước đó.');
+            }
+            if ($ctm['trang_thai'] !== 'DangMuon') {
+                throw new \DomainException("Không thể trả cuốn sách ở trạng thái {$ctm['trang_thai']}.");
+            }
+
+            // 2. Tính số ngày quá hạn và tiền phạt (1.000 VNĐ / ngày)
+            $today = date('Y-m-d');
+            $overdueDays = max(0, (int)round((strtotime($today) - strtotime($ctm['han_tra'])) / 86400));
+            $fineAmount = $overdueDays * 1000;
+
+            // 3. Cập nhật chi tiết mượn sang 'DaTra'
+            $updateCtm = $this->db->prepare(
+                "UPDATE `chi_tiet_muon` 
+                 SET `trang_thai` = 'DaTra', `ngay_tra_thuc_te` = CURDATE() 
+                 WHERE `id` = :id AND `trang_thai` = 'DangMuon'"
+            );
+            $updateCtm->execute([':id' => $detailId]);
+
+            // 4. Cập nhật cuốn sách sang 'SanSang'
+            $updateCopy = $this->db->prepare(
+                "UPDATE `cuon_sach` SET `trang_thai` = 'SanSang' WHERE `id_cuon_sach` = :copy_id"
+            );
+            $updateCopy->execute([':copy_id' => $ctm['id_cuon_sach']]);
+
+            // 5. Nếu tất cả các cuốn trong phiếu mượn đã trả, cập nhật phiếu mượn sang 'HoanTat'
+            $checkRemaining = $this->db->prepare(
+                "SELECT COUNT(*) FROM `chi_tiet_muon` 
+                 WHERE `id_phieu_muon` = :pm_id AND `trang_thai` != 'DaTra'"
+            );
+            $checkRemaining->execute([':pm_id' => $ctm['id_phieu_muon']]);
+            if (((int)$checkRemaining->fetchColumn()) === 0) {
+                $updatePm = $this->db->prepare(
+                    "UPDATE `phieu_muon` SET `trang_thai` = 'HoanTat' WHERE `id` = :pm_id"
+                );
+                $updatePm->execute([':pm_id' => $ctm['id_phieu_muon']]);
+            }
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return [
+                'success' => true,
+                'detail_id' => $detailId,
+                'overdue_days' => $overdueDays,
+                'fine_amount' => $fineAmount,
+            ];
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Gia hạn sách mượn (Rule 23: Invalid Book Renewal)
+     * - Chỉ gia hạn khi chưa quá hạn
+     * - Tối đa gia hạn 1 lần (+7 ngày)
+     */
+    public function renewBook(int $detailId, int $renewDays = 7): array
+    {
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
+
+        try {
+            $stmt = $this->db->prepare(
+                "SELECT * FROM `chi_tiet_muon` WHERE `id` = :id FOR UPDATE"
+            );
+            $stmt->execute([':id' => $detailId]);
+            $ctm = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$ctm) {
+                throw new \DomainException('Không tìm thấy bản ghi mượn sách.');
+            }
+            if ($ctm['trang_thai'] !== 'DangMuon') {
+                throw new \DomainException('Chỉ có thể gia hạn cuốn sách đang trong trạng thái mượn.');
+            }
+
+            // Kiểm tra quá hạn
+            $today = date('Y-m-d');
+            if ($ctm['han_tra'] < $today) {
+                throw new \DomainException('Sách đã quá hạn trả, không thể gia hạn. Vui lòng mang sách đến quầy trả.');
+            }
+
+            // Kiểm tra số lần gia hạn (đã gia hạn trước đó)
+            $note = (string)($ctm['ghi_chu'] ?? '');
+            if (str_contains($note, 'DaGiaHan')) {
+                throw new \DomainException('Cuốn sách này đã được gia hạn 1 lần. Mỗi lượt mượn chỉ được gia hạn tối đa 1 lần.');
+            }
+
+            $newDueDate = date('Y-m-d', strtotime($ctm['han_tra'] . " +{$renewDays} days"));
+            $update = $this->db->prepare(
+                "UPDATE `chi_tiet_muon` 
+                 SET `han_tra` = :new_due, 
+                     `ghi_chu` = CONCAT(COALESCE(`ghi_chu`, ''), ' [DaGiaHan]') 
+                 WHERE `id` = :id AND `trang_thai` = 'DangMuon'"
+            );
+            $update->execute([
+                ':new_due' => $newDueDate,
+                ':id' => $detailId,
+            ]);
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return [
+                'success' => true,
+                'detail_id' => $detailId,
+                'old_due_date' => $ctm['han_tra'],
+                'new_due_date' => $newDueDate,
+            ];
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 }

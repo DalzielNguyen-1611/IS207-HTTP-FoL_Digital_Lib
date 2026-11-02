@@ -16,12 +16,15 @@ $testSuites = [
         'tests/Unit/ImageOptimizerServiceTest.php' => 'Tự động Thu nhỏ & Nén ảnh WebP (GD Library)',
         'tests/Unit/StudentCardApprovalTest.php' => 'Quy trình Xét duyệt Thẻ Sinh viên & Luồng Chờ duyệt',
         'tests/Unit/RoomBookingServiceTest.php' => 'Nghiệp vụ đặt chỗ phòng đọc và phân bổ ghế',
+        'tests/Unit/ConcurrencyBookingTest.php' => 'Đồng thời, Chống Overbooking & Deadlock Retry',
+        'tests/Unit/SecurityHardeningTest.php' => 'Bảo mật CSRF, Rate Limiting, Session Fixation & SQLi',
+        'tests/Unit/LibraryBusinessLogicTest.php' => 'Nghiệp vụ Mượn/Trả, Hạn mức & Ghost Booking Worker',
     ],
     'Integration Tests' => [
         'tests/Integration/ViewsDbIntegrationTest.php' => 'Tích hợp 15 Giao diện Views kết nối CSDL thực',
         'tests/Integration/BookManagementRegressionTest.php' => 'Hồi quy Quản lý sách & Phân trang thủ thư',
         'tests/Integration/AuthenticationAuthorizationRegressionTest.php' => 'Hồi quy Toàn diện Phiên đăng nhập & Bảo mật RBAC (16 Kịch bản)',
-        'tests/Integration/HttpEndToEndTest.php' => 'Kiểm thử Live HTTP End-to-End trên Server (17 Kịch bản)',
+        'tests/Integration/HttpEndToEndTest.php' => 'Kiểm thử Live HTTP End-to-End trên Server (21 Kịch bản)',
     ],
 ];
 

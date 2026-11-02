@@ -134,122 +134,153 @@ class RoomRepository
         int $shiftId,
         DateTimeImmutable $now
     ): array {
-        $ownsTransaction = !$this->db->inTransaction();
-        if ($ownsTransaction) {
-            $this->db->beginTransaction();
-        }
+        $maxRetries = 3;
+        $attempt = 0;
 
-        try {
-            $lockSuffix = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
-                ? ' FOR UPDATE'
-                : '';
-
-            $shiftStmt = $this->db->prepare(
-                "SELECT `id_ca_doc`, `ten_ca`, `gio_bat_dau`, `gio_ket_thuc`
-                 FROM `ca_doc`
-                 WHERE `id_ca_doc` = :shift_id AND `trang_thai` = 'HoatDong'"
-                 . $lockSuffix
-            );
-            $shiftStmt->execute([':shift_id' => $shiftId]);
-            $shift = $shiftStmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($shift === false) {
-                throw new DomainException('Ca đọc không tồn tại hoặc đã ngừng hoạt động.');
-            }
-
-            $timeZone = new DateTimeZone('Asia/Ho_Chi_Minh');
-            $startAt = new DateTimeImmutable($date . ' ' . $shift['gio_bat_dau'], $timeZone);
-            if ($startAt <= $now) {
-                throw new DomainException('Ca đọc này đã bắt đầu hoặc đã qua.');
-            }
-
-            $existingStmt = $this->db->prepare(
-                "SELECT 1
-                 FROM `dat_cho`
-                 WHERE `id_nguoi_dung` = :user_id
-                   AND `ngay_dat` = :booking_date
-                   AND `id_ca_doc` = :shift_id
-                   AND `trang_thai` IN ('DaDat', 'DaNhanCho')
-                 LIMIT 1"
-            );
-            $existingStmt->execute([
-                ':user_id' => $userId,
-                ':booking_date' => $date,
-                ':shift_id' => $shiftId,
-            ]);
-            if ($existingStmt->fetchColumn() !== false) {
-                throw new DomainException('Bạn đã có lượt đặt cho ca đọc này.');
-            }
-
-            $seatStmt = $this->db->prepare(
-                "SELECT cn.`id_cho_ngoi`, cn.`ma_cho_ngoi`
-                 FROM `cho_ngoi` cn
-                 WHERE cn.`trang_thai` = 'HoatDong'
-                   AND NOT EXISTS (
-                       SELECT 1
-                       FROM `dat_cho` dc
-                       WHERE dc.`id_cho_ngoi` = cn.`id_cho_ngoi`
-                         AND dc.`id_ca_doc` = :shift_id
-                         AND dc.`ngay_dat` = :booking_date
-                         AND dc.`trang_thai` IN ('DaDat', 'DaNhanCho')
-                   )
-                 ORDER BY cn.`id_cho_ngoi` ASC
-                 LIMIT 1"
-                 . $lockSuffix
-            );
-            $seatStmt->execute([
-                ':shift_id' => $shiftId,
-                ':booking_date' => $date,
-            ]);
-            $seat = $seatStmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($seat === false) {
-                throw new DomainException('Ca đọc đã hết chỗ. Vui lòng chọn ca khác.');
-            }
-
-            $bookingCode = 'DC-' . strtoupper(bin2hex(random_bytes(8)));
-            $createdAt = $now->setTimezone($timeZone)->format('Y-m-d H:i:s');
-            $insertStmt = $this->db->prepare(
-                "INSERT INTO `dat_cho`
-                    (`ma_dat_cho`, `id_cho_ngoi`, `id_ca_doc`, `id_nguoi_dung`,
-                     `ngay_dat`, `thoi_gian_tao`, `trang_thai`)
-                 VALUES
-                    (:booking_code, :seat_id, :shift_id, :user_id,
-                     :booking_date, :created_at, 'DaDat')"
-            );
-            $insertStmt->execute([
-                ':booking_code' => $bookingCode,
-                ':seat_id' => (int)$seat['id_cho_ngoi'],
-                ':shift_id' => $shiftId,
-                ':user_id' => $userId,
-                ':booking_date' => $date,
-                ':created_at' => $createdAt,
-            ]);
-
-            $booking = [
-                'id' => (int)$this->db->lastInsertId(),
-                'code' => $bookingCode,
-                'date' => $date,
-                'shift_id' => $shiftId,
-                'shift' => $shift['ten_ca'],
-                'start' => $shift['gio_bat_dau'],
-                'end' => $shift['gio_ket_thuc'],
-                'seat' => $seat['ma_cho_ngoi'],
-                'status' => 'DaDat',
-                'created_at' => $createdAt,
-            ];
-
+        while ($attempt < $maxRetries) {
+            $attempt++;
+            $ownsTransaction = !$this->db->inTransaction();
             if ($ownsTransaction) {
-                $this->db->commit();
+                $this->db->beginTransaction();
             }
 
-            return $booking;
-        } catch (Throwable $exception) {
-            if ($ownsTransaction && $this->db->inTransaction()) {
-                $this->db->rollBack();
+            try {
+                $lockSuffix = $this->db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+                    ? ' FOR UPDATE'
+                    : '';
+
+                $shiftStmt = $this->db->prepare(
+                    "SELECT `id_ca_doc`, `ten_ca`, `gio_bat_dau`, `gio_ket_thuc`
+                     FROM `ca_doc`
+                     WHERE `id_ca_doc` = :shift_id AND `trang_thai` = 'HoatDong'"
+                     . $lockSuffix
+                );
+                $shiftStmt->execute([':shift_id' => $shiftId]);
+                $shift = $shiftStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($shift === false) {
+                    throw new DomainException('Ca đọc không tồn tại hoặc đã ngừng hoạt động.');
+                }
+
+                $timeZone = new DateTimeZone('Asia/Ho_Chi_Minh');
+                $startAt = new DateTimeImmutable($date . ' ' . $shift['gio_bat_dau'], $timeZone);
+                if ($startAt <= $now) {
+                    throw new DomainException('Ca đọc này đã bắt đầu hoặc đã qua.');
+                }
+
+                $existingStmt = $this->db->prepare(
+                    "SELECT 1
+                     FROM `dat_cho`
+                     WHERE `id_nguoi_dung` = :user_id
+                       AND `ngay_dat` = :booking_date
+                       AND `id_ca_doc` = :shift_id
+                       AND `trang_thai` IN ('DaDat', 'DaNhanCho')
+                     LIMIT 1"
+                );
+                $existingStmt->execute([
+                    ':user_id' => $userId,
+                    ':booking_date' => $date,
+                    ':shift_id' => $shiftId,
+                ]);
+                if ($existingStmt->fetchColumn() !== false) {
+                    throw new DomainException('Bạn đã có lượt đặt cho ca đọc này.');
+                }
+
+                $seatStmt = $this->db->prepare(
+                    "SELECT cn.`id_cho_ngoi`, cn.`ma_cho_ngoi`
+                     FROM `cho_ngoi` cn
+                     WHERE cn.`trang_thai` = 'HoatDong'
+                       AND NOT EXISTS (
+                           SELECT 1
+                           FROM `dat_cho` dc
+                           WHERE dc.`id_cho_ngoi` = cn.`id_cho_ngoi`
+                             AND dc.`id_ca_doc` = :shift_id
+                             AND dc.`ngay_dat` = :booking_date
+                             AND dc.`trang_thai` IN ('DaDat', 'DaNhanCho')
+                       )
+                     ORDER BY cn.`id_cho_ngoi` ASC
+                     LIMIT 1"
+                     . $lockSuffix
+                );
+                $seatStmt->execute([
+                    ':shift_id' => $shiftId,
+                    ':booking_date' => $date,
+                ]);
+                $seat = $seatStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($seat === false) {
+                    throw new DomainException('Ca đọc đã hết chỗ. Vui lòng chọn ca khác.');
+                }
+
+                $bookingCode = 'DC-' . strtoupper(bin2hex(random_bytes(8)));
+                $createdAt = $now->setTimezone($timeZone)->format('Y-m-d H:i:s');
+                $insertStmt = $this->db->prepare(
+                    "INSERT INTO `dat_cho`
+                        (`ma_dat_cho`, `id_cho_ngoi`, `id_ca_doc`, `id_nguoi_dung`,
+                         `ngay_dat`, `thoi_gian_tao`, `trang_thai`)
+                     VALUES
+                        (:booking_code, :seat_id, :shift_id, :user_id,
+                         :booking_date, :created_at, 'DaDat')"
+                );
+                $insertStmt->execute([
+                    ':booking_code' => $bookingCode,
+                    ':seat_id' => (int)$seat['id_cho_ngoi'],
+                    ':shift_id' => $shiftId,
+                    ':user_id' => $userId,
+                    ':booking_date' => $date,
+                    ':created_at' => $createdAt,
+                ]);
+
+                $booking = [
+                    'id' => (int)$this->db->lastInsertId(),
+                    'code' => $bookingCode,
+                    'date' => $date,
+                    'shift_id' => $shiftId,
+                    'shift' => $shift['ten_ca'],
+                    'start' => $shift['gio_bat_dau'],
+                    'end' => $shift['gio_ket_thuc'],
+                    'seat' => $seat['ma_cho_ngoi'],
+                    'status' => 'DaDat',
+                    'created_at' => $createdAt,
+                ];
+
+                if ($ownsTransaction) {
+                    $this->db->commit();
+                }
+
+                return $booking;
+            } catch (\PDOException $exception) {
+                if ($ownsTransaction && $this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+
+                $errorCode = (int)($exception->errorInfo[1] ?? 0);
+                $sqlState = (string)($exception->errorInfo[0] ?? $exception->getCode());
+                $isDeadlock = ($errorCode === 1213 || $errorCode === 1205 || $sqlState === '40001');
+
+                if ($isDeadlock && $attempt < $maxRetries) {
+                    usleep((int)((50000 * (2 ** ($attempt - 1))) + random_int(1000, 20000)));
+                    continue;
+                }
+
+                $msg = $exception->getMessage();
+                if ($errorCode === 1062 || str_contains($msg, 'uq_active_user_shift') || str_contains($msg, 'active_user_shift')) {
+                    throw new DomainException('Bạn đã có lượt đặt cho ca đọc này.');
+                }
+                if ($errorCode === 1062 || str_contains($msg, 'uq_active_seat_booking') || str_contains($msg, 'active_seat_booking')) {
+                    throw new DomainException('Chỗ ngồi này vừa được người khác đặt trước. Vui lòng chọn ca hoặc chỗ khác.');
+                }
+
+                throw $exception;
+            } catch (Throwable $exception) {
+                if ($ownsTransaction && $this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                throw $exception;
             }
-            throw $exception;
         }
+
+        throw new DomainException('Không thể hoàn tất đặt chỗ do xung đột truy cập đồng thời. Vui lòng thử lại.');
     }
 
     /**
@@ -408,5 +439,85 @@ class RoomRepository
         $stmt->execute($params);
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
+    /**
+     * Xác nhận Check-in cho bạn đọc khi đến nhận chỗ ngồi (Issue 24: No-show Booking check-in)
+     */
+    public function checkinBooking(int $bookingId, ?DateTimeImmutable $now = null): void
+    {
+        $tz = new DateTimeZone('Asia/Ho_Chi_Minh');
+        $now = $now ?? new DateTimeImmutable('now', $tz);
+
+        $stmt = $this->db->prepare(
+            "SELECT dc.`id_dat_cho`, dc.`trang_thai`, dc.`ngay_dat`, cd.`gio_bat_dau`, cd.`gio_ket_thuc`
+             FROM `dat_cho` dc
+             INNER JOIN `ca_doc` cd ON cd.`id_ca_doc` = dc.`id_ca_doc`
+             WHERE dc.`id_dat_cho` = :id"
+        );
+        $stmt->execute([':id' => $bookingId]);
+        $booking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$booking) {
+            throw new DomainException('Không tìm thấy lượt đặt chỗ.');
+        }
+
+        if ($booking['trang_thai'] === 'DaNhanCho') {
+            throw new DomainException('Lượt đặt này đã được check-in trước đó.');
+        }
+
+        if ($booking['trang_thai'] !== 'DaDat') {
+            throw new DomainException("Không thể check-in lượt đặt ở trạng thái {$booking['trang_thai']}.");
+        }
+
+        $update = $this->db->prepare(
+            "UPDATE `dat_cho`
+             SET `trang_thai` = 'DaNhanCho', `thoi_gian_checkin` = :checkin_time
+             WHERE `id_dat_cho` = :id AND `trang_thai` = 'DaDat'"
+        );
+        $update->execute([
+            ':checkin_time' => $now->format('Y-m-d H:i:s'),
+            ':id' => $bookingId,
+        ]);
+
+        if ($update->rowCount() !== 1) {
+            throw new DomainException('Lượt đặt đã được cập nhật bởi tiến trình khác.');
+        }
+    }
+
+    /**
+     * Tự động quét và giải phóng các lượt đặt chỗ bị bỏ rơi / quá giờ không đến (Issue 3 & 24)
+     * Đổi trạng thái 'DaDat' -> 'QuaHanKhongDen'
+     *
+     * @return int Số lượt đặt bị hết hạn và giải phóng
+     */
+    public function expireNoShowBookings(?DateTimeImmutable $now = null): int
+    {
+        $tz = new DateTimeZone('Asia/Ho_Chi_Minh');
+        $now = $now ?? new DateTimeImmutable('now', $tz);
+        $currentDate = $now->format('Y-m-d');
+        $currentTime = $now->format('H:i:s');
+
+        // Hết hạn nếu:
+        // 1. Ngày đặt là quá khứ (< currentDate)
+        // 2. Ngày đặt là hôm nay và giờ kết thúc ca đọc đã qua (< currentTime)
+        $sql = "UPDATE `dat_cho` dc
+                INNER JOIN `ca_doc` cd ON cd.`id_ca_doc` = dc.`id_ca_doc`
+                SET dc.`trang_thai` = 'QuaHanKhongDen',
+                    dc.`ghi_chu` = CONCAT(COALESCE(dc.`ghi_chu`, ''), ' [Tự động giải phóng do quá giờ không checkin]')
+                WHERE dc.`trang_thai` = 'DaDat'
+                  AND (
+                      dc.`ngay_dat` < :cur_date
+                      OR (dc.`ngay_dat` = :cur_date_2 AND cd.`gio_ket_thuc` <= :cur_time)
+                  )";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            ':cur_date' => $currentDate,
+            ':cur_date_2' => $currentDate,
+            ':cur_time' => $currentTime,
+        ]);
+
+        return $stmt->rowCount();
     }
 }

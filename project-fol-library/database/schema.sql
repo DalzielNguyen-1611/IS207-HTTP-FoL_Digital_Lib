@@ -154,9 +154,13 @@ CREATE TABLE IF NOT EXISTS `dat_cho` (
     `thoi_gian_huy` DATETIME NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DaDat' COMMENT 'DaDat, DaNhanCho, Huy, QuaHanKhongDen',
     `ghi_chu` VARCHAR(500) NULL,
+    `active_seat_booking` VARCHAR(100) GENERATED ALWAYS AS (IF(`trang_thai` IN ('DaDat', 'DaNhanCho'), CONCAT(`id_cho_ngoi`, '_', `id_ca_doc`, '_', `ngay_dat`), NULL)) STORED,
+    `active_user_shift` VARCHAR(100) GENERATED ALWAYS AS (IF(`trang_thai` IN ('DaDat', 'DaNhanCho'), CONCAT(`id_nguoi_dung`, '_', `id_ca_doc`, '_', `ngay_dat`), NULL)) STORED,
     INDEX `idx_booking_slot_status` (`ngay_dat`, `id_ca_doc`, `trang_thai`),
     INDEX `idx_booking_user_slot_status` (`id_nguoi_dung`, `ngay_dat`, `id_ca_doc`, `trang_thai`),
     INDEX `idx_booking_seat_slot_status` (`id_cho_ngoi`, `id_ca_doc`, `ngay_dat`, `trang_thai`),
+    UNIQUE KEY `uq_active_seat_booking` (`active_seat_booking`),
+    UNIQUE KEY `uq_active_user_shift` (`active_user_shift`),
     CONSTRAINT `fk_19` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_20` FOREIGN KEY (`id_cho_ngoi`) REFERENCES `cho_ngoi` (`id_cho_ngoi`) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT `fk_21` FOREIGN KEY (`id_ca_doc`) REFERENCES `ca_doc` (`id_ca_doc`) ON DELETE NO ACTION ON UPDATE NO ACTION
@@ -285,6 +289,7 @@ CREATE TABLE IF NOT EXISTS `cuon_sach` (
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'SanSang' COMMENT 'SanSang, DangMuon, Mat, Hong, ThanhLy',
     `ngay_nhap_kho` DATE NULL,
     `ghi_chu` VARCHAR(500) NULL,
+    INDEX `idx_cuon_sach_dau_trang_thai` (`id_dau_sach`, `trang_thai`),
     CONSTRAINT `fk_7` FOREIGN KEY (`id_dau_sach`) REFERENCES `dau_sach` (`id_dau_sach`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_33` FOREIGN KEY (`id_o_sach`) REFERENCES `o_sach` (`id_o_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -338,6 +343,8 @@ CREATE TABLE IF NOT EXISTS `chi_tiet_muon` (
     `ngay_tra_thuc_te` DATE NULL,
     `trang_thai` VARCHAR(30) NOT NULL DEFAULT 'DangMuon' COMMENT 'DangMuon, DaTra, Mat, Hong',
     `ghi_chu` VARCHAR(500) NULL,
+    INDEX `idx_ctm_cuon_trang_thai` (`id_cuon_sach`, `trang_thai`),
+    INDEX `idx_ctm_trang_thai_han` (`trang_thai`, `han_tra`),
     CONSTRAINT `fk_13` FOREIGN KEY (`id_phieu_muon`) REFERENCES `phieu_muon` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
     CONSTRAINT `fk_14` FOREIGN KEY (`id_cuon_sach`) REFERENCES `cuon_sach` (`id_cuon_sach`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -378,6 +385,7 @@ CREATE TABLE IF NOT EXISTS `nhat_ky_hoat_dong` (
     `mo_ta` TEXT NULL,
     `dia_chi_ip` VARCHAR(45) NULL,
     `thoi_gian` DATETIME NOT NULL,
+    INDEX `idx_audit_time` (`thoi_gian`),
     CONSTRAINT `fk_32` FOREIGN KEY (`id_nguoi_dung`) REFERENCES `tai_khoan` (`id_tai_khoan`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

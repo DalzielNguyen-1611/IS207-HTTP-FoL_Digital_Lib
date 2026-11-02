@@ -51,8 +51,34 @@ class RoomBookingController
             return;
         }
 
+        $userId = Session::getUserId() ?? 0;
+
+        // 1. Điều tiết lưu lượng (Rate Limiting: tối đa 10 lượt đặt / phút / tài khoản)
+        $rateKey = "booking:user:{$userId}";
+        if (\App\Core\RateLimiter::tooManyAttempts($rateKey, 10)) {
+            $wait = \App\Core\RateLimiter::availableIn($rateKey);
+            $this->respond([
+                'success' => false,
+                'error' => "Bạn thao tác đặt chỗ quá nhanh. Vui lòng chờ {$wait} giây rồi thử lại.",
+            ], 429);
+            return;
+        }
+        \App\Core\RateLimiter::hit($rateKey, 60);
+
         try {
             $data = $this->readJsonBody();
+
+            // 2. Xử lý Idempotency Key (Chống gửi trùng lặp - Duplicate Submission)
+            $idempotencyKey = $_SERVER['HTTP_IDEMPOTENCY_KEY'] ?? ($data['idempotency_key'] ?? null);
+            if (is_string($idempotencyKey) && trim($idempotencyKey) !== '') {
+                $trimmedKey = trim($idempotencyKey);
+                $cached = Session::get("idempotency_booking_{$userId}_{$trimmedKey}");
+                if (is_array($cached)) {
+                    $this->respond($cached, 200);
+                    return;
+                }
+            }
+
             $date = $data['date'] ?? null;
             $shiftId = filter_var($data['shift_id'] ?? null, FILTER_VALIDATE_INT);
             if (!is_string($date) || $shiftId === false || $shiftId === null) {
@@ -64,15 +90,23 @@ class RoomBookingController
             }
 
             $booking = $this->bookingService->createBooking(
-                Session::getUserId() ?? 0,
+                $userId,
                 $date,
                 (int)$shiftId
             );
-            $this->respond([
+
+            $responseBody = [
                 'success' => true,
                 'message' => 'Đặt chỗ thành công.',
                 'booking' => $booking,
-            ], 201);
+            ];
+
+            // Lưu cache kết quả theo Idempotency Key nếu có
+            if (!empty($trimmedKey)) {
+                Session::set("idempotency_booking_{$userId}_{$trimmedKey}", $responseBody);
+            }
+
+            $this->respond($responseBody, 201);
         } catch (DomainException $exception) {
             $this->respond([
                 'success' => false,
@@ -134,9 +168,20 @@ class RoomBookingController
 
     private function hasValidCsrfToken(): bool
     {
-        $sessionToken = Session::get('csrf_token');
-        $requestToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
+        $requestToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? null;
+        if (!is_string($requestToken) || $requestToken === '') {
+            $raw = file_get_contents('php://input');
+            if (is_string($raw) && $raw !== '') {
+                $decoded = json_decode($raw, true);
+                $requestToken = $decoded['csrf_token'] ?? null;
+            }
+        }
 
+        if (is_string($requestToken) && $requestToken !== '' && Session::validateCsrfToken($requestToken)) {
+            return true;
+        }
+
+        $sessionToken = Session::get('csrf_token');
         return is_string($sessionToken)
             && is_string($requestToken)
             && $sessionToken !== ''

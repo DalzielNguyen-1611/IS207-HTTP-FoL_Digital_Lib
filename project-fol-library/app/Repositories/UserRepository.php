@@ -142,37 +142,53 @@ class UserRepository
 
     public function createFromGoogle(array $profile, int $roleId = 3): int
     {
-        $status = ($roleId === 3) ? 'ChoDuyet' : 'HoatDong';
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
 
-        $stmt = $this->db->prepare(
-            'INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `google_sub`, `trang_thai`, `created_at`, `updated_at`)
-             VALUES (:role_id, :email, NULL, :sub, :status, NOW(), NOW())'
-        );
-        $stmt->execute([
-            ':role_id' => $roleId,
-            ':email' => $profile['email'],
-            ':sub' => $profile['sub'],
-            ':status' => $status
-        ]);
-        $userId = (int)$this->db->lastInsertId();
+        try {
+            $status = ($roleId === 3) ? 'ChoDuyet' : 'HoatDong';
 
-        $name = trim((string)($profile['name'] ?? explode('@', $profile['email'])[0]));
-        $picture = (string)($profile['picture'] ?? '/assets/images/logo.png');
-        $prefix = ($roleId === 1) ? 'AD' : 'SV';
-        $mssv = $prefix . str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
+            $stmt = $this->db->prepare(
+                'INSERT INTO `tai_khoan` (`id_vai_tro`, `email`, `mat_khau`, `google_sub`, `trang_thai`, `created_at`, `updated_at`)
+                 VALUES (:role_id, :email, NULL, :sub, :status, NOW(), NOW())'
+            );
+            $stmt->execute([
+                ':role_id' => $roleId,
+                ':email' => $profile['email'],
+                ':sub' => $profile['sub'],
+                ':status' => $status
+            ]);
+            $userId = (int)$this->db->lastInsertId();
 
-        $profileStmt = $this->db->prepare(
-            'INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `so_dien_thoai`, `anh_dai_dien`)
-             VALUES (:id, :mssv, :name, 1, "Nam", "2005-01-01", "", :avatar)'
-        );
-        $profileStmt->execute([
-            ':id' => $userId,
-            ':mssv' => $mssv,
-            ':name' => $name,
-            ':avatar' => $picture
-        ]);
+            $name = trim((string)($profile['name'] ?? explode('@', $profile['email'])[0]));
+            $picture = (string)($profile['picture'] ?? '/assets/images/logo.png');
+            $prefix = ($roleId === 1) ? 'AD' : 'SV';
+            $mssv = $prefix . str_pad((string)$userId, 5, '0', STR_PAD_LEFT);
 
-        return $userId;
+            $profileStmt = $this->db->prepare(
+                'INSERT INTO `ho_so_nguoi_dung` (`id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `so_dien_thoai`, `anh_dai_dien`)
+                 VALUES (:id, :mssv, :name, 1, "Nam", "2005-01-01", "", :avatar)'
+            );
+            $profileStmt->execute([
+                ':id' => $userId,
+                ':mssv' => $mssv,
+                ':name' => $name,
+                ':avatar' => $picture
+            ]);
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return $userId;
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -271,18 +287,34 @@ class UserRepository
             $params[':anh_the_sv'] = $anhTheSvUrl;
         }
 
-        $sql .= ' WHERE `id_tai_khoan` = :id';
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
 
-        $stmtAccount = $this->db->prepare(
-            'UPDATE `tai_khoan`
-             SET `trang_thai` = "ChoDuyet", `updated_at` = NOW()
-             WHERE `id_tai_khoan` = :id'
-        );
-        $stmtAccount->execute([':id' => $userId]);
+        try {
+            $sql .= ' WHERE `id_tai_khoan` = :id';
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute($params);
 
-        return true;
+            $stmtAccount = $this->db->prepare(
+                'UPDATE `tai_khoan`
+                 SET `trang_thai` = "ChoDuyet", `updated_at` = NOW()
+                 WHERE `id_tai_khoan` = :id'
+            );
+            $stmtAccount->execute([':id' => $userId]);
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**
@@ -332,21 +364,37 @@ class UserRepository
      */
     public function approveStudent(int $userId): bool
     {
-        $stmt = $this->db->prepare(
-            'UPDATE `tai_khoan`
-             SET `trang_thai` = "HoatDong", `updated_at` = NOW()
-             WHERE `id_tai_khoan` = :id'
-        );
-        $ok = $stmt->execute([':id' => $userId]);
+        $ownsTx = !$this->db->inTransaction();
+        if ($ownsTx) {
+            $this->db->beginTransaction();
+        }
 
-        $stmtHs = $this->db->prepare(
-            'UPDATE `ho_so_nguoi_dung`
-             SET `ghi_chu_duyet` = NULL
-             WHERE `id_tai_khoan` = :id'
-        );
-        $stmtHs->execute([':id' => $userId]);
+        try {
+            $stmt = $this->db->prepare(
+                'UPDATE `tai_khoan`
+                 SET `trang_thai` = "HoatDong", `updated_at` = NOW()
+                 WHERE `id_tai_khoan` = :id'
+            );
+            $stmt->execute([':id' => $userId]);
 
-        return $ok;
+            $stmtHs = $this->db->prepare(
+                'UPDATE `ho_so_nguoi_dung`
+                 SET `ghi_chu_duyet` = NULL
+                 WHERE `id_tai_khoan` = :id'
+            );
+            $stmtHs->execute([':id' => $userId]);
+
+            if ($ownsTx) {
+                $this->db->commit();
+            }
+
+            return true;
+        } catch (\Throwable $e) {
+            if ($ownsTx && $this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
+            throw $e;
+        }
     }
 
     /**

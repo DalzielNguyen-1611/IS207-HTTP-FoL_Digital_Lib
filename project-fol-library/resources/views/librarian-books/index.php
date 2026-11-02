@@ -45,6 +45,7 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
     <!-- Metadata & tài nguyên giao diện -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Quản lý sách · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->

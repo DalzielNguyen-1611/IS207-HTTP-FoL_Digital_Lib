@@ -148,6 +148,7 @@ $savedEmail = $_GET['email'] ?? '';
 
             <!-- Form POST đăng nhập trực tiếp vào Backend -->
             <form id="login-form" method="POST" action="/login">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                 <!-- Email đăng nhập -->
                 <div class="auth-field">
                     <label for="login-email">Email</label>

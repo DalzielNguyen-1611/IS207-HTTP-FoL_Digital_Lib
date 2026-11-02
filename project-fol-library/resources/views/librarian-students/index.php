@@ -535,6 +535,7 @@ $pendingCount = count($pendingStudents);
                                     <td>
                                         <div class="action-btns">
                                             <form action="/librarian/students/approve" method="POST" style="margin:0;">
+                                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                                                 <input type="hidden" name="user_id" value="<?= $sId ?>">
                                                 <button type="submit" class="btn-approve" onclick="return confirm('Xác nhận phê duyệt thẻ cho sinh viên <?= $sName ?> (MSSV: <?= $sMssv ?>)?')">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -587,6 +588,7 @@ $pendingCount = count($pendingStudents);
                     Yêu cầu chụp lại
                 </button>
                 <form id="modalApproveForm" action="/librarian/students/approve" method="POST" style="margin:0;">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
                     <input type="hidden" name="user_id" id="modalUserId" value="0">
                     <button type="submit" class="btn-approve">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
@@ -599,6 +601,7 @@ $pendingCount = count($pendingStudents);
 
     <!-- Form ẩn để gửi yêu cầu chụp lại -->
     <form id="rejectForm" action="/librarian/students/reject" method="POST" style="display:none;">
+        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(\App\Core\Session::getCsrfToken(), ENT_QUOTES, 'UTF-8') ?>">
         <input type="hidden" name="user_id" id="rejectUserId" value="0">
         <input type="hidden" name="reason" id="rejectReason" value="">
     </form>

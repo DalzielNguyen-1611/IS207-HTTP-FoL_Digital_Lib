@@ -25,6 +25,8 @@ class Session
         $lifetimeMinutes = (int)($_ENV['SESSION_LIFETIME'] ?? 120);
         $lifetimeSeconds = $lifetimeMinutes > 0 ? $lifetimeMinutes * 60 : 7200;
 
+        @ini_set('session.use_strict_mode', '1');
+
         if (!headers_sent()) {
             session_set_cookie_params([
                 'lifetime' => $lifetimeSeconds,
@@ -161,5 +163,40 @@ class Session
     public static function isAuthenticated(): bool
     {
         return self::getUserId() !== null;
+    }
+
+    /**
+     * Lấy CSRF token hiện tại hoặc tự động tạo mới token bảo mật 64 ký tự hex
+     */
+    public static function getCsrfToken(): string
+    {
+        self::start();
+        if (empty($_SESSION['_csrf_token'])) {
+            $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        }
+        return (string)$_SESSION['_csrf_token'];
+    }
+
+    /**
+     * Xác thực CSRF token gửi lên bằng hàm so sánh timing-safe hash_equals
+     */
+    public static function validateCsrfToken(?string $token): bool
+    {
+        self::start();
+        $stored = $_SESSION['_csrf_token'] ?? null;
+        if (!is_string($stored) || empty($stored) || !is_string($token) || empty($token)) {
+            return false;
+        }
+        return hash_equals($stored, $token);
+    }
+
+    /**
+     * Tái tạo CSRF token mới sau khi thực hiện hành động nhạy cảm
+     */
+    public static function regenerateCsrfToken(): string
+    {
+        self::start();
+        $_SESSION['_csrf_token'] = bin2hex(random_bytes(32));
+        return $_SESSION['_csrf_token'];
     }
 }
