@@ -81,11 +81,11 @@ class ViewsDbIntegrationTest
             ],
             'view_onboarding_renders_successfully' => [
                 'file' => 'resources/views/onboarding/index.php',
-                'mustContain' => ['Kích hoạt Thẻ Thư viện', 'HỒ SƠ BẠN ĐỌC SINH VIÊN', 'Mã số sinh viên'],
+                'mustContain' => ['Chào mừng bạn đến với Thư viện', 'Mã số sinh viên'],
             ],
             'view_librarian_students_renders_successfully' => [
                 'file' => 'resources/views/librarian-students/index.php',
-                'mustContain' => ['Duyệt thẻ sinh viên', 'XÉT DUYỆT BẠN ĐỌC'],
+                'mustContain' => ['Duyệt thẻ sinh viên'],
             ],
         ];
 

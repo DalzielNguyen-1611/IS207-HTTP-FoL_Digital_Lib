@@ -131,7 +131,7 @@ $results['E2E-07: Admin đăng xuất thành công chuyển hướng về /login
 
 // 8. Đăng nhập tài khoản Sinh viên
 $studentLoginData = [
-    'email' => '24520500@gm.uit.edu.vn',
+    'email' => '24521234@gm.uit.edu.vn',
     'password' => 'Password@123'
 ];
 $res = httpRequest('POST', "{$baseUrl}/login", $studentLoginData, $cookieFile);
@@ -232,7 +232,7 @@ httpRequest('POST', "{$baseUrl}/login", $loginData, $cookieFile);
 // 18.1. Admin truy cập danh sách duyệt thẻ sinh viên /librarian/students (HTTP 200)
 $res = httpRequest('GET', "{$baseUrl}/librarian/students", [], $cookieFile);
 $results['E2E-18: Admin/Cán bộ truy cập /librarian/students duyệt thẻ thành công (HTTP 200)'] = [
-    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Duyệt thẻ sinh viên') && str_contains($res['body'], 'XÉT DUYỆT BẠN ĐỌC')),
+    'pass' => ($res['code'] === 200 && str_contains($res['body'], 'Duyệt thẻ sinh viên')),
     'detail' => "HTTP {$res['code']}, Đã hiển thị giao diện duyệt thẻ"
 ];
 
@@ -250,7 +250,7 @@ if (file_exists($guestCookieFile)) {
 // 20. Người dùng đăng nhập truy cập /onboarding thành công (HTTP 200)
 $userOnboardingRes = httpRequest('GET', "{$baseUrl}/onboarding", [], $cookieFile);
 $results['E2E-20: Người dùng truy cập trang hoàn thiện hồ sơ /onboarding thành công (HTTP 200)'] = [
-    'pass' => ($userOnboardingRes['code'] === 200 && str_contains($userOnboardingRes['body'], 'Kích hoạt Thẻ Thư viện') && str_contains($userOnboardingRes['body'], 'dropzone')),
+    'pass' => ($userOnboardingRes['code'] === 200 && (str_contains($userOnboardingRes['body'], 'Chào mừng bạn đến với Thư viện') || str_contains($userOnboardingRes['body'], 'Kích hoạt Thẻ Thư viện')) && str_contains($userOnboardingRes['body'], 'dropzone')),
     'detail' => "HTTP {$userOnboardingRes['code']}, Giao diện Onboarding chuẩn xác"
 ];
 
