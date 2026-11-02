@@ -44,8 +44,19 @@ class OperationalSeeder
             (4, 'Ca 4', '15:15:00', '17:15:00', 'HoatDong')
             ON DUPLICATE KEY UPDATE `gio_bat_dau` = VALUES(`gio_bat_dau`), `gio_ket_thuc` = VALUES(`gio_ket_thuc`), `trang_thai` = VALUES(`trang_thai`);");
 
-        // 4. Giao dịch mượn/đặt phòng mẫu (chỉ nạp khi được yêu cầu rõ)
         if ($withSampleTransactions) {
+            // Đảm bảo có bạn đọc sinh viên mẫu hoạt động (user 3 & user 4)
+            $db->exec("UPDATE `tai_khoan` SET `trang_thai` = 'HoatDong' WHERE `id_tai_khoan` = 3;");
+            $hasU4 = $db->query("SELECT `id_tai_khoan` FROM `tai_khoan` WHERE `id_tai_khoan` = 4")->fetchColumn();
+            if (!$hasU4) {
+                $hash = password_hash('Password@123', PASSWORD_BCRYPT);
+                $db->exec("INSERT INTO `tai_khoan` (`id_tai_khoan`, `id_vai_tro`, `email`, `mat_khau`, `trang_thai`, `created_at`, `updated_at`) 
+                           VALUES (4, 3, '24521234@gm.uit.edu.vn', '{$hash}', 'HoatDong', NOW(), NOW())");
+                $db->exec("INSERT INTO `ho_so_nguoi_dung` (`id_ho_so`, `id_tai_khoan`, `mssv`, `ho_ten`, `id_lop`, `gioi_tinh`, `ngay_sinh`, `so_dien_thoai`, `anh_dai_dien`) 
+                           VALUES (4, 4, '24521234', 'Trần Phương Anh', 1, 'Nữ', '2006-03-24', '0981122334', '/assets/images/logo.png')
+                           ON DUPLICATE KEY UPDATE `ho_ten` = VALUES(`ho_ten`);");
+            }
+
             $db->exec("DELETE FROM `dat_cho` WHERE `ngay_dat` = CURDATE();");
             $bookingValues = [];
             for ($s = 1; $s <= 12; $s++) {

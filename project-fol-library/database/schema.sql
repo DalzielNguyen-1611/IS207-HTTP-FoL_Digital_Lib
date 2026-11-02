@@ -54,9 +54,16 @@ CREATE TABLE IF NOT EXISTS `tai_khoan` (
     CONSTRAINT `fk_1` FOREIGN KEY (`id_vai_tro`) REFERENCES `vai_tro` (`id_vai_tro`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS `khoa` (
+    `id_khoa` INT AUTO_INCREMENT PRIMARY KEY,
+    `ten_khoa` VARCHAR(100) NOT NULL UNIQUE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS `nganh` (
     `id_nganh` INT AUTO_INCREMENT PRIMARY KEY,
-    `ten_nganh` VARCHAR(50) NOT NULL
+    `ten_nganh` VARCHAR(100) NOT NULL,
+    `id_khoa` INT NULL,
+    CONSTRAINT `fk_nganh_khoa` FOREIGN KEY (`id_khoa`) REFERENCES `khoa` (`id_khoa`) ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `id_lop` (
