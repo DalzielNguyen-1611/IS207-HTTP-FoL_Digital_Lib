@@ -202,3 +202,16 @@ body {
     outline: 3px solid #2c78a8;
     outline-offset: 3px;
 }
+
+/* Đồng bộ màu nút Đăng nhập và Tìm kiếm */
+.header .login-button,
+.search-box button {
+    background: #f1d27d;
+    border-color: #e5c66f;
+    color: #24465b;
+}
+
+.header .login-button:hover,
+.search-box button:hover {
+    background: #e9c35e;
+}
