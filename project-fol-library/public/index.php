@@ -77,6 +77,18 @@ if (str_starts_with($path, '/uploads/')) {
     }
 }
 
+// Phục vụ trực tiếp ảnh thẻ sinh viên lưu theo định dạng {mssv}.jpg
+if (preg_match('#^/([a-zA-Z0-9_\-\.]+\.(jpg|jpeg|png|webp))$#i', $path, $matches)) {
+    $cardPath = dirname(__DIR__) . '/storage/uploads/student_cards/' . $matches[1];
+    if (file_exists($cardPath) && is_file($cardPath)) {
+        $mime = mime_content_type($cardPath) ?: 'image/jpeg';
+        header("Content-Type: {$mime}");
+        header('Cache-Control: public, max-age=86400');
+        readfile($cardPath);
+        exit;
+    }
+}
+
 // -----------------------------------------------------------------------------
 // XỬ LÝ XÁC THỰC VÀ PHÂN QUYỀN RBAC TẠI BACKEND
 // -----------------------------------------------------------------------------

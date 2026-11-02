@@ -37,30 +37,68 @@ class ImageOptimizerService
             throw new InvalidArgumentException("File ảnh nguồn không tồn tại hoặc không thể đọc: {$sourcePath}");
         }
 
+        if (filesize($sourcePath) === 0) {
+            throw new InvalidArgumentException("Tệp tải lên là tệp rỗng (0 bytes). Vui lòng chọn một ảnh hợp lệ.");
+        }
+
         if (!extension_loaded('gd')) {
             throw new RuntimeException('Thư viện PHP GD chưa được kích hoạt trên máy chủ.');
         }
 
         $imageInfo = @getimagesize($sourcePath);
-        if ($imageInfo === false) {
-            throw new InvalidArgumentException("Định dạng file không phải là ảnh hợp lệ: {$sourcePath}");
+        $srcImage = null;
+        $origWidth = 0;
+        $origHeight = 0;
+        $imageType = null;
+
+        if ($imageInfo !== false) {
+            [$origWidth, $origHeight, $imageType] = $imageInfo;
+            $srcImage = match ($imageType) {
+                IMAGETYPE_JPEG => @imagecreatefromjpeg($sourcePath),
+                IMAGETYPE_PNG => @imagecreatefrompng($sourcePath),
+                IMAGETYPE_WEBP => @imagecreatefromwebp($sourcePath),
+                IMAGETYPE_GIF => @imagecreatefromgif($sourcePath),
+                defined('IMAGETYPE_BMP') ? IMAGETYPE_BMP : -1 => function_exists('imagecreatefrombmp') ? @imagecreatefrombmp($sourcePath) : null,
+                defined('IMAGETYPE_AVIF') ? IMAGETYPE_AVIF : -2 => function_exists('imagecreatefromavif') ? @imagecreatefromavif($sourcePath) : null,
+                default => null,
+            };
         }
 
-        [$origWidth, $origHeight, $imageType] = $imageInfo;
-        $originalSize = (int)filesize($sourcePath);
-
-        // 1. Nạp ảnh từ bộ nhớ theo định dạng gốc
-        $srcImage = match ($imageType) {
-            IMAGETYPE_JPEG => @imagecreatefromjpeg($sourcePath),
-            IMAGETYPE_PNG => @imagecreatefrompng($sourcePath),
-            IMAGETYPE_WEBP => @imagecreatefromwebp($sourcePath),
-            IMAGETYPE_GIF => @imagecreatefromgif($sourcePath),
-            default => null,
-        };
+        // Nếu getimagesize không nạp được hoặc thất bại, thử nạp qua imagecreatefromstring
+        if (!$srcImage) {
+            $rawContent = @file_get_contents($sourcePath);
+            if ($rawContent !== false && $rawContent !== '') {
+                $srcImage = @imagecreatefromstring($rawContent);
+                if ($srcImage) {
+                    $origWidth = imagesx($srcImage);
+                    $origHeight = imagesy($srcImage);
+                    $imageType = IMAGETYPE_JPEG;
+                }
+            }
+        }
 
         if (!$srcImage) {
-            throw new RuntimeException("Không thể giải mã ảnh từ định dạng MIME: {$imageInfo['mime']}");
+            $mime = 'unknown';
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                if ($finfo) {
+                    $mime = (string)@finfo_file($finfo, $sourcePath);
+                    finfo_close($finfo);
+                }
+            }
+            if ($mime === 'image/heic' || $mime === 'image/heif') {
+                throw new InvalidArgumentException('Ảnh chụp định dạng HEIC (từ thiết bị Apple) chưa được hỗ trợ trực tiếp. Vui lòng chuyển ảnh sang JPG hoặc PNG trước khi tải lên.');
+            }
+            if ($mime === 'application/pdf') {
+                throw new InvalidArgumentException('Tệp bạn chọn là tài liệu PDF. Vui lòng chụp hoặc xuất thẻ sinh viên thành file ảnh (JPG, PNG).');
+            }
+            if (str_starts_with($mime, 'text/')) {
+                throw new InvalidArgumentException('Tệp bạn chọn là tệp văn bản, không phải là hình ảnh hợp lệ.');
+            }
+            throw new InvalidArgumentException('Định dạng tệp không được hỗ trợ hoặc file ảnh bị hỏng. Vui lòng chọn một file ảnh JPG, PNG hoặc WEBP hợp lệ.');
         }
+
+        $originalSize = (int)filesize($sourcePath);
 
         // 2. Tự động xoay ảnh theo EXIF Orientation (chống lật ngang khi chụp bằng điện thoại)
         if ($imageType === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
@@ -121,15 +159,20 @@ class ImageOptimizerService
             throw new RuntimeException("Không thể tạo thư mục lưu trữ ảnh: {$targetDir}");
         }
 
-        // 7. Chuyển đổi và nén sang chuẩn WebP
-        $success = imagewebp($targetImage, $targetPath, max(1, min(100, $quality)));
+        // 7. Chuyển đổi và nén ảnh (Hỗ trợ JPG hoặc WebP theo phần mở rộng)
+        $ext = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION));
+        if ($ext === 'jpg' || $ext === 'jpeg') {
+            $success = imagejpeg($targetImage, $targetPath, max(1, min(100, $quality)));
+        } else {
+            $success = imagewebp($targetImage, $targetPath, max(1, min(100, $quality)));
+        }
 
         // Giải phóng tài nguyên RAM ngay sau khi nén
         imagedestroy($srcImage);
         imagedestroy($targetImage);
 
         if (!$success || !file_exists($targetPath)) {
-            throw new RuntimeException("Lỗi ghi file ảnh WebP ra ổ đĩa: {$targetPath}");
+            throw new RuntimeException("Lỗi ghi file ảnh ra ổ đĩa: {$targetPath}");
         }
 
         $optimizedSize = (int)filesize($targetPath);
@@ -169,30 +212,53 @@ class ImageOptimizerService
         string $prefix = 'img',
         int $maxWidth = 1000,
         int $maxHeight = 1000,
-        int $quality = 80
+        int $quality = 80,
+        ?string $customFilename = null
     ): array {
-        if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
-            throw new InvalidArgumentException('File tải lên không hợp lệ hoặc bị lỗi mã truyền tải.');
+        try {
+            if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+                $code = (int)($file['error'] ?? UPLOAD_ERR_NO_FILE);
+                $msg = match ($code) {
+                    UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Dung lượng ảnh vượt quá giới hạn tối đa cho phép của máy chủ (10MB).',
+                    UPLOAD_ERR_PARTIAL => 'Quá trình tải file ảnh lên bị gián đoạn. Vui lòng thử lại.',
+                    UPLOAD_ERR_NO_FILE => 'Chưa có file ảnh nào được chọn.',
+                    default => 'Lỗi tải ảnh lên máy chủ (mã ' . $code . ').',
+                };
+                throw new InvalidArgumentException($msg);
+            }
+
+            $tmpPath = (string)($file['tmp_name'] ?? '');
+            if ($tmpPath === '' || (!is_uploaded_file($tmpPath) && !file_exists($tmpPath))) {
+                throw new InvalidArgumentException('File tải lên không hợp lệ hoặc không tồn tại trên máy chủ.');
+            }
+
+            if (($file['size'] ?? 0) <= 0 || filesize($tmpPath) === 0) {
+                throw new InvalidArgumentException('Tệp bạn chọn không có dữ liệu (0 bytes). Vui lòng chọn một file ảnh thực tế.');
+            }
+
+            if ($customFilename !== null && trim($customFilename) !== '') {
+                $filename = trim($customFilename);
+            } else {
+                // Tạo tên file ngẫu nhiên an toàn chống đoán tên hoặc trùng lặp
+                $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '', $prefix) ?: 'img';
+                $uniqueSuffix = bin2hex(random_bytes(6));
+                $filename = "{$cleanPrefix}_{$uniqueSuffix}.webp";
+            }
+
+            $storageRoot = dirname(__DIR__, 2) . '/storage/uploads';
+            $cleanSubDir = trim($subDir, '/\\');
+            $targetPath = "{$storageRoot}/{$cleanSubDir}/{$filename}";
+
+            $stats = $this->optimize($tmpPath, $targetPath, $maxWidth, $maxHeight, $quality);
+            $stats['relative_url'] = "/uploads/{$cleanSubDir}/{$filename}";
+            $stats['filename'] = $filename;
+
+            return $stats;
+        } catch (\Throwable $e) {
+            return [
+                'success' => false,
+                'error' => $e->getMessage(),
+            ];
         }
-
-        $tmpPath = (string)$file['tmp_name'];
-        if (!is_uploaded_file($tmpPath) && !file_exists($tmpPath)) {
-            throw new InvalidArgumentException('File nguồn không phải là file upload hợp lệ.');
-        }
-
-        // Tạo tên file ngẫu nhiên an toàn chống đoán tên hoặc trùng lặp
-        $cleanPrefix = preg_replace('/[^a-zA-Z0-9_-]/', '', $prefix) ?: 'img';
-        $uniqueSuffix = bin2hex(random_bytes(6));
-        $filename = "{$cleanPrefix}_{$uniqueSuffix}.webp";
-
-        $storageRoot = dirname(__DIR__, 2) . '/storage/uploads';
-        $cleanSubDir = trim($subDir, '/\\');
-        $targetPath = "{$storageRoot}/{$cleanSubDir}/{$filename}";
-
-        $stats = $this->optimize($tmpPath, $targetPath, $maxWidth, $maxHeight, $quality);
-        $stats['relative_url'] = "/uploads/{$cleanSubDir}/{$filename}";
-        $stats['filename'] = $filename;
-
-        return $stats;
     }
 }

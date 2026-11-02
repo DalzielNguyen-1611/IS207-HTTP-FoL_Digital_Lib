@@ -114,6 +114,21 @@ class ImageOptimizerServiceTest
             'Xử lý mượt mà ảnh PNG trong suốt và chuyển đổi sang WebP 300x300'
         );
 
+        // 5. Kiểm thử nén và lưu dưới dạng .jpg (theo yêu cầu mssv.jpg)
+        $targetJpg = $this->tempDir . '/24520500.jpg';
+        $jpgStats = $this->service->optimize(
+            sourcePath: $largeImgPath,
+            targetPath: $targetJpg,
+            maxWidth: 1000,
+            maxHeight: 1000,
+            quality: 85
+        );
+
+        $results['supports_saving_as_jpg'] = $this->assert(
+            $jpgStats['success'] === true && file_exists($targetJpg) && @exif_imagetype($targetJpg) === IMAGETYPE_JPEG,
+            'Tối ưu hóa và lưu thành công định dạng JPEG chuẩn (mssv.jpg)'
+        );
+
         return $results;
     }
 
