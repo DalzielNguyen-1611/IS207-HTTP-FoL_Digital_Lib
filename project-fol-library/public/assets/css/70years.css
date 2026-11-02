@@ -173,3 +173,59 @@ body {
 .header {
   background: #fffdf6;
 }
+
+/* Giữ banner gọn trong chiều rộng màn hình */
+.hero {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: clamp(16px, 3vw, 40px);
+    padding: clamp(20px, 4vw, 48px);
+}
+
+.hero-content,
+.hero-art {
+    min-width: 0;
+}
+
+.hero-content h1 {
+    font-size: clamp(32px, 4.2vw, 56px);
+    line-height: 1.2;
+}
+
+.faculty-brand {
+    max-width: min(100%, 560px);
+}
+
+.hero-art .arch {
+    transform: scale(clamp(0.75, 5vw, 1));
+    transform-origin: center;
+}
+
+/* Xếp nội dung gọn hơn khi màn hình hẹp */
+@media (max-width: 900px) {
+    .hero {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hero-art {
+        display: none;
+    }
+}
+
+/* Giảm khoảng trống trên màn hình thấp */
+@media (max-height: 850px) and (min-width: 901px) {
+    .hero {
+        padding-top: 24px;
+        padding-bottom: 24px;
+    }
+
+    .faculty-brand {
+        margin-bottom: 16px;
+    }
+
+    .hero-content h1 {
+        font-size: clamp(32px, 3.5vw, 46px);
+    }
+}
