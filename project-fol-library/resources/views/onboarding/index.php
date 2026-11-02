@@ -14,13 +14,63 @@ $status = $user['trang_thai'] ?? 'ChoDuyet';
 $hasCard = !empty($user['anh_the_sv']);
 $rejectionNote = $user['ghi_chu_duyet'] ?? null;
 $submittedAt = $user['ngay_gui_duyet'] ?? null;
-$userName = htmlspecialchars($user['ho_ten'] ?? '', ENT_QUOTES, 'UTF-8');
+
+// Chuẩn hóa họ tên Google SSO sang định dạng tiếng Việt chuẩn: Họ + Tên đệm + Tên chính
+if (!function_exists('fixVietnameseNameOrder')) {
+    function fixVietnameseNameOrder(string $name): string {
+        $parts = preg_split('/\s+/', trim($name));
+        if (count($parts) < 2) {
+            return $name;
+        }
+        $vietnameseSurnames = [
+            'nguyễn', 'nguyen', 'trần', 'tran', 'lê', 'le', 'phạm', 'pham',
+            'hoàng', 'hoang', 'huỳnh', 'huynh', 'phan', 'vũ', 'vu', 'võ', 'vo',
+            'đặng', 'dang', 'bùi', 'bui', 'đỗ', 'do', 'hồ', 'ho', 'ngô', 'ngo',
+            'dương', 'duong', 'lý', 'ly', 'đào', 'dao', 'đoàn', 'doan', 'đinh', 'dinh',
+            'lâm', 'lam', 'phùng', 'phung', 'mai', 'trịnh', 'trinh', 'lương', 'luong',
+            'tạ', 'ta', 'khổng', 'khong', 'quách', 'quach', 'thái', 'thai', 'vương', 'vuong'
+        ];
+        $firstWord = mb_strtolower($parts[0], 'UTF-8');
+        $secondWord = mb_strtolower($parts[1], 'UTF-8');
+        if (!in_array($firstWord, $vietnameseSurnames, true) && in_array($secondWord, $vietnameseSurnames, true)) {
+            $firstName = array_shift($parts);
+            $parts[] = $firstName;
+            return implode(' ', $parts);
+        }
+        return $name;
+    }
+}
+
+$rawName = (string)($user['ho_ten'] ?? '');
+$userName = htmlspecialchars(fixVietnameseNameOrder($rawName), ENT_QUOTES, 'UTF-8');
 $userEmail = htmlspecialchars($user['email'] ?? '', ENT_QUOTES, 'UTF-8');
-$userMssv = htmlspecialchars($user['mssv'] ?? '', ENT_QUOTES, 'UTF-8');
+
+// Tự động trích xuất mã số sinh viên từ các chữ số đứng trước '@' trong email trường
+$emailPrefix = explode('@', (string)($user['email'] ?? ''))[0];
+preg_match('/\d+/', $emailPrefix, $mssvMatches);
+$extractedMssv = !empty($mssvMatches[0]) ? $mssvMatches[0] : '';
+$currentMssv = (string)($user['mssv'] ?? '');
+if (!empty($extractedMssv)) {
+    $userMssv = htmlspecialchars($extractedMssv, ENT_QUOTES, 'UTF-8');
+} else {
+    $userMssv = htmlspecialchars($currentMssv, ENT_QUOTES, 'UTF-8');
+}
+
 $userPhone = htmlspecialchars($user['so_dien_thoai'] ?? '', ENT_QUOTES, 'UTF-8');
 $userDob = htmlspecialchars($user['ngay_sinh'] ?? '2005-01-01', ENT_QUOTES, 'UTF-8');
 $userGender = $user['gioi_tinh'] ?? 'Nam';
 $userClassId = (int)($user['id_lop'] ?? 1);
+$userClassTen = htmlspecialchars($user['ten_lop'] ?? 'VH2024.1', ENT_QUOTES, 'UTF-8');
+$userNganhId = (int)($user['id_nganh'] ?? 1);
+
+$userKhoaId = (int)($user['id_khoa'] ?? 3); // Mặc định Khoa Văn học (ID: 3)
+
+if (!isset($faculties) || empty($faculties)) {
+    $faculties = $userRepo->getFacultiesList();
+}
+if (!isset($majors) || empty($majors)) {
+    $majors = $userRepo->getMajorsList();
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -39,9 +89,16 @@ $userClassId = (int)($user['id_lop'] ?? 1);
 
     <style>
         .onboarding-container {
-            max-width: 920px;
+            max-width: 1180px;
             margin: 40px auto 80px;
             padding: 0 20px;
+            box-sizing: border-box;
+        }
+
+        @media (min-width: 1228px) {
+            .onboarding-container {
+                padding: 0;
+            }
         }
 
         .onboarding-card {
@@ -53,29 +110,30 @@ $userClassId = (int)($user['id_lop'] ?? 1);
         }
 
         .onboarding-header {
-            background: linear-gradient(135deg, #24445c 0%, #172c3c 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, #fffdf6 0%, #fbf5e6 100%);
+            color: #24445c;
             padding: 36px 36px 28px;
             position: relative;
+            border-bottom: 1px solid #e9dfbf;
         }
 
         .onboarding-header::after {
             content: '';
             position: absolute;
-            bottom: 0;
+            bottom: -1px;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #d4af37, #f3e5ab, #d4af37);
+            height: 3px;
+            background: linear-gradient(90deg, #d4af37, #efd097, #d4af37);
         }
 
         .onboarding-eyebrow {
             display: inline-block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: #f3e5ab;
+            color: #1e5c8c;
             margin-bottom: 8px;
         }
 
@@ -83,13 +141,14 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             font-size: 26px;
             font-family: var(--font-serif, "Literata", serif);
             font-weight: 700;
+            color: #24445c;
             margin: 0 0 10px;
             line-height: 1.3;
         }
 
         .onboarding-desc {
-            font-size: 15px;
-            color: #d1dbe3;
+            font-size: 14.5px;
+            color: #617584;
             line-height: 1.6;
             margin: 0;
         }
@@ -123,6 +182,12 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             color: #1e40af;
         }
 
+        .status-banner.welcome {
+            background: rgba(242, 178, 27, 0.1);
+            border: 1px solid rgba(242, 178, 27, 0.3);
+            color: #78350f;
+        }
+
         .status-banner.rejected {
             background: #fffbeb;
             border: 1px solid #fde68a;
@@ -151,11 +216,83 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             margin: 0;
         }
 
+        /* Giao diện trạng thái tối giản (Inline Status) */
+        .inline-status-pending {
+            margin-bottom: 24px;
+            padding: 0;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        .inline-status-header {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .inline-status-icon {
+            color: #d97706; /* Tông màu amber ấm biểu thị trạng thái chờ duyệt */
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .inline-status-title {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .inline-status-sep {
+            color: #94a3b8;
+            font-weight: 400;
+            user-select: none;
+        }
+
+        .inline-status-time {
+            color: #64748b;
+            font-size: 14px;
+            font-weight: 400;
+        }
+
+        .inline-status-desc {
+            margin-top: 6px;
+            padding-left: 26px; /* Căn chỉnh thẳng hàng với tiêu đề sau icon 18px + 8px gap */
+            font-size: 13.5px;
+            line-height: 1.55;
+            color: #64748b;
+        }
+
+        .inline-status-desc p {
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .inline-status-desc {
+                padding-left: 0;
+            }
+        }
+
         /* Form Grid */
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 20px;
+        }
+
+        @media (max-width: 992px) {
+            .form-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .form-full {
@@ -197,14 +334,51 @@ $userClassId = (int)($user['id_lop'] ?? 1);
 
         .form-control:focus {
             outline: none;
-            border-color: #24445c;
-            box-shadow: 0 0 0 3px rgba(36, 68, 92, 0.15);
+            border-color: #1e5c8c;
+            box-shadow: 0 0 0 3px rgba(30, 92, 140, 0.15);
         }
 
-        .form-control:read-only {
-            background: #f1f5f9;
-            color: #64748b;
-            cursor: not-allowed;
+        input.form-control:read-only,
+        textarea.form-control:read-only {
+            background-color: #fafaf9 !important;
+            color: #78716c !important;
+            cursor: not-allowed !important;
+        }
+
+        select.form-control {
+            background-color: #ffffff !important;
+            color: #0f172a !important;
+            cursor: pointer !important;
+        }
+
+        select.form-control option {
+            background-color: #ffffff;
+            color: #0f172a;
+        }
+
+        /* Tailwind utility classes mapping */
+        .bg-stone-50 {
+            background-color: #fafaf9 !important;
+        }
+
+        .cursor-not-allowed {
+            cursor: not-allowed !important;
+        }
+
+        .text-stone-500 {
+            color: #78716c !important;
+        }
+
+        .text-stone-500:hover, .hover\:text-stone-800:hover {
+            color: #292524 !important;
+        }
+
+        .hover\:underline:hover {
+            text-decoration: underline !important;
+        }
+
+        .text-stone-400 {
+            color: #a8a29e !important;
         }
 
         /* Upload Area */
@@ -220,7 +394,7 @@ $userClassId = (int)($user['id_lop'] ?? 1);
         }
 
         .upload-section.dragover {
-            border-color: #24445c;
+            border-color: #1e5c8c;
             background: #f0f7ff;
         }
 
@@ -252,17 +426,31 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             height: 100%;
         }
 
+        .upload-section:hover {
+            border-color: #dec383;
+            background: #fffdf9;
+        }
+
         .upload-btn-fake {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: #24445c;
-            color: #ffffff;
+            background: #efd097;
+            border: 1px solid #dec383;
+            color: #24445c;
             font-weight: 600;
-            font-size: 13px;
-            padding: 9px 20px;
+            font-size: 13.5px;
+            padding: 10px 22px;
             border-radius: 6px;
             pointer-events: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(36, 68, 92, 0.08);
+        }
+
+        .upload-section:hover .upload-btn-fake {
+            background: #e5c37f;
+            border-color: #d1b16e;
+            color: #1a3346;
         }
 
         /* Preview Area */
@@ -312,22 +500,26 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             margin-bottom: 4px;
         }
 
-        .preview-size {
-            font-size: 12px;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-
-        .preview-badge {
+        .btn-remove-photo {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
-            font-weight: 700;
-            color: #047857;
-            background: #d1fae5;
-            padding: 3px 8px;
-            border-radius: 4px;
+            margin-top: 8px;
+            padding: 5px 12px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: #dc2626;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-remove-photo:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+            color: #b91c1c;
         }
 
         /* Existing card */
@@ -356,34 +548,42 @@ $userClassId = (int)($user['id_lop'] ?? 1);
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: #24445c;
-            color: #ffffff;
+            background: #efd097;
+            border: 1px solid #dec383;
+            color: #24445c;
             font-size: 15px;
             font-weight: 600;
             padding: 12px 32px;
-            border: none;
             border-radius: 6px;
             cursor: pointer;
             transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(36, 68, 92, 0.2);
+            box-shadow: 0 3px 6px rgba(36, 68, 92, 0.08);
         }
 
         .submit-btn:hover {
-            background: #1a3244;
+            background: #e5c37f;
+            border-color: #d1b16e;
+            color: #1a3346;
             transform: translateY(-1px);
-            box-shadow: 0 6px 10px -1px rgba(36, 68, 92, 0.25);
+            box-shadow: 0 5px 12px rgba(36, 68, 92, 0.12);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.99);
         }
 
         .logout-link {
             font-size: 14px;
-            color: #dc2626;
+            color: #78716c;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            transition: color 0.15s ease;
         }
 
         .logout-link:hover {
+            color: #292524;
             text-decoration: underline;
         }
 
@@ -429,7 +629,7 @@ $userClassId = (int)($user['id_lop'] ?? 1);
 
         <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
             <span style="font-size:13px;font-weight:600;color:#334155;"><?= $userEmail ?></span>
-            <a href="/logout" class="login-button" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:6px 14px;color:#dc2626;border-color:#fecaca;background:#fff5f5;text-decoration:none;" title="Đăng xuất">
+            <a href="/logout" class="login-button text-stone-500 hover:text-stone-800 hover:underline" style="display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:6px 14px;color:#78716c;border-color:#e7e5e4;background:#fafaf9;text-decoration:none;" title="Đăng xuất">
                 Đăng xuất
             </a>
         </div>
@@ -438,10 +638,9 @@ $userClassId = (int)($user['id_lop'] ?? 1);
     <main class="onboarding-container">
         <div class="onboarding-card">
             <div class="onboarding-header">
-                <span class="onboarding-eyebrow">HỒ SƠ BẠN ĐỌC SINH VIÊN</span>
-                <h1 class="onboarding-title">Kích hoạt Thẻ Thư viện Khoa Văn học</h1>
+                <h1 class="onboarding-title">Chào mừng bạn đến với Thư viện!</h1>
                 <p class="onboarding-desc">
-                    Hoàn tất thông tin cá nhân và tải lên ảnh chụp thẻ sinh viên rõ nét để cán bộ thư viện kích hoạt tài khoản mượn giáo trình và đặt chỗ phòng đọc tự học.
+                    Vui lòng hoàn thiện hồ sơ bên dưới để sử dụng dịch vụ mượn tài liệu và phòng tự học.
                 </p>
             </div>
 
@@ -468,21 +667,22 @@ $userClassId = (int)($user['id_lop'] ?? 1);
                                 <p style="margin-top:6px;">Vui lòng đặt thẻ trên mặt phẳng đủ sáng, chụp thẳng góc và tải lại ảnh mới bên dưới để cán bộ kiểm tra lại.</p>
                             </div>
                         </div>
-                    <?php elseif ($hasCard): ?>
-                        <div class="status-banner pending">
-                            <div class="status-banner-icon">⏳</div>
-                            <div class="status-banner-content">
-                                <h4>Hồ sơ của bạn đang chờ cán bộ xét duyệt</h4>
-                                <p>Thư viện đã tiếp nhận thông tin và ảnh thẻ sinh viên của bạn (Gửi lúc: <?= htmlspecialchars($submittedAt ?? 'Vừa xong', ENT_QUOTES, 'UTF-8') ?>). Cán bộ sẽ đối chiếu và kích hoạt thẻ trong vòng 24 giờ làm việc.</p>
-                                <p style="margin-top:4px;font-size:13px;color:#3b82f6;">Bạn vẫn có thể cập nhật lại thông tin hoặc chụp lại ảnh thẻ mới bên dưới nếu phát hiện sai sót.</p>
+                    <?php elseif ($hasCard || !empty($success)): ?>
+                        <div class="inline-status-pending">
+                            <div class="inline-status-header">
+                                <span class="inline-status-icon" aria-hidden="true">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16.5 12"></polyline>
+                                    </svg>
+                                </span>
+                                <strong class="inline-status-title">Hồ sơ đang chờ duyệt</strong>
+                                <span class="inline-status-sep">·</span>
+                                <span class="inline-status-time">Đã gửi lúc <?= htmlspecialchars(date('H:i (d/m/Y)', strtotime($submittedAt ?: 'now')), ENT_QUOTES, 'UTF-8') ?></span>
                             </div>
-                        </div>
-                    <?php else: ?>
-                        <div class="status-banner pending">
-                            <div class="status-banner-icon">👋</div>
-                            <div class="status-banner-content">
-                                <h4>Chào mừng bạn đăng nhập lần đầu!</h4>
-                                <p>Vui lòng kiểm tra lại thông tin, chọn Lớp sinh hoạt và tải lên ảnh thẻ sinh viên để thư viện cấp quyền sử dụng.</p>
+                            <div class="inline-status-desc">
+                                <p>Thư viện dự kiến xử lý hồ sơ trong vòng 24 giờ làm việc.</p>
+                                <p style="margin-top:2px;">Bạn có thể chỉnh sửa thông tin bên dưới nếu cần.</p>
                             </div>
                         </div>
                     <?php endif; ?>
@@ -498,26 +698,15 @@ $userClassId = (int)($user['id_lop'] ?? 1);
                     </div>
                 <?php endif; ?>
 
-                <?php if (!empty($success)): ?>
-                    <div class="status-banner approved">
-                        <div class="status-banner-icon">🎉</div>
-                        <div class="status-banner-content">
-                            <h4>Đã gửi hồ sơ thành công!</h4>
-                            <p>Ảnh thẻ sinh viên đã được hệ thống nén tối ưu WebP tự động và chuyển đến hàng đợi xét duyệt của cán bộ thư viện.</p>
-                        </div>
-                    </div>
-                <?php endif; ?>
-
                 <!-- Biểu mẫu gửi hồ sơ -->
                 <form id="onboardingForm" action="/onboarding/submit" method="POST" enctype="multipart/form-data">
                     <div class="form-grid">
                         <!-- Email sinh viên -->
                         <div class="form-group">
-                            <label class="form-label">
+                            <label class="form-label" for="email">
                                 <span>Email tài khoản trường</span>
-                                <span style="font-size:11px;color:#64748b;">(Tự động liên kết Google)</span>
                             </label>
-                            <input type="email" class="form-control" value="<?= $userEmail ?>" readonly title="Email Google đã liên kết">
+                            <input type="email" id="email" class="form-control bg-stone-50 cursor-not-allowed" value="<?= $userEmail ?>" readonly title="Email Google đã liên kết">
                         </div>
 
                         <!-- Họ và tên -->
@@ -528,43 +717,72 @@ $userClassId = (int)($user['id_lop'] ?? 1);
                             <input type="text" id="ho_ten" name="ho_ten" class="form-control" value="<?= $userName ?>" required placeholder="Ví dụ: Nguyễn Văn A">
                         </div>
 
-                        <!-- Mã số sinh viên (MSSV) -->
+                        <!-- Mã số sinh viên -->
                         <div class="form-group">
                             <label class="form-label" for="mssv">
-                                <span>Mã số sinh viên (MSSV) <span class="req">*</span></span>
+                                <span>Mã số sinh viên <span class="req">*</span></span>
                             </label>
-                            <input type="text" id="mssv" name="mssv" class="form-control" value="<?= $userMssv ?>" required placeholder="Ví dụ: 22010123" style="text-transform:uppercase;">
+                            <input type="text" id="mssv" name="mssv" class="form-control bg-stone-50 cursor-not-allowed" value="<?= $userMssv ?>" readonly required placeholder="Ví dụ: 24520500" style="text-transform:uppercase;">
                         </div>
 
-                        <!-- Lớp và Ngành học -->
+                        <!-- Hàng 2: Tách thông tin học tập thành 3 phần: Khoa (dropdown), Ngành (dropdown), Lớp (tự điền) -->
+                        <!-- Khoa / Viện đào tạo -->
                         <div class="form-group">
-                            <label class="form-label" for="id_lop">
-                                <span>Lớp - Ngành sinh hoạt <span class="req">*</span></span>
+                            <label class="form-label" for="id_khoa">
+                                <span>Khoa / Viện đào tạo <span class="req">*</span></span>
                             </label>
-                            <select id="id_lop" name="id_lop" class="form-control" required>
-                                <option value="">-- Chọn Lớp / Ngành đào tạo --</option>
-                                <?php foreach ($classes as $c): ?>
-                                    <option value="<?= (int)$c['id_lop'] ?>" <?= ($userClassId === (int)$c['id_lop']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($c['ten_lop'] . ' - ' . $c['ten_nganh'], ENT_QUOTES, 'UTF-8') ?>
+                            <select id="id_khoa" name="id_khoa" class="form-control" required>
+                                <?php foreach ($faculties as $fac): ?>
+                                    <option value="<?= (int)$fac['id_khoa'] ?>" <?= ($userKhoaId === (int)$fac['id_khoa']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($fac['ten_khoa'], ENT_QUOTES, 'UTF-8') ?>
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
-                        <!-- Số điện thoại -->
+                        <!-- Chuyên ngành học -->
+                        <div class="form-group">
+                            <label class="form-label" for="id_nganh">
+                                <span>Chuyên ngành đào tạo <span class="req">*</span></span>
+                            </label>
+                            <select id="id_nganh" name="id_nganh" class="form-control" required>
+                                <?php 
+                                foreach ($majors as $m): 
+                                    if ((int)($m['id_khoa'] ?? 0) === $userKhoaId):
+                                ?>
+                                    <option value="<?= (int)$m['id_nganh'] ?>" <?= ($userNganhId === (int)$m['id_nganh']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($m['ten_nganh'], ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php 
+                                    endif;
+                                endforeach; 
+                                ?>
+                            </select>
+                        </div>
+
+                        <!-- Lớp sinh hoạt (Tự điền) -->
+                        <div class="form-group">
+                            <label class="form-label" for="ten_lop">
+                                <span>Lớp sinh hoạt <span class="req">*</span></span>
+                            </label>
+                            <input type="text" id="ten_lop" name="ten_lop" class="form-control" value="<?= $userClassTen ?>" required placeholder="Ví dụ: VH2024.1 hoặc K18-VH">
+                        </div>
+
+                        <!-- Hàng 3: Số điện thoại liên hệ (bắt buộc), Giới tính, Ngày sinh -->
+                        <!-- Số điện thoại liên hệ -->
                         <div class="form-group">
                             <label class="form-label" for="so_dien_thoai">
-                                <span>Số điện thoại liên hệ</span>
+                                <span>Số điện thoại liên hệ <span class="req">*</span></span>
                             </label>
-                            <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control" value="<?= $userPhone ?>" placeholder="Ví dụ: 0912345678">
+                            <input type="tel" id="so_dien_thoai" name="so_dien_thoai" class="form-control" value="<?= $userPhone ?>" required placeholder="Ví dụ: 0912345678" pattern="[0-9]{9,12}">
                         </div>
 
                         <!-- Giới tính -->
                         <div class="form-group">
                             <label class="form-label" for="gioi_tinh">
-                                <span>Giới tính</span>
+                                <span>Giới tính <span class="req">*</span></span>
                             </label>
-                            <select id="gioi_tinh" name="gioi_tinh" class="form-control">
+                            <select id="gioi_tinh" name="gioi_tinh" class="form-control" required>
                                 <option value="Nam" <?= $userGender === 'Nam' ? 'selected' : '' ?>>Nam</option>
                                 <option value="Nu" <?= $userGender === 'Nu' ? 'selected' : '' ?>>Nữ</option>
                                 <option value="Khac" <?= $userGender === 'Khac' ? 'selected' : '' ?>>Khác</option>
@@ -581,16 +799,18 @@ $userClassId = (int)($user['id_lop'] ?? 1);
 
                         <!-- Phần Upload ảnh thẻ SV -->
                         <div class="form-group form-full">
-                            <label class="form-label">
+                            <label class="form-label" for="anh_the_sv">
                                 <span>Ảnh chụp mặt trước Thẻ sinh viên <span class="req">*</span></span>
-                                <span style="font-size:11px;color:#059669;font-weight:600;">Tự động nén WebP & tối ưu bảo mật</span>
                             </label>
 
                             <div class="upload-section" id="dropzone">
                                 <input type="file" id="anh_the_sv" name="anh_the_sv" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,image/jpg" <?= $hasCard ? '' : 'required' ?>>
                                 <div class="upload-icon">🪪</div>
-                                <div class="upload-title">Kéo & thả ảnh thẻ sinh viên vào đây, hoặc nhấp để chọn tệp</div>
-                                <div class="upload-subtitle">Hỗ trợ JPG, PNG, WEBP chụp từ điện thoại hoặc máy ảnh (Dung lượng ảnh gốc đến 10MB)</div>
+                                <div class="upload-title">Kéo thả hoặc bấm vào đây để tải lên ảnh thẻ sinh viên</div>
+                                <div class="upload-subtitle">Hỗ trợ JPG, PNG, WEBP (Tối đa 10MB).</div>
+                                <div class="upload-hint text-stone-400" style="font-size:12px;color:#a8a29e;margin-top:-6px;margin-bottom:14px;">
+                                    (Hệ thống sẽ tự động nén và tối ưu hóa ảnh)
+                                </div>
                                 <span class="upload-btn-fake">
                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"></path></svg>
                                     Chọn ảnh từ thiết bị
@@ -604,26 +824,35 @@ $userClassId = (int)($user['id_lop'] ?? 1);
                                 </div>
                                 <div class="preview-meta">
                                     <div class="preview-name" id="previewFileName">the_sinh_vien.jpg</div>
-                                    <div class="preview-size" id="previewFileSize">Dung lượng: 3.8 MB</div>
-                                    <div class="preview-badge">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                        Sẵn sàng nén WebP (Resize $\le 1000\text{px}$, Quality 80%)
-                                    </div>
+                                    <button type="button" class="btn-remove-photo" id="btnRemovePhoto" title="Xóa ảnh và chọn lại">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            <line x1="10" y1="11" x2="10" y2="17"></line>
+                                            <line x1="14" y1="11" x2="14" y2="17"></line>
+                                        </svg>
+                                        <span>Xóa ảnh</span>
+                                    </button>
                                 </div>
                             </div>
 
                             <!-- Ảnh thẻ đã tải lên trước đó nếu có -->
                             <?php if ($hasCard): ?>
+                                <?php
+                                    $savedCardUrl = !empty($user['anh_the_sv']) 
+                                        ? (str_starts_with($user['anh_the_sv'], '/') ? $user['anh_the_sv'] : '/uploads/student_cards/' . $user['anh_the_sv']) 
+                                        : '';
+                                ?>
                                 <div class="existing-card-box">
                                     <div class="preview-img-wrapper">
-                                        <img src="<?= htmlspecialchars($user['anh_the_sv'], ENT_QUOTES, 'UTF-8') ?>" alt="Ảnh thẻ đã nộp">
+                                        <img src="<?= htmlspecialchars($savedCardUrl, ENT_QUOTES, 'UTF-8') ?>" alt="Ảnh thẻ đã nộp">
                                     </div>
                                     <div>
                                         <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px;">
                                             Ảnh thẻ hiện đang lưu trên hệ thống
                                         </div>
                                         <div style="font-size:12px;color:#64748b;margin-bottom:8px;">
-                                            Định dạng WebP tối ưu · Đã nộp lúc <?= htmlspecialchars($submittedAt ?? '', ENT_QUOTES, 'UTF-8') ?>
+                                            Đã nộp lúc <?= htmlspecialchars($submittedAt ?? '', ENT_QUOTES, 'UTF-8') ?>
                                         </div>
                                         <span style="font-size:11px;background:#e0f2fe;color:#0369a1;padding:3px 8px;border-radius:4px;font-weight:600;">
                                             Nếu muốn thay đổi, bạn chỉ cần chọn ảnh mới bên trên
@@ -636,7 +865,7 @@ $userClassId = (int)($user['id_lop'] ?? 1);
 
                     <!-- Nút thao tác -->
                     <div class="onboarding-actions">
-                        <a href="/logout" class="logout-link">
+                        <a href="/logout" class="logout-link text-stone-500 hover:text-stone-800 hover:underline">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"></path></svg>
                             Đăng xuất khỏi tài khoản này
                         </a>
@@ -664,7 +893,7 @@ $userClassId = (int)($user['id_lop'] ?? 1);
         const previewBox = document.getElementById('previewBox');
         const previewImg = document.getElementById('previewImg');
         const previewFileName = document.getElementById('previewFileName');
-        const previewFileSize = document.getElementById('previewFileSize');
+        const btnRemovePhoto = document.getElementById('btnRemovePhoto');
         const form = document.getElementById('onboardingForm');
         const submitBtn = document.getElementById('submitBtn');
 
@@ -700,21 +929,101 @@ $userClassId = (int)($user['id_lop'] ?? 1);
         });
 
         function handleFileSelect(file) {
+            if (!file) return;
+
+            if (file.size === 0) {
+                alert('Tệp bạn vừa chọn không có dữ liệu (0 bytes). Vui lòng chọn một file ảnh thực tế.');
+                resetFileInput();
+                return;
+            }
+
+            if (file.size > 10 * 1024 * 1024) {
+                alert('Dung lượng ảnh vượt quá 10MB. Vui lòng chọn một file ảnh có dung lượng nhỏ hơn.');
+                resetFileInput();
+                return;
+            }
+
             if (!file.type.match('image.*')) {
                 alert('Vui lòng chỉ chọn tệp hình ảnh (JPG, PNG, WEBP).');
+                resetFileInput();
                 return;
             }
 
             previewFileName.textContent = file.name;
-            const sizeInMb = (file.size / (1024 * 1024)).toFixed(2);
-            previewFileSize.textContent = `Dung lượng gốc: ${sizeInMb} MB · Sẽ được nén WebP tự động`;
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                previewImg.onload = function() {
+                    previewBox.classList.add('active');
+                };
+                previewImg.onerror = function() {
+                    alert('Không thể hiển thị tệp này dưới dạng hình ảnh. Vui lòng chọn một file ảnh JPG, PNG hoặc WEBP hợp lệ.');
+                    resetFileInput();
+                };
                 previewImg.src = e.target.result;
-                previewBox.classList.add('active');
             };
             reader.readAsDataURL(file);
+        }
+
+        function resetFileInput() {
+            fileInput.value = '';
+            previewImg.src = '';
+            previewFileName.textContent = '';
+            previewBox.classList.remove('active');
+        }
+
+        if (btnRemovePhoto) {
+            btnRemovePhoto.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                resetFileInput();
+            });
+        }
+
+        // Xử lý liên kết động Khoa/Viện -> Chuyên ngành đào tạo
+        const allMajors = <?= json_encode($majors, JSON_UNESCAPED_UNICODE) ?>;
+        const khoaSelect = document.getElementById('id_khoa');
+        const nganhSelect = document.getElementById('id_nganh');
+        let initialNganhId = <?= (int)$userNganhId ?>;
+
+        function updateMajorsByFaculty(facultyId, preserveSaved = false) {
+            const fid = parseInt(facultyId, 10);
+            const filteredMajors = allMajors.filter(m => parseInt(m.id_khoa, 10) === fid);
+
+            nganhSelect.innerHTML = '';
+
+            if (filteredMajors.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '-- Chưa có ngành --';
+                nganhSelect.appendChild(opt);
+                return;
+            }
+
+            let isSelected = false;
+            filteredMajors.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id_nganh;
+                opt.textContent = m.ten_nganh;
+                if (preserveSaved && parseInt(m.id_nganh, 10) === initialNganhId) {
+                    opt.selected = true;
+                    isSelected = true;
+                }
+                nganhSelect.appendChild(opt);
+            });
+
+            // Nếu ngành đang chọn không thuộc Khoa mới, tự động chọn ngành đầu tiên của Khoa đó
+            if (!isSelected && filteredMajors.length > 0) {
+                nganhSelect.options[0].selected = true;
+            }
+        }
+
+        if (khoaSelect && nganhSelect) {
+            khoaSelect.addEventListener('change', function() {
+                updateMajorsByFaculty(this.value, false);
+            });
+            // Đồng bộ danh sách ngành ban đầu theo Khoa đang chọn
+            updateMajorsByFaculty(khoaSelect.value, true);
         }
 
         form.addEventListener('submit', function() {
