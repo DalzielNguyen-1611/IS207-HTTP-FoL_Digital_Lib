@@ -565,7 +565,7 @@
 }
 
 .filter-chips-label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: #64748b;
   margin-right: 4px;
@@ -580,7 +580,7 @@
   border: 1px solid #d4e2ec;
   background: #ffffff;
   color: #334155;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   text-decoration: none;
   cursor: pointer;
@@ -682,4 +682,335 @@
   background: #fee2e2;
   color: #b91c1c;
   border: 1px solid #fca5a5;
+}
+/* Cỡ chữ nội dung đồng bộ với trang cá nhân sinh viên */
+.staff-layout {
+  font-size: 14.5px;
+}
+.staff-sidebar a,
+.staff-sidebar button,
+.staff-content .staff-intro p,
+.staff-content .staff-note,
+.staff-content .staff-stat p,
+.staff-content .staff-shift p,
+.staff-content .staff-shift strong,
+.staff-content .staff-table,
+.staff-content .staff-table th,
+.staff-content .staff-table td {
+  font-size: 14.5px;
+}
+.staff-stat h2,
+.staff-stat p {
+  font-size: 14px;
+}/* Canh khung điều hướng xuống ngang phần tiêu đề nội dung */
+@media (min-width: 1001px) {
+  .staff-layout > .staff-sidebar {
+    margin-top: 40px;
+  }
+}
+@media (max-width: 1000px) {
+  .staff-layout > .staff-sidebar {
+    margin-top: 0;
+  }
+}
+.staff-sidebar a:hover,
+.staff-sidebar a[aria-current="page"]:hover,
+.staff-sidebar button:hover:not(:disabled) {
+  background: #245d88;
+  color: #fff;
+}
+/* Nút tìm kiếm và thêm sách dùng nền sáng, chuyển xanh khi tương tác */
+.staff-layout #add-book-button,
+.staff-layout .staff-search button {
+  color: #245d88 !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+  transition: color .15s ease, background .15s ease, border-color .15s ease;
+}
+.staff-layout #add-book-button:hover,
+.staff-layout #add-book-button:focus-visible,
+.staff-layout #add-book-button:active,
+.staff-layout .staff-search button:hover,
+.staff-layout .staff-search button:focus-visible,
+.staff-layout .staff-search button:active {
+  color: #fff !important;
+  background: #245d88 !important;
+  border-color: #245d88 !important;
+}
+.staff-layout #add-book-button,
+.staff-layout .staff-search button,
+.staff-layout .staff-search .staff-action-button {
+  font-size: 14.5px !important;
+}/* Bảng đầu sách: ưu tiên cột tên, header căn giữa, thao tác xếp dọc */
+#staff-book-table {
+  min-width: 900px;
+  table-layout: fixed;
+}
+#staff-book-table thead th {
+  text-align: center !important;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+#staff-book-table thead th:nth-child(4) {
+  line-height: 1.35;
+}
+#staff-book-table tbody td,
+#staff-book-table tbody th {
+  overflow-wrap: anywhere;
+}
+#staff-book-table .staff-book-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+#staff-book-table .staff-book-actions .staff-action-button {
+  width: 100%;
+  white-space: normal;
+}
+#staff-book-table {
+  border: 1px solid #e3d8bd;
+}
+#staff-book-table th,
+#staff-book-table td {
+  border: 1px solid #e9dfbf;
+}
+#staff-book-table .staff-book-actions .staff-action-button {
+  min-width: 0;
+  box-sizing: border-box;
+}
+/* Hoàn thiện viền bảng và cỡ chữ đồng nhất trong danh sách đầu sách */
+#staff-book-table {
+  border: 1px solid #d9c89f !important;
+}
+#staff-book-table th,
+#staff-book-table td {
+  border: 1px solid #e2d2a8 !important;
+  font-size: 13px !important;
+}
+#staff-book-table code,
+#staff-book-table button,
+#staff-book-table span {
+  font-size: 13px !important;
+}
+#staff-book-table th:last-child,
+#staff-book-table td:last-child {
+  border-left: 2px solid #d9c89f !important;
+  border-right: 2px solid #d9c89f !important;
+}
+#staff-book-table .staff-book-actions {
+  align-items: center;
+}
+#staff-book-table .staff-book-actions .staff-action-button {
+  width: max-content;
+  max-width: 100%;
+  align-self: center;
+  white-space: nowrap;
+  padding-right: 12px;
+  padding-left: 12px;
+}/* Danh sách đầu sách gọn theo chiều ngang, chỉ dùng đường kẻ hàng */
+#staff-book-table-wrap {
+  max-width: 100%;
+  overflow-x: visible;
+}
+#staff-book-table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+  border: 0 !important;
+  border-collapse: collapse;
+}
+#staff-book-table th,
+#staff-book-table td {
+  border: 0 !important;
+  border-bottom: 1px solid #e2d2a8 !important;
+  font-size: 13px !important;
+}
+#staff-book-table thead th {
+  border-bottom: 1px solid #d9c89f !important;
+}
+#staff-book-table th:last-child,
+#staff-book-table td:last-child {
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+@media (max-width: 700px) {
+  #staff-book-table,
+  #staff-book-table tbody,
+  #staff-book-table tr,
+  #staff-book-table th[scope="row"],
+  #staff-book-table td {
+    display: block;
+    width: 100%;
+  }
+  #staff-book-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  #staff-book-table tbody tr {
+    margin-bottom: 14px;
+    padding: 8px 10px;
+    border: 1px solid #e9dfbf;
+    border-radius: 10px;
+    background: #fffefa;
+  }
+  #staff-book-table tbody th[scope="row"],
+  #staff-book-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(100px, 34%) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    padding: 8px 2px;
+    border: 0 !important;
+    border-bottom: 1px solid #f0e8d8 !important;
+    text-align: left !important;
+  }
+  #staff-book-table tbody tr > :last-child {
+    border-bottom: 0 !important;
+  }
+  #staff-book-table tbody th[scope="row"]::before,
+  #staff-book-table tbody td::before {
+    content: attr(data-label);
+    color: #607888;
+    font-weight: 600;
+  }
+  #staff-book-table .staff-book-actions {
+    align-items: flex-start;
+  }
+  #staff-book-table .staff-book-actions .staff-action-button {
+    align-self: flex-start;
+  }
+}
+/* Bảng đầu sách: vừa khung, chỉ phân cách bằng đường kẻ ngang */
+#staff-book-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+#staff-book-table {
+  width: 100%;
+  min-width: 0 !important;
+  table-layout: fixed;
+  border: 0 !important;
+  border-collapse: collapse;
+}
+#staff-book-table th,
+#staff-book-table td {
+  min-width: 0;
+  border: 0 !important;
+  border-bottom: 1px solid #e2d2a8 !important;
+  font-size: 13px !important;
+  overflow-wrap: anywhere;
+  word-break: normal;
+}
+#staff-book-table thead th {
+  text-align: center;
+  border-bottom: 1px solid #d9c89f !important;
+}
+#staff-book-table th:last-child,
+#staff-book-table td:last-child {
+  border-left: 0 !important;
+  border-right: 0 !important;
+}
+#staff-book-table .staff-book-actions {
+  align-items: center;
+}
+#staff-book-table .staff-book-actions .staff-action-button {
+  width: max-content;
+  max-width: 100%;
+  align-self: center;
+  white-space: normal;
+  font-size: 13px !important;
+}
+@media (max-width: 700px) {
+  #staff-book-table,
+  #staff-book-table tbody,
+  #staff-book-table tr,
+  #staff-book-table th[scope="row"],
+  #staff-book-table td {
+    display: block;
+    width: 100% !important;
+  }
+  #staff-book-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+  #staff-book-table tbody tr {
+    margin: 0;
+    padding: 8px 0;
+    border: 0 !important;
+    border-bottom: 1px solid #d9c89f !important;
+    border-radius: 0;
+    background: transparent;
+  }
+  #staff-book-table tbody th[scope="row"],
+  #staff-book-table tbody td {
+    display: grid;
+    grid-template-columns: minmax(96px, 34%) minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+    padding: 7px 2px;
+    border: 0 !important;
+    text-align: left !important;
+  }
+  #staff-book-table tbody th[scope="row"]::before,
+  #staff-book-table tbody td::before {
+    content: attr(data-label);
+    color: #607888;
+    font-weight: 600;
+  }
+  #staff-book-table tbody td:last-child {
+    display: block;
+  }
+  #staff-book-table tbody td:last-child::before {
+    display: block;
+    margin-bottom: 6px;
+  }
+  #staff-book-table .staff-book-actions {
+    align-items: flex-start;
+  }
+  #staff-book-table .staff-book-actions .staff-action-button {
+    align-self: flex-start;
+  }
+}
+/* Hộp danh sách bản sách vật lý: mã đầu sách nằm riêng một dòng */
+#view-copies-dialog * {
+  font-size: 13px !important;
+}
+#view-copies-dialog h2 {
+  font-size: 13px !important;
+}
+#view-copies-dialog .staff-table thead th {
+  font-size: 12px !important;
+  text-align: center;
+}
+#view-copies-dialog .staff-table tbody th,
+#view-copies-dialog .staff-table tbody td {
+  font-size: 13px !important;
+  overflow-wrap: anywhere;
+}
+#view-copies-dialog #copies-book-info .copies-book-meta {
+  display: block;
+  margin-top: 3px;
+  overflow-wrap: anywhere;
+}
+#view-copies-dialog #copies-book-info code,
+#view-copies-dialog .staff-table tbody code {
+  font-size: 13px !important;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }

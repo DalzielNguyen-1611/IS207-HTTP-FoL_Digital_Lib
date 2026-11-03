@@ -48,23 +48,25 @@ $statuses = [
     <title>Quản lý người dùng · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/admin-users.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
+    <link rel="stylesheet" href="/assets/css/admin-ui.css">
 </head>
-<body>
+<body class="admin-ui">
     <!-- Header: Nhận diện thư viện & điều hướng -->
     <header class="header">
         <a class="brand" href="/" title="Về trang chủ Thư viện">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -74,7 +76,7 @@ $statuses = [
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -126,6 +128,9 @@ $statuses = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -187,7 +192,7 @@ $statuses = [
                         aria-label="Tìm mã tài khoản, họ tên hoặc email"
                         placeholder="Tìm mã tài khoản, họ tên hoặc email…"
                     >
-                    <button type="submit">Tìm kiếm</button>
+                    <button type="submit" class="search-button">Tìm kiếm</button>
                 </form>
 
                 <!-- Bộ lọc vai trò và trạng thái -->
@@ -249,7 +254,7 @@ $statuses = [
                     role="region"
                     aria-label="Danh sách tài khoản mẫu"
                 >
-                    <table class="staff-table">
+                    <table class="staff-table" id="admin-users-table">
                         <thead>
                             <tr>
                                 <th scope="col">Mã tài khoản</th>
@@ -415,5 +420,7 @@ $statuses = [
 
     <!-- Tìm kiếm và lọc tài khoản mẫu -->
     <script src="/assets/js/admin-users.js" defer></script>
+    <script src="/assets/js/admin-controls.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

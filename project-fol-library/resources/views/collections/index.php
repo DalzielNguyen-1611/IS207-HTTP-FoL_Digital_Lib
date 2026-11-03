@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,300;0,400;0,500;0,700;0,900;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="icon" type="image/png" href="assets/images/logo.png">
+  <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
 
@@ -249,37 +250,7 @@
   <!-- ==============================================================================
        5. FOOTER
        ============================================================================== -->
-  <footer class="main-footer">
-    <div class="footer-container">
-      <div class="footer-info">
-        <div class="footer-org-name">THƯ VIỆN TRUNG TÂM, ĐẠI HỌC QUỐC GIA TP. HỒ CHÍ MINH</div>
-        <div class="footer-line">
-          <strong>Địa chỉ:</strong> Đường Võ Trường Toản, Khu đô thị ĐHQG-HCM, Khu phố 6, Phường Linh Trung, TP. Thủ Đức, TP.HCM
-        </div>
-        <div class="footer-line">
-          <strong>Điện thoại:</strong> (028) 37242160 (2311)
-        </div>
-        <div class="footer-line">
-          <strong>Email:</strong> centralib@vnuhcm.edu.vn
-        </div>
-      </div>
-
-      <div class="footer-right-logo">
-        <svg class="footer-logo-svg" viewBox="0 0 140 90" fill="none">
-          <path d="M20 22 L65 5 L65 80 L20 63 Z" fill="#67e8f9" opacity="0.9"/>
-          <path d="M30 30 L55 20 L55 72 L30 62 Z" fill="#ffffff" opacity="0.8"/>
-          <path d="M75 5 L120 22 L120 63 L75 80 Z" fill="#67e8f9" opacity="0.9"/>
-          <path d="M85 20 L110 30 L110 62 L85 72 Z" fill="#ffffff" opacity="0.8"/>
-          <rect x="36" y="37" width="14" height="3" fill="#137036"/>
-          <rect x="36" y="45" width="14" height="3" fill="#137036"/>
-          <rect x="36" y="53" width="14" height="3" fill="#137036"/>
-          <rect x="90" y="37" width="14" height="3" fill="#137036"/>
-          <rect x="90" y="45" width="14" height="3" fill="#137036"/>
-          <rect x="90" y="53" width="14" height="3" fill="#137036"/>
-        </svg>
-      </div>
-    </div>
-  </footer>
+  <?php require __DIR__ . '/../partials/footer.php'; ?>
 
   <script src="assets/js/main.js"></script>
 </body>

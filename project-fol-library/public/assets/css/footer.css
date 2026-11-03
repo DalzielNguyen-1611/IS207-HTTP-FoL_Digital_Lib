@@ -1,0 +1,483 @@
+.site-footer {
+  width: 100%;
+  margin-top: 48px;
+  padding: 34px 24px;
+  color: #f8f5eb;
+  background: #24445c;
+  border-top: 4px solid #d8b76a;
+  box-sizing: border-box;
+}
+.site-footer-inner {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+.site-footer-logo {
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: #fff;
+}
+.site-footer-content { min-width: 0; }
+.site-footer-content h2 {
+  margin: 0 0 8px;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: .035em;
+}
+.site-footer-content p {
+  margin: 5px 0;
+  color: #e5edf3;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.site-footer-content strong { color: #f0d99d; }
+.site-footer-contact { display: flex; flex-wrap: wrap; gap: 8px 32px; }
+.site-footer-contact p { min-width: 150px; }
+@media (max-width: 640px) {
+  .site-footer { margin-top: 32px; padding: 28px 20px; }
+  .site-footer-inner { align-items: flex-start; gap: 16px; }
+  .site-footer-logo { width: 58px; height: 58px; flex-basis: 58px; }
+  .site-footer-content h2 { font-size: 13px; }
+  .site-footer-content p { font-size: 13px; }
+  .site-footer-contact { display: block; }
+}
+/* Header chung đồng bộ màu với footer */
+header.header,
+header.main-header,
+header.auth-header {
+  background: #24445c !important;
+  color: #f8f5eb !important;
+  border-bottom: 4px solid #d8b76a !important;
+  box-shadow: 0 3px 14px rgba(36, 68, 92, .12);
+}
+header.header .brand,
+header.header .brand-label,
+header.header .brand strong,
+header.header .navigation > a,
+header.header .navigation > .nav-dropdown > .nav-dropdown-trigger,
+header.header .user-nav-group,
+header.main-header .brand-title-sub,
+header.main-header .brand-title-main,
+header.main-header .nav-links > .nav-item > .nav-link,
+header.auth-header a,
+header.auth-header > span {
+  color: #f8f5eb !important;
+}
+header.header .brand-label { opacity: .82; }
+header.header .navigation > a:hover,
+header.header .navigation > a:focus-visible,
+header.header .navigation > a.active,
+header.header .navigation > a[aria-current="page"],
+header.header .navigation > .nav-dropdown:hover > .nav-dropdown-trigger,
+header.header .navigation > .nav-dropdown:focus-within > .nav-dropdown-trigger,
+header.header .navigation > .nav-dropdown.is-active > .nav-dropdown-trigger,
+header.main-header .nav-links > .nav-item > .nav-link:hover,
+header.main-header .nav-links > .nav-item > .nav-link:focus-visible {
+  color: #24445c !important;
+  background: #efd097 !important;
+  border-color: #efd097 !important;
+}
+header.header .login-button,
+header.main-header .login-button {
+  color: #24445c !important;
+  background: #fffdf6 !important;
+  border-color: #efd097 !important;
+}
+header.header .login-button:hover,
+header.header .login-button:focus-visible,
+header.main-header .login-button:hover,
+header.main-header .login-button:focus-visible {
+  color: #24445c !important;
+  background: #efd097 !important;
+  border-color: #efd097 !important;
+}
+header.header .mobile-nav-toggle {
+  color: #f8f5eb !important;
+  background: transparent !important;
+  border-color: #d8b76a !important;
+}
+header.auth-header {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 20px max(24px, calc((100% - 1100px) / 2));
+  box-sizing: border-box;
+}
+header.auth-header a:hover,
+header.auth-header a:focus-visible { color: #efd097 !important; }
+header.main-header .nav-link:hover,
+header.main-header .nav-link:focus-visible {
+  color: #24445c !important;
+  background: #efd097 !important;
+}
+.top-bar {
+  color: #f8f5eb !important;
+  background: #24445c !important;
+  border-bottom: 0 !important;
+}
+.top-bar a,
+.top-bar span { color: #f8f5eb !important; }
+.top-bar a:hover,
+.top-bar a:focus-visible { color: #efd097 !important; }
+/* Nút tìm kiếm trang chủ đồng bộ màu với nút đăng nhập, giữ dáng chữ nhật */
+#home .search-box button {
+  color: #245d88 !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+  border-radius: 6px !important;
+}
+#home .search-box button:hover,
+#home .search-box button:focus-visible {
+  color: #1a496f !important;
+  background: #efd097 !important;
+  border-color: #efd097 !important;
+}
+/* Nút tìm kiếm tra cứu theo đúng màu và kiểu bo góc của nút trang chủ */
+#catalog-search.search-box button {
+  color: #245d88 !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+  border-radius: 6px !important;
+  font-weight: 600;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+#catalog-search.search-box button:hover,
+#catalog-search.search-box button:focus-visible {
+  color: #1a496f !important;
+  background: #efd097 !important;
+  border-color: #efd097 !important;
+}
+
+/* Mũi tên cho các nút quay lại và chuyển trang */
+.direction-arrow {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: -2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.direction-arrow-left { margin-right: 5px; }
+.direction-arrow-right { margin-left: 5px; }
+.direction-link .direction-arrow {
+  transition: transform 0.18s ease;
+}
+.direction-link:hover,
+.direction-link:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.direction-link:hover .direction-arrow-left,
+.direction-link:focus-visible .direction-arrow-left {
+  transform: translateX(-4px);
+}
+.direction-link:hover .direction-arrow-right,
+.direction-link:focus-visible .direction-arrow-right {
+  transform: translateX(4px);
+}
+/* Phân trang: trạng thái rê chuột xanh đậm như nút chính */
+.pagination-btn:hover,
+.pagination-btn:focus-visible,
+.staff-page-btn:hover:not(.disabled),
+.staff-page-btn:focus-visible:not(.disabled) {
+  color: #fff !important;
+  background: #245d88 !important;
+  border-color: #245d88 !important;
+}
+.pagination-btn:hover .direction-arrow,
+.pagination-btn:focus-visible .direction-arrow,
+.staff-page-btn:hover .direction-arrow,
+.staff-page-btn:focus-visible .direction-arrow {
+  stroke: currentColor;
+}
+/* Hover xanh đậm dùng chung cho các nút thường; giữ nguyên nút đăng nhập/tìm kiếm và nút cảnh báo */
+button:not(.login-button):not(.auth-submit):not(.mobile-nav-toggle):not(.nav-dropdown-trigger):not(.btn-google-login):not(.btn-remove-photo):not(.btn-reject):not(.danger):not(.room-cancel):not(.room-booking-cancel):not(.search-button):not(.filter-dropdown-trigger):not(.filter-dropdown-option):not(.feedback-topic-trigger):not(.feedback-topic-option):not(.nav-search-btn):not(.search-btn):hover:not(:disabled),
+.staff-action-button:not(.danger):hover,
+a[class*="btn"]:not(.login-button):not(.danger):not(.btn-reject):not(.room-booking-cancel):hover:not(.disabled),
+a.button:not(.login-button):hover:not(.disabled) {
+  color: #fff !important;
+  background: #245d88 !important;
+  border-color: #245d88 !important;
+  text-decoration: none;
+}
+/* Hai nút thao tác ở trang chi tiết sách dùng cùng nền sáng */
+.detail-actions .detail-primary:not(:disabled),
+.detail-actions .detail-secondary:not(:disabled) {
+  color: #24445c !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+}
+/* Bộ lọc trang Tra cứu sách: menu thả xuống đồng bộ với Dịch vụ */
+.filter-dropdown {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+.filter-dropdown.is-open { z-index: 30; }
+.filter-dropdown-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 2px;
+  border: 0;
+  border-bottom: 1.5px solid #d4cbb3;
+  border-radius: 0;
+  color: #24445c;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+.filter-dropdown-trigger:hover,
+.filter-dropdown-trigger:focus-visible,
+.filter-dropdown.is-open .filter-dropdown-trigger {
+  color: #245d88;
+  border-bottom-color: #245d88;
+  background: transparent;
+}
+.filter-dropdown-trigger svg {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform .18s ease;
+}
+.filter-dropdown.is-open .filter-dropdown-trigger svg { transform: rotate(180deg); }
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  z-index: 31;
+  display: none;
+  width: 100%;
+  max-height: min(280px, 50vh);
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid #e9dfbf;
+  border-radius: 10px;
+  background: #fffdf6;
+  box-shadow: 0 12px 28px rgba(36, 68, 92, .16);
+}
+.filter-dropdown.is-open .filter-dropdown-menu { display: block; }
+.filter-dropdown-option {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #24445c;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  cursor: pointer;
+}
+.filter-dropdown .filter-dropdown-option:hover,
+.filter-dropdown .filter-dropdown-option:focus-visible,
+.filter-dropdown .filter-dropdown-option.is-selected {
+  color: #245d88 !important;
+  border-color: transparent !important;
+  background: #f2f7fb !important;
+}
+.filter-dropdown-option.is-selected { font-weight: 600; }
+.filter-dropdown-option:disabled { color: #94a3b8; cursor: not-allowed; }
+/* Giữ nhóm đang mở nổi trên các bộ lọc kế tiếp */
+.filter-group.filter-dropdown-active {
+  position: relative;
+  z-index: 50;
+}
+.filter-dropdown-menu { top: 100%; }
+/* Khối liên hệ/hỗ trợ dùng cùng bảng màu xanh nhạt với banner đầu trang */
+.page-support-panel,
+.page-support-card {
+  color: #24445c !important;
+  background: linear-gradient(135deg, #e8f2f8 0%, #f4f8fb 100%) !important;
+  border: 1px solid #d7e7f1 !important;
+}
+.page-support-panel h2,
+.page-support-panel h3,
+.page-support-card h3 { color: #24445c !important; }
+.page-support-panel p,
+.page-support-card p { color: #486581 !important; }
+.page-support-panel .support-button-primary,
+.page-support-panel .support-button-secondary {
+  background: #fffdf6 !important;
+  color: #245d88 !important;
+  border: 1px solid #d6cbb1 !important;
+}
+.page-support-panel .support-button-primary { background: #245d88 !important; color: #fff !important; border-color: #245d88 !important; }
+.page-support-panel .support-button-primary:hover,
+.page-support-panel .support-button-secondary:hover {
+  background: #1e527a !important;
+  color: #fff !important;
+  border-color: #1e527a !important;
+}
+/* Nút trong các khu vực liên hệ/hỗ trợ: cùng màu thường, xanh đậm khi rê */
+.page-support-panel .support-button-primary,
+.page-support-panel .support-button-secondary {
+  color: #245d88 !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+}
+.page-support-panel .support-button-primary:hover,
+.page-support-panel .support-button-primary:focus-visible,
+.page-support-panel .support-button-secondary:hover,
+.page-support-panel .support-button-secondary:focus-visible,
+.page-support-panel .support-button-primary:active,
+.page-support-panel .support-button-secondary:active,
+.page-support-action:hover,
+.page-support-action:focus-visible,
+.page-support-action:active {
+  color: #fff !important;
+  background: #245d88 !important;
+  border-color: #245d88 !important;
+}
+.page-support-action {
+  color: #245d88 !important;
+  background: #fffdf6 !important;
+  border: 1px solid #d6cbb1 !important;
+}
+/* Logo kỷ niệm trong banner các trang thông tin */
+.page-hero-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+.page-hero-logo img {
+  display: block;
+  width: clamp(140px, 18vw, 200px);
+  max-width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+@media (max-width: 900px) {
+  .page-hero-logo img {
+    width: clamp(112px, 30vw, 150px);
+  }
+}
+
+/* Dropdown chủ đề góp ý dùng cùng kiểu menu với mục Dịch vụ */
+.feedback-topic-dropdown {
+  position: relative;
+  width: 100%;
+}
+.feedback-topic-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 14px;
+  border: 1px solid #dce7ef;
+  border-radius: 10px;
+  color: #24445c;
+  background: #fff;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.feedback-topic-trigger:hover,
+.feedback-topic-trigger:focus-visible,
+.feedback-topic-dropdown.is-open .feedback-topic-trigger {
+  outline: none;
+  border-color: #1e5c8c;
+  box-shadow: 0 0 0 3px rgba(30, 92, 140, .12);
+}
+.feedback-topic-chevron {
+  flex: 0 0 12px;
+  transition: transform .18s ease;
+}
+.feedback-topic-dropdown.is-open .feedback-topic-chevron,
+.feedback-topic-dropdown:hover .feedback-topic-chevron {
+  transform: rotate(180deg);
+}
+.feedback-topic-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px;
+  border: 1px solid #dfd6bc;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 10px 24px -4px rgba(36, 68, 92, .12), 0 2px 6px rgba(36, 68, 92, .04);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  pointer-events: none;
+  transition: opacity .18s ease, transform .18s ease, visibility .18s;
+}
+.feedback-topic-menu::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+}
+.feedback-topic-dropdown.is-open .feedback-topic-menu,
+.feedback-topic-dropdown:hover .feedback-topic-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.feedback-topic-option {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: 0;
+  border-radius: 6px;
+  color: #24445c;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease;
+}
+.feedback-topic-option:hover,
+.feedback-topic-option:focus-visible,
+.feedback-topic-option.is-selected {
+  color: #245d88;
+  background: #f2f7fb;
+}
+.feedback-topic-native {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+.contact-email-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color .15s ease, text-decoration-color .15s ease;
+}
+.contact-email-link:hover,
+.contact-email-link:focus-visible {
+  color: #245d88;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

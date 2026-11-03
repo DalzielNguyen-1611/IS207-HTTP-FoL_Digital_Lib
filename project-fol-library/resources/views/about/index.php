@@ -39,19 +39,20 @@ $milestones = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
     <header class="header">
         <a class="brand" href="/">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -103,6 +104,9 @@ $milestones = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -121,18 +125,17 @@ $milestones = [
         <!-- Hero: Giới thiệu tổng quan -->
         <section class="hero" style="margin-bottom: 40px; background: linear-gradient(135deg, #e8f2f8 0%, #f4f8fb 100%);">
             <div class="hero-content">
-                <span class="eyebrow">KHÔNG GIAN HỌC THUẬT & TRI THỨC</span>
                 <h1 style="margin: 16px 0;">Thư viện <span>Khoa Văn học</span></h1>
                 <p style="font-size: 15px; color: #486581; line-height: 1.8;">
                     Nơi lưu giữ hồn cốt văn hóa, tinh hoa học thuật và những trang sách vàng của các thế hệ học giả, giảng viên và sinh viên Khoa Văn học suốt 70 năm xây dựng và phát triển.
                 </p>
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <a href="/books" class="login-button" style="background:#1e5c8c; color:white; border-color:#1e5c8c; font-weight:600;">Khám phá kho sách</a>
+                <div class="about-hero-actions" style="display: flex; gap: 12px; margin-top: 24px;">
+                    <a href="/books" class="login-button">Khám phá kho sách</a>
                     <a href="/rules" class="login-button" style="font-weight:600;">Xem nội quy thư viện</a>
                 </div>
             </div>
-            <div style="text-align: center;">
-                <img src="/assets/images/logo.jpg" alt="Thư viện Khoa Văn học" style="width: 220px; height: 220px; object-fit: contain; border-radius: 24px; box-shadow: 0 16px 32px rgba(30, 92, 140, 0.12); background: white; padding: 16px;">
+            <div class="page-hero-logo">
+                <img src="/assets/images/logo70.png" alt="Logo kỷ niệm 70 năm Khoa Văn học">
             </div>
         </section>
 
@@ -149,7 +152,6 @@ $milestones = [
         <!-- Sứ mệnh và Giá trị cốt lõi -->
         <section style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-bottom: 48px;">
             <div style="background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 32px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04);">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: #eaf3f9; color: #1e5c8c; font-size: 20px; margin-bottom: 16px;">🎯</div>
                 <h2 style="font-family: 'Literata', serif; font-size: 22px; color: #24445c; margin-top: 0;">Sứ Mệnh Học Thuật</h2>
                 <p style="font-size: 14.5px; color: #486581; line-height: 1.8;">
                     Thư viện Khoa Văn học là trung tâm thông tin tư liệu chuyên ngành trọng điểm, có nhiệm vụ lưu trữ, bảo tồn và phổ biến các tài liệu nghiên cứu văn học, ngôn ngữ, lý luận phê bình, văn học dân gian và văn học các dân tộc. Chúng tôi đồng hành cùng cán bộ nghiên cứu, giảng viên và người học trong sự nghiệp khám phá chân trời tri thức nhân văn.
@@ -157,7 +159,6 @@ $milestones = [
             </div>
 
             <div style="background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 32px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04);">
-                <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: #eaf3f9; color: #1e5c8c; font-size: 20px; margin-bottom: 16px;">💡</div>
                 <h2 style="font-family: 'Literata', serif; font-size: 22px; color: #24445c; margin-top: 0;">Tầm Nhìn & Hiện Đại Hóa</h2>
                 <p style="font-size: 14.5px; color: #486581; line-height: 1.8;">
                     Xây dựng mô hình thư viện số thông minh kết hợp không gian đọc truyền thống ấm cúng. Hệ thống số hóa từng bước toàn bộ mục lục, tích hợp quản lý đặt chỗ theo thời gian thực và tra cứu trực tuyến 24/7, trở thành điểm tựa tri thức tin cậy hàng đầu trong khối các trường đại học nhân văn.
@@ -184,16 +185,17 @@ $milestones = [
         </section>
 
         <!-- Khối kêu gọi liên hệ & hỗ trợ -->
-        <section style="background: #1e5c8c; color: white; border-radius: 20px; padding: 40px; text-align: center; box-shadow: 0 12px 32px rgba(30, 92, 140, 0.2);">
+        <section class="page-support-panel" style="border-radius: 20px; padding: 40px; text-align: center;">
             <h2 style="font-family: 'Literata', serif; font-size: 26px; margin: 0 0 12px 0;">Bạn cần hỗ trợ tra cứu hoặc mượn tài liệu?</h2>
-            <p style="font-size: 15px; color: #dce7ef; max-width: 600px; margin: 0 auto 24px auto; line-height: 1.7;">
+            <p style="font-size: 15px; max-width: 600px; margin: 0 auto 24px auto; line-height: 1.7;">
                 Đội ngũ cán bộ thư viện Khoa Văn học luôn sẵn sàng đồng hành và giải đáp mọi thắc mắc của bạn đọc trong suốt các ngày làm việc trong tuần.
             </p>
             <div style="display: inline-flex; gap: 14px;">
-                <a href="/contact" class="login-button" style="background: white; color: #1e5c8c; border: none; font-weight: 600; padding: 12px 24px;">Liên hệ với chúng tôi</a>
-                <a href="/feedback" class="login-button" style="background: transparent; color: white; border-color: rgba(255,255,255,0.4); font-weight: 600; padding: 12px 24px;">Gửi góp ý & đề xuất sách</a>
+                <a href="/contact" class="login-button support-button-primary" style="font-weight: 600; padding: 12px 24px;">Liên hệ với chúng tôi</a>
+                <a href="/feedback" class="login-button support-button-secondary" style="font-weight: 600; padding: 12px 24px;">Gửi góp ý & đề xuất sách</a>
             </div>
         </section>
     </main>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

@@ -15,9 +15,9 @@ $savedEmail = $_GET['email'] ?? '';
     <title>Đăng nhập · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
@@ -91,11 +91,12 @@ $savedEmail = $_GET['email'] ?? '';
             padding: 0 12px;
         }
     </style>
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Điều hướng về trang chủ -->
     <header class="auth-header">
-        <a href="/">← Về trang chủ</a>
+        <a href="/" class="direction-link"><svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Về trang chủ</a>
         <span>Thư viện Khoa Văn học</span>
     </header>
 
@@ -104,7 +105,7 @@ $savedEmail = $_GET['email'] ?? '';
         <section class="auth-intro" aria-labelledby="intro-title">
             <img
                 class="auth-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -112,16 +113,14 @@ $savedEmail = $_GET['email'] ?? '';
 
             <h1 id="intro-title">
                 Tiếp nối hành trình<br>
-                khám phá tri thức.
+                khám phá tri thức
             </h1>
 
             <p>
                 Tra cứu tài liệu, theo dõi sách mượn và tìm
-                một không gian đọc phù hợp dành riêng cho bạn.
+                một không gian đọc phù hợp dành riêng cho bạn
             </p>
-
-            <span class="auth-decoration" aria-hidden="true">❧</span>
-        </section>
+</section>
 
         <!-- Biểu mẫu đăng nhập xác thực -->
         <section class="auth-card" aria-labelledby="login-title">
@@ -129,20 +128,18 @@ $savedEmail = $_GET['email'] ?? '';
             <h2 id="login-title">Đăng nhập</h2>
 
             <p class="auth-description">
-                Sử dụng tài khoản thư viện của bạn.
+                Sử dụng tài khoản thư viện của bạn
             </p>
 
             <?php if (!empty($error)): ?>
                 <div class="auth-alert-error" role="alert">
-                    <span style="font-size: 18px;">⚠️</span>
-                    <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
+<span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($message)): ?>
                 <div class="auth-alert-success" role="status">
-                    <span style="font-size: 18px;">✅</span>
-                    <span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
+<span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             <?php endif; ?>
 
@@ -178,14 +175,7 @@ $savedEmail = $_GET['email'] ?? '';
                             required
                         >
 
-                        <button
-                            id="toggle-password"
-                            type="button"
-                            aria-controls="login-password"
-                            aria-pressed="false"
-                        >
-                            Hiện
-                        </button>
+
                     </div>
                 </div>
 
@@ -228,5 +218,6 @@ $savedEmail = $_GET['email'] ?? '';
 
     <!-- Tương tác điền form và hiện/ẩn mật khẩu -->
     <script src="/assets/js/auth.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

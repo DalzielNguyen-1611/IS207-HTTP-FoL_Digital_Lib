@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
 
       const book = data.data
-      copiesBookInfo.innerHTML = `<strong>${escapeHtml(book.title)}</strong> (Mã: <code>${escapeHtml(book.id)}</code>) · Tổng số: <strong>${book.totalQuantity}</strong> bản (Khả dụng: <strong>${book.availableQuantity}</strong>)`
+      copiesBookInfo.innerHTML = `<strong>${escapeHtml(book.title)}</strong><span class="copies-book-meta">Mã: <code>${escapeHtml(book.id)}</code> · Tổng số: <strong>${book.totalQuantity}</strong> bản (Khả dụng: <strong>${book.availableQuantity}</strong>)</span>`
 
       const copies = book.copies || []
       if (copies.length === 0) {

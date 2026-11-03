@@ -262,6 +262,7 @@ CREATE TABLE IF NOT EXISTS `dau_sach` (
     `ngay_tao` DATETIME NULL,
     `ngay_cap_nhat` DATETIME NULL,
     `so_luong` INT NULL,
+    `luot_tim_kiem` INT UNSIGNED NOT NULL DEFAULT 0,
     CONSTRAINT `fk_2` FOREIGN KEY (`id_nha_xuat_ban`) REFERENCES `nha_xuat_ban` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -481,6 +482,7 @@ BEGIN
         `ngay_cap_nhat` = NOW()
     WHERE `id_dau_sach` = OLD.id_dau_sach;
 END //
+DELIMITER ;
 -- -----------------------------------------------------------------------------
 -- 12. DỮ LIỆU KHỞI TẠO MẶC ĐỊNH (DEFAULT SEED DATA)
 -- -----------------------------------------------------------------------------

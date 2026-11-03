@@ -4,25 +4,21 @@ declare(strict_types=1);
 
 $contactCards = [
     [
-        'icon' => '📍',
         'title' => 'Địa chỉ phòng đọc',
         'detail' => 'Tầng 2, Nhà B, Trường Đại học Khoa học Xã hội và Nhân văn',
         'sub' => '336 Nguyễn Trãi, Quận Thanh Xuân, Hà Nội'
     ],
     [
-        'icon' => '⏰',
         'title' => 'Thời gian mở cửa',
         'detail' => 'Thứ 2 đến Thứ 6: 07:30 - 21:00',
         'sub' => 'Thứ 7: 08:00 - 17:00 (Nghỉ Chủ nhật & ngày lễ)'
     ],
     [
-        'icon' => '📞',
         'title' => 'Điện thoại liên hệ',
         'detail' => '(024) 3858 3799',
         'sub' => 'Hotline hỗ trợ: (024) 3858 5282'
     ],
     [
-        'icon' => '✉️',
         'title' => 'Hộp thư điện tử',
         'detail' => 'khoavan@ussh.edu.vn',
         'sub' => 'thuvien.khoavan@ussh.edu.vn'
@@ -40,19 +36,20 @@ $contactCards = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
     <header class="header">
         <a class="brand" href="/">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -104,6 +101,9 @@ $contactCards = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -122,42 +122,47 @@ $contactCards = [
         <!-- Banner tiêu đề -->
         <section class="hero" style="margin-bottom: 36px; background: #eaf3f9;">
             <div class="hero-content">
-                <span class="eyebrow">KẾT NỐI & HỖ TRỢ BẠN ĐỌC</span>
+                
                 <h1 style="margin: 16px 0;">Thông tin <span>Liên hệ Thư viện</span></h1>
                 <p style="font-size: 15px; color: #486581; line-height: 1.8;">
                     Chúng tôi luôn sẵn lòng chào đón, hỗ trợ và đồng hành cùng quý thầy cô, các nhà nghiên cứu và toàn thể các bạn sinh viên trong mọi hoạt động học thuật và tìm kiếm nguồn học liệu.
                 </p>
             </div>
-            <div style="text-align: right; font-size: 80px; opacity: 0.85;">
-                📞
+            <div class="page-hero-logo">
+                <img src="/assets/images/logo70.png" alt="Logo kỷ niệm 70 năm Khoa Văn học">
             </div>
         </section>
 
         <!-- Lưới thẻ thông tin liên hệ -->
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-bottom: 48px;">
             <?php foreach ($contactCards as $card): ?>
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 28px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04); display: flex; flex-direction: column; gap: 8px;">
-                    <div style="font-size: 32px; margin-bottom: 4px;"><?= $card['icon'] ?></div>
+                <div class="page-support-card" style="border-radius: 18px; padding: 28px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04); display: flex; flex-direction: column; gap: 8px;">
                     <h3 style="margin: 0; font-size: 16px; color: #24445c;"><?= htmlspecialchars($card['title'], ENT_QUOTES, 'UTF-8') ?></h3>
-                    <div style="font-size: 14.5px; font-weight: 600; color: #1e5c8c; line-height: 1.5;"><?= htmlspecialchars($card['detail'], ENT_QUOTES, 'UTF-8') ?></div>
-                    <div style="font-size: 13px; color: #718695; line-height: 1.5;"><?= htmlspecialchars($card['sub'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php if ($card['title'] === 'Hộp thư điện tử'): ?>
+                        <div style="font-size: 14.5px; font-weight: 600; color: #1e5c8c; line-height: 1.5;"><a class="contact-email-link" href="mailto:<?= htmlspecialchars($card['detail'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($card['detail'], ENT_QUOTES, 'UTF-8') ?></a></div>
+                        <div style="font-size: 13px; color: #718695; line-height: 1.5;"><a class="contact-email-link" href="mailto:<?= htmlspecialchars($card['sub'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($card['sub'], ENT_QUOTES, 'UTF-8') ?></a></div>
+                    <?php else: ?>
+                        <div style="font-size: 14.5px; font-weight: 600; color: #1e5c8c; line-height: 1.5;"><?= htmlspecialchars($card['detail'], ENT_QUOTES, 'UTF-8') ?></div>
+                        <div style="font-size: 13px; color: #718695; line-height: 1.5;"><?= htmlspecialchars($card['sub'], ENT_QUOTES, 'UTF-8') ?></div>
+                    <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
 
         <!-- Khung gửi tin nhắn nhanh -->
-        <section style="background: white; border: 1px solid #e2e8f0; border-radius: 20px; padding: 36px; box-shadow: 0 4px 16px rgba(36, 68, 92, 0.04);">
+        <section class="page-support-panel" style="border-radius: 20px; padding: 36px; box-shadow: 0 4px 16px rgba(36, 68, 92, 0.04);">
             <div style="max-width: 680px; margin: 0 auto; text-align: center;">
                 <h2 style="font-family: 'Literata', serif; font-size: 24px; color: #24445c; margin: 0 0 10px 0;">Gửi thư hỏi đáp hoặc yêu cầu hỗ trợ</h2>
                 <p style="font-size: 14px; color: #718695; margin: 0 0 24px 0;">
                     Bạn cần liên hệ mượn tài liệu lưu trữ đặc biệt, đăng ký hướng dẫn sử dụng thư viện hoặc đề xuất mượn liên thư viện?
                 </p>
                 <div style="display: inline-flex; gap: 14px; justify-content: center;">
-                    <a href="mailto:khoavan@ussh.edu.vn" class="login-button" style="background: #1e5c8c; color: white; border-color: #1e5c8c; font-weight: 600; padding: 12px 24px;">Gửi email trực tiếp</a>
-                    <a href="/feedback" class="login-button" style="font-weight: 600; padding: 12px 24px;">Gửi biểu mẫu góp ý & đề xuất</a>
+                    <a href="mailto:khoavan@ussh.edu.vn" class="login-button support-button-primary" style="font-weight: 600; padding: 12px 24px;">Gửi email trực tiếp</a>
+                    <a href="/feedback" class="login-button support-button-secondary" style="font-weight: 600; padding: 12px 24px;">Gửi biểu mẫu góp ý & đề xuất</a>
                 </div>
             </div>
         </section>
     </main>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

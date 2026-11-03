@@ -31,15 +31,16 @@ $periods = [
     <title>Báo cáo thống kê · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/reports.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -47,7 +48,7 @@ $periods = [
         <a class="brand" href="/" title="Về trang chủ Thư viện">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -57,7 +58,7 @@ $periods = [
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -109,6 +110,9 @@ $periods = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -127,7 +131,6 @@ $periods = [
     <main class="staff-layout">
         <!-- Điều hướng nghiệp vụ -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
-            <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian">Tổng quan</a>
             <a href="/librarian/students">
                 <span>Duyệt thẻ sinh viên</span>
@@ -149,7 +152,6 @@ $periods = [
         <div class="staff-content">
             <!-- Tiêu đề báo cáo -->
             <section class="staff-intro">
-                <span class="staff-eyebrow">HOẠT ĐỘNG THƯ VIỆN</span>
                 <h1>Báo cáo thống kê</h1>
                 <p>Theo dõi lượt mượn và trả theo kỳ báo cáo mẫu.</p>
             </section>
@@ -242,7 +244,7 @@ $periods = [
                     role="region"
                     aria-label="Báo cáo hoạt động theo ngày"
                 >
-                    <table class="staff-table">
+                    <table class="staff-table" id="report-table">
                         <thead>
                             <tr>
                                 <th scope="col">Ngày</th>
@@ -310,5 +312,6 @@ $periods = [
 
     <!-- Lọc và xuất báo cáo mẫu -->
     <script src="/assets/js/reports.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

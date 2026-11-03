@@ -43,14 +43,16 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
     <meta name="csrf-token" content="<?= htmlspecialchars($csrfToken, ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href='/assets/css/base.css'>
     <link rel="stylesheet" href='/assets/css/home.css'>
+    <link rel="stylesheet" href='/assets/css/books.css'>
     <link rel="stylesheet" href='/assets/css/profile.css'>
     <link rel="stylesheet" href='/assets/css/70years.css'>
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header & Điều hướng -->
@@ -58,16 +60,16 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
         <a class="brand" href="/">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
             <span>
-                <span class="brand-label">THƯ VIỆN KHOA VĂN HỌC</span>
-                <strong>Không gian tri thức của bạn</strong>
+                <span class="brand-label">USSH · VNU-HANOI</span>
+                <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -109,6 +111,9 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
                 <a href="/librarian">Cán bộ</a>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực & Đăng xuất -->
         <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
@@ -121,7 +126,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
     <main class="page">
         <!-- Giới thiệu trang cá nhân -->
         <section class="profile-intro">
-            <span class="eyebrow">GÓC THƯ VIỆN CỦA BẠN</span>
+
             <h1>Trang cá nhân</h1>
             <p>Quản lý hồ sơ và theo dõi hoạt động tại thư viện</p>
         </section>
@@ -166,7 +171,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
 
                             <!-- Mã sinh viên không chỉnh sửa -->
                             <div>
-                                <label for="profile-code">Mã sinh viên</label>
+                                <label for="profile-code">Mã số sinh viên</label>
                                 <input
                                     id="profile-code"
                                     type="text"
@@ -333,63 +338,22 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
                     <!-- Trạng thái chưa lưu sách -->
                     <p class="profile-empty" id="favorites-empty" hidden>
                         Bạn chưa lưu sách yêu thích.
-                        <a href="/books">Khám phá sách →</a>
+                        <a class="direction-link" href="/books">Khám phá sách <svg class="direction-arrow direction-arrow-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-7-7m7 7-7 7"></path></svg></a>
                     </p>
 
                     <!-- Các tài liệu sẽ được JavaScript lọc theo mã đã lưu -->
-                    <div class="profile-favorites">
+                    <div class="catalog-list profile-favorites">
                         <?php foreach ($favoriteCatalog as $favoriteBook): ?>
-                            <article
-                                class="profile-favorite"
-                                data-favorite-id="<?= htmlspecialchars(
-                                    (string) $favoriteBook['id'],
-                                    ENT_QUOTES,
-                                    'UTF-8'
-                                ) ?>"
-                                hidden
-                            >
-                                <!-- Tên sách & tác giả -->
-                                <div>
-                                    <h3>
-                                        <a href="/book-detail?id=<?= htmlspecialchars(
-                                            (string) $favoriteBook['id'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>">
-                                            <?= htmlspecialchars(
-                                                $favoriteBook['title'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ) ?>
-                                        </a>
-                                    </h3>
-
-                                    <p>
-                                        <?= htmlspecialchars(
-                                            $favoriteBook['author'],
-                                            ENT_QUOTES,
-                                            'UTF-8'
-                                        ) ?>
-                                    </p>
+                            <article class="catalog-item profile-favorite" data-favorite-id="<?= htmlspecialchars((string)$favoriteBook['id'], ENT_QUOTES, 'UTF-8') ?>" hidden>
+                                <div class="catalog-cover-box">
+                                    <img src="/assets/images/default-book-cover.jpg" alt="Bìa sách <?= htmlspecialchars($favoriteBook['title'], ENT_QUOTES, 'UTF-8') ?>" loading="lazy">
                                 </div>
-
-                                <!-- Thao tác bỏ yêu thích -->
-                                <button
-                                    class="profile-reset"
-                                    type="button"
-                                    data-remove-favorite="<?= htmlspecialchars(
-                                        (string) $favoriteBook['id'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>"
-                                    aria-label="<?= htmlspecialchars(
-                                        'Bỏ yêu thích ' . $favoriteBook['title'],
-                                        ENT_QUOTES,
-                                        'UTF-8'
-                                    ) ?>"
-                                >
-                                    Bỏ yêu thích
-                                </button>
+                                <div class="catalog-main-info">
+                                    <h2 class="book-title"><a class="catalog-title-link" href="/book-detail?id=<?= htmlspecialchars((string)$favoriteBook['id'], ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($favoriteBook['title'], ENT_QUOTES, 'UTF-8') ?></a></h2>
+                                    <p class="book-author"><?= htmlspecialchars($favoriteBook['author'], ENT_QUOTES, 'UTF-8') ?></p>
+                                    <div class="catalog-card-footer"><div class="book-meta"><span><?= htmlspecialchars((string)$favoriteBook['id'], ENT_QUOTES, 'UTF-8') ?></span><span class="meta-dot">·</span><span><?= (int)($favoriteBook['available'] ?? 0) > 0 ? 'Còn ' . (int)$favoriteBook['available'] . ' bản' : 'Đang mượn hết' ?></span></div></div>
+                                </div>
+                                <button class="profile-reset" type="button" data-remove-favorite="<?= htmlspecialchars((string)$favoriteBook['id'], ENT_QUOTES, 'UTF-8') ?>" aria-label="Bỏ yêu thích <?= htmlspecialchars($favoriteBook['title'], ENT_QUOTES, 'UTF-8') ?>">Bỏ yêu thích</button>
                             </article>
                         <?php endforeach; ?>
                     </div>
@@ -420,7 +384,7 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
                     <div class="profile-bookings" id="bookings-list"></div>
 
                     <!-- Điều hướng tới lịch ca đọc -->
-                    <p><a href="/reading-room">Đặt chỗ phòng đọc →</a></p>
+                    <p><a class="direction-link" href="/reading-room">Đặt chỗ phòng đọc <svg class="direction-arrow direction-arrow-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-7-7m7 7-7 7"></path></svg></a></p>
                 </section>
             </div>
         </div>
@@ -431,5 +395,6 @@ $favoriteCatalog = $loanRepo->getUserFavorites($userId);
 
     <!-- Quản lý phòng đọc -->
     <script src="/assets/js/profile-bookings.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

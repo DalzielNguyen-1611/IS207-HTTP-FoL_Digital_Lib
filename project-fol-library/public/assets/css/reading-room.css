@@ -228,3 +228,110 @@
     flex-direction: column;
   }
 }
+/* Thanh chuyển tuần nổi bật hơn để dễ nhận biết lịch đang xem */
+.room-week-navigation {
+  min-height: 54px;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #e2d2a8;
+  border-radius: 12px;
+  background: linear-gradient(110deg, #edf5fa 0%, #fff9e9 100%);
+  box-shadow: 0 4px 12px rgba(36, 68, 92, .07);
+}
+.room-week-navigation strong {
+  padding: 8px 16px;
+  border: 1px solid #e2d2a8;
+  border-radius: 9px;
+  color: #24445c;
+  background: rgba(255, 255, 255, .82);
+  font-size: 14px;
+  font-weight: 700;
+  text-align: center;
+}
+.room-week-navigation a {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #245d88;
+  font-weight: 600;
+  transition: color .15s ease, background .15s ease, border-color .15s ease;
+}
+.room-week-navigation a:hover,
+.room-week-navigation a:focus-visible {
+  color: #fff;
+  border-color: #245d88;
+  background: #245d88;
+  text-decoration: none;
+}
+.room-week-navigation .direction-arrow {
+  margin: 0 2px;
+}
+@media (max-width: 600px) {
+  .room-week-navigation {
+    gap: 6px;
+    padding: 7px;
+  }
+  .room-week-navigation strong {
+    padding: 7px 8px;
+    font-size: 12px;
+  }
+  .room-week-navigation a {
+    gap: 5px;
+    padding: 7px 6px;
+    font-size: 12px;
+  }
+}
+/* Phiên bản tối giản: thanh tuần chỉ được ngăn bởi hai đường kẻ */
+.room-week-navigation {
+  min-height: 0;
+  padding: 12px 0;
+  border: 0;
+  border-top: 1px solid #d9c89f;
+  border-bottom: 1px solid #d9c89f;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.room-week-navigation strong {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #24445c;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 700;
+}
+.room-week-navigation a {
+  padding: 6px 0;
+  border: 0;
+  border-radius: 0;
+  color: #245d88;
+  background: transparent;
+  font-weight: 600;
+}
+.room-week-navigation a:hover,
+.room-week-navigation a:focus-visible {
+  color: #1e527a;
+  border: 0;
+  background: transparent;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .room-week-navigation {
+    gap: 6px;
+    padding: 10px 0;
+  }
+  .room-week-navigation strong {
+    padding: 0;
+    font-size: 12px;
+  }
+  .room-week-navigation a {
+    padding: 6px 0;
+    font-size: 12px;
+  }
+}
+.room-week-navigation strong { text-shadow: 0 2px 4px rgba(36, 68, 92, .22); }

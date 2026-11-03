@@ -91,3 +91,283 @@
   font-size: 12px;
   line-height: 1.9;
 }
+/* Điều chỉnh giao diện biểu mẫu mượn/trả */
+#counter-form .counter-hint {
+  margin-bottom: 12px;
+}
+#counter-form .counter-field label {
+  font-size: 13px;
+}
+#counter-form .counter-field input,
+#counter-form .counter-book-dropdown .filter-dropdown-trigger {
+  min-height: 48px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+#counter-form .counter-book-dropdown .filter-dropdown-trigger {
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 10px;
+  background: #fffdf6;
+}
+#counter-form .counter-book-dropdown .filter-dropdown-trigger:hover,
+#counter-form .counter-book-dropdown .filter-dropdown-trigger:focus-visible,
+#counter-form .counter-book-dropdown.is-open .filter-dropdown-trigger {
+  border-color: #245d88;
+  color: #245d88;
+  background: #fffdf6;
+  outline: 2px solid #dcebf5;
+  outline-offset: 1px;
+}
+#counter-form .counter-book-dropdown .filter-dropdown-menu {
+  top: calc(100% + 5px);
+  border-color: #e9dfbf;
+  background: #fffdf6;
+}
+#counter-form input[type="date"] {
+  color-scheme: light;
+  accent-color: #245d88;
+}
+#counter-form input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(30%) sepia(18%) saturate(1390%) hue-rotate(163deg) brightness(88%) contrast(91%);
+}
+#counter-form .counter-actions button {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #d6cbb1;
+  border-radius: 8px;
+  color: #24445c;
+  background: #fffdf6;
+  font: inherit;
+  font-size: 13px !important;
+  line-height: 1.3;
+  cursor: pointer;
+  transition: color .15s ease, background-color .15s ease, border-color .15s ease;
+}
+#counter-form .counter-actions button:hover,
+#counter-form .counter-actions button:focus-visible,
+#counter-form .counter-actions button:active {
+  color: #fff;
+  background: #245d88;
+  border-color: #245d88;
+}
+#counter-form .counter-actions button:focus-visible {
+  outline: 2px solid #b8d4e7;
+  outline-offset: 2px;
+}
+/* Lịch hạn trả tùy chỉnh theo gam kem, xanh và vàng của thư viện */
+#counter-form .counter-date-picker {
+  position: relative;
+  width: 100%;
+  z-index: 1;
+}
+#counter-form .counter-date-picker.is-open { z-index: 40; }
+#counter-form .counter-date-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 10px;
+  color: #24445c;
+  background: #fffdf6;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+}
+#counter-form .counter-date-trigger:hover,
+#counter-form .counter-date-trigger:focus-visible,
+#counter-form .counter-date-picker.is-open .counter-date-trigger {
+  border-color: #245d88;
+  color: #245d88;
+  background: #f2f7fb;
+  outline: 2px solid #dcebf5;
+  outline-offset: 1px;
+}
+#counter-form .counter-date-trigger svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#counter-form .counter-calendar {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 41;
+  display: none;
+  width: min(320px, calc(100vw - 48px));
+  padding: 14px;
+  border: 1px solid #e3d5b6;
+  border-radius: 12px;
+  background: #fffdf6;
+  color: #24445c;
+  box-shadow: 0 14px 32px rgba(36, 68, 92, .18);
+}
+#counter-form .counter-date-picker.is-open .counter-calendar { display: block; }
+#counter-form .counter-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #24445c;
+  text-transform: capitalize;
+}
+#counter-form .counter-calendar-header strong { font-size: 14px; font-weight: 600; }
+#counter-form .counter-calendar-nav {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #e3d5b6;
+  border-radius: 8px;
+  color: #245d88;
+  background: #fffefa;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+#counter-form .counter-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 4px;
+  text-align: center;
+}
+#counter-form .counter-calendar-weekdays {
+  margin-bottom: 5px;
+  color: #718695;
+  font-size: 11px;
+  font-weight: 600;
+}
+#counter-form .counter-calendar-weekdays span { padding: 5px 0; }
+#counter-form .counter-calendar-day {
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #24445c;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+#counter-form .counter-calendar-day:hover:not(:disabled),
+#counter-form .counter-calendar-day:focus-visible {
+  border-color: #d9bd70;
+  color: #24445c;
+  background: #f7e8b8;
+}
+#counter-form .counter-calendar-day.is-selected {
+  border-color: #245d88;
+  color: #fff;
+  background: #245d88;
+  font-weight: 600;
+}
+#counter-form .counter-calendar-day:disabled {
+  color: #c6c2b8;
+  cursor: not-allowed;
+}
+/* Chỉ nút lịch có tương tác; giữ ngày ở định dạng dd/mm/yy */
+#counter-form .counter-date-picker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 4px 8px 4px 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 10px;
+  color: #24445c;
+  background: #fffdf6;
+}
+#counter-form .counter-date-picker:hover,
+#counter-form .counter-date-picker.is-open {
+  border-color: #d4e2ec;
+  background: #fffdf6;
+}
+#counter-form .counter-date-trigger {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  min-height: 34px;
+  padding: 7px;
+  border: 0;
+  border-radius: 7px;
+  color: #245d88;
+  background: transparent;
+  cursor: pointer;
+}
+#counter-form .counter-date-trigger:hover,
+#counter-form .counter-date-trigger:focus-visible,
+#counter-form .counter-date-picker.is-open .counter-date-trigger {
+  border: 0;
+  color: #1e527a;
+  background: #e8f2f8;
+  outline: none;
+}
+#counter-form .counter-date-trigger:focus-visible {
+  box-shadow: 0 0 0 2px #b8d4e7;
+}
+#counter-form .counter-date-picker > span {
+  flex: 1;
+  color: #24445c;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+}
+#counter-form .counter-calendar {
+  width: min(270px, calc(100vw - 48px));
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(36, 68, 92, .16);
+}
+#counter-form .counter-calendar-header { margin-bottom: 8px; }
+#counter-form .counter-calendar-header strong { font-size: 13px; }
+#counter-form .counter-calendar-nav {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  font-size: 20px;
+}
+#counter-form .counter-calendar-grid { gap: 2px; }
+#counter-form .counter-calendar-weekdays { font-size: 10px; }
+#counter-form .counter-calendar-day {
+  height: 30px;
+  aspect-ratio: auto;
+  border-radius: 7px;
+  font-size: 12px;
+}
+/* Đưa gợi ý gần tiêu đề hơn nhưng tách khỏi các trường nhập */
+.staff-panel[aria-labelledby="borrow-title"] > h2 {
+  margin-bottom: 10px;
+}
+.staff-panel[aria-labelledby="borrow-title"] > .counter-hint {
+  margin: 0 0 16px;
+  color: #718695;
+  font-size: 11px;
+  line-height: 1.6;
+}
+/* Bảng phiếu mượn: tiêu đề cột căn giữa, thông báo gọn gần tiêu đề */
+.staff-panel[aria-labelledby="counter-loans-title"] > h2 {
+  margin-bottom: 12px;
+}
+.staff-panel[aria-labelledby="counter-loans-title"] > #counter-empty {
+  margin: 0 0 4px;
+}
+#counter-loans-table thead th {
+  text-align: center;
+}

@@ -14,6 +14,223 @@ const reportFeedback = document.querySelector('#report-feedback')
 let displayedRows = []
 let displayedRange = null
 
+// Lịch và dropdown báo cáo đồng bộ giao diện thư viện.
+let syncPeriodDropdown = () => {}
+let closePeriodDropdown = () => {}
+const periodField = periodInput?.parentElement
+let periodDropdown = null
+let periodTrigger = null
+let periodCurrent = null
+let periodOptions = []
+
+if (periodInput && periodField) {
+  periodDropdown = document.createElement('div')
+  periodDropdown.className = 'filter-dropdown report-period-dropdown'
+  periodTrigger = document.createElement('button')
+  periodTrigger.type = 'button'
+  periodTrigger.className = 'filter-dropdown-trigger'
+  periodTrigger.id = 'report-period-trigger'
+  periodTrigger.setAttribute('aria-haspopup', 'listbox')
+  periodTrigger.setAttribute('aria-expanded', 'false')
+  periodCurrent = document.createElement('span')
+  periodCurrent.className = 'filter-dropdown-current'
+  const chevron = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  chevron.setAttribute('viewBox', '0 0 24 24')
+  chevron.setAttribute('aria-hidden', 'true')
+  chevron.innerHTML = '<polyline points="6 9 12 15 18 9"></polyline>'
+  periodTrigger.append(periodCurrent, chevron)
+  const menu = document.createElement('div')
+  menu.className = 'filter-dropdown-menu'
+  menu.setAttribute('role', 'listbox')
+  menu.setAttribute('aria-label', 'Kỳ thống kê')
+  periodOptions = Array.from(periodInput.options).map((option, index) => {
+    const item = document.createElement('button')
+    item.type = 'button'
+    item.className = 'filter-dropdown-option'
+    item.setAttribute('role', 'option')
+    item.textContent = option.textContent.trim()
+    item.addEventListener('click', () => {
+      periodInput.selectedIndex = index
+      syncPeriodDropdown()
+      closePeriodDropdown()
+      periodInput.dispatchEvent(new Event('change', { bubbles: true }))
+    })
+    menu.append(item)
+    return item
+  })
+  syncPeriodDropdown = () => {
+    periodCurrent.textContent = periodInput.options[periodInput.selectedIndex]?.textContent.trim() || ''
+    periodTrigger.setAttribute('aria-label', `Kỳ thống kê: ${periodCurrent.textContent}`)
+    periodOptions.forEach((item, index) => {
+      const selected = periodInput.options[index].value === periodInput.value
+      item.classList.toggle('is-selected', selected)
+      item.setAttribute('aria-selected', selected ? 'true' : 'false')
+    })
+  }
+  const openMenu = () => {
+    periodField.classList.add('filter-group', 'filter-dropdown-active')
+    periodDropdown.classList.add('is-open')
+    periodTrigger.setAttribute('aria-expanded', 'true')
+  }
+  closePeriodDropdown = () => {
+    periodDropdown.classList.remove('is-open')
+    periodField.classList.remove('filter-dropdown-active')
+    periodTrigger.setAttribute('aria-expanded', 'false')
+  }
+  periodInput.style.display = 'none'
+  periodInput.setAttribute('aria-hidden', 'true')
+  periodInput.tabIndex = -1
+  periodField.querySelector('label')?.setAttribute('for', periodTrigger.id)
+  periodField.insertBefore(periodDropdown, periodInput)
+  periodDropdown.append(periodTrigger, menu, periodInput)
+  periodTrigger.addEventListener('pointerenter', openMenu)
+  periodDropdown.addEventListener('pointerleave', () => window.setTimeout(() => {
+    if (!periodDropdown.matches(':hover')) closePeriodDropdown()
+  }, 160))
+  periodTrigger.addEventListener('click', openMenu)
+  periodTrigger.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+      event.preventDefault()
+      openMenu()
+      periodOptions[Math.max(0, periodInput.selectedIndex)]?.focus()
+    } else if (event.key === 'Escape') closePeriodDropdown()
+  })
+  document.addEventListener('click', (event) => {
+    if (!periodDropdown.contains(event.target)) closePeriodDropdown()
+  })
+  periodInput.addEventListener('change', syncPeriodDropdown)
+  syncPeriodDropdown()
+}
+
+let reportDatePicker = null
+let reportDateButton = null
+let reportDateLabel = null
+let reportCalendarTitle = null
+let reportCalendarDays = null
+let syncReportCalendar = () => {}
+let closeReportCalendar = () => {}
+let openReportCalendar = () => {}
+const reportDateField = dateInput?.parentElement
+
+if (dateInput && reportDateField) {
+  reportDatePicker = document.createElement('div')
+  reportDatePicker.className = 'counter-date-picker report-date-picker'
+  reportDateLabel = document.createElement('span')
+  reportDateButton = document.createElement('button')
+  reportDateButton.type = 'button'
+  reportDateButton.className = 'counter-date-trigger'
+  reportDateButton.id = 'report-date-trigger'
+  reportDateButton.setAttribute('aria-haspopup', 'dialog')
+  reportDateButton.setAttribute('aria-expanded', 'false')
+  reportDateButton.setAttribute('aria-controls', 'report-calendar')
+  reportDateButton.setAttribute('aria-required', 'true')
+  const calendarIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  calendarIcon.setAttribute('viewBox', '0 0 24 24')
+  calendarIcon.setAttribute('aria-hidden', 'true')
+  calendarIcon.innerHTML = '<rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M16 3v4M8 3v4M3 10h18"></path>'
+  reportDateButton.append(calendarIcon)
+  reportDatePicker.append(reportDateLabel, reportDateButton)
+  const calendar = document.createElement('div')
+  calendar.className = 'counter-calendar'
+  calendar.id = 'report-calendar'
+  calendar.setAttribute('role', 'dialog')
+  calendar.setAttribute('aria-label', 'Chọn ngày thuộc kỳ báo cáo')
+  const header = document.createElement('div')
+  header.className = 'counter-calendar-header'
+  const previous = document.createElement('button')
+  previous.type = 'button'
+  previous.className = 'counter-calendar-nav'
+  previous.setAttribute('aria-label', 'Tháng trước')
+  previous.textContent = '‹'
+  reportCalendarTitle = document.createElement('strong')
+  const next = document.createElement('button')
+  next.type = 'button'
+  next.className = 'counter-calendar-nav'
+  next.setAttribute('aria-label', 'Tháng sau')
+  next.textContent = '›'
+  header.append(previous, reportCalendarTitle, next)
+  const weekdays = document.createElement('div')
+  weekdays.className = 'counter-calendar-grid counter-calendar-weekdays'
+  for (const day of ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']) {
+    const label = document.createElement('span')
+    label.textContent = day
+    weekdays.append(label)
+  }
+  reportCalendarDays = document.createElement('div')
+  reportCalendarDays.className = 'counter-calendar-grid counter-calendar-days'
+  calendar.append(header, weekdays, reportCalendarDays)
+  const fromIso = (value) => {
+    const [year, month, day] = value.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+  const toIso = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
+  let shownMonth = dateInput.value ? fromIso(dateInput.value) : new Date()
+  shownMonth = new Date(shownMonth.getFullYear(), shownMonth.getMonth(), 1)
+  const renderCalendar = () => {
+    reportCalendarTitle.textContent = new Intl.DateTimeFormat('vi-VN', { month: 'long', year: 'numeric' }).format(shownMonth)
+    reportCalendarDays.replaceChildren()
+    const offset = (new Date(shownMonth.getFullYear(), shownMonth.getMonth(), 1).getDay() + 6) % 7
+    for (let i = 0; i < offset; i += 1) {
+      const spacer = document.createElement('span')
+      spacer.className = 'counter-calendar-spacer'
+      reportCalendarDays.append(spacer)
+    }
+    const count = new Date(shownMonth.getFullYear(), shownMonth.getMonth() + 1, 0).getDate()
+    for (let day = 1; day <= count; day += 1) {
+      const date = new Date(shownMonth.getFullYear(), shownMonth.getMonth(), day)
+      const iso = toIso(date)
+      const button = document.createElement('button')
+      button.type = 'button'
+      button.className = 'counter-calendar-day'
+      button.textContent = String(day)
+      button.setAttribute('aria-pressed', iso === dateInput.value ? 'true' : 'false')
+      if (iso === dateInput.value) button.classList.add('is-selected')
+      button.addEventListener('click', () => {
+        dateInput.value = iso
+        dateInput.dispatchEvent(new Event('change', { bubbles: true }))
+        syncReportCalendar()
+        closeReportCalendar()
+      })
+      reportCalendarDays.append(button)
+    }
+  }
+  syncReportCalendar = () => {
+    const date = dateInput.value ? fromIso(dateInput.value) : null
+    reportDateLabel.textContent = date
+      ? `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear()).slice(-2)}`
+      : 'dd/mm/yy'
+    reportDateButton.setAttribute('aria-label', date ? `Ngày thuộc kỳ cần xem: ${reportDateLabel.textContent}` : 'Chọn ngày thuộc kỳ cần xem')
+    renderCalendar()
+  }
+  openReportCalendar = () => {
+    reportDatePicker.classList.add('is-open')
+    reportDateButton.setAttribute('aria-expanded', 'true')
+  }
+  closeReportCalendar = () => {
+    reportDatePicker.classList.remove('is-open')
+    reportDateButton.setAttribute('aria-expanded', 'false')
+  }
+  previous.addEventListener('click', () => {
+    shownMonth = new Date(shownMonth.getFullYear(), shownMonth.getMonth() - 1, 1)
+    renderCalendar()
+  })
+  next.addEventListener('click', () => {
+    shownMonth = new Date(shownMonth.getFullYear(), shownMonth.getMonth() + 1, 1)
+    renderCalendar()
+  })
+  reportDateButton.addEventListener('click', () => reportDatePicker.classList.contains('is-open') ? closeReportCalendar() : openReportCalendar())
+  document.addEventListener('click', (event) => {
+    if (!reportDatePicker.contains(event.target)) closeReportCalendar()
+  })
+  dateInput.style.display = 'none'
+  dateInput.required = false
+  dateInput.setAttribute('aria-hidden', 'true')
+  dateInput.tabIndex = -1
+  reportDateField.querySelector('label')?.setAttribute('for', reportDateButton.id)
+  reportDateField.insertBefore(reportDatePicker, dateInput)
+  reportDatePicker.append(calendar, dateInput)
+  syncReportCalendar()
+}
 // Chuyển ngày UTC sang YYYY-MM-DD để so sánh ngày lịch.
 function dateKey(date) {
   return date.toISOString().slice(0, 10)
@@ -60,6 +277,11 @@ function getReportRange(value, period) {
 
 // Lọc bảng và tổng hợp các dòng đang hiển thị.
 function applyReport() {
+  if (!dateInput.value) {
+    reportDateButton?.focus()
+    openReportCalendar()
+    return
+  }
   if (!reportForm.reportValidity()) return
 
   const range = getReportRange(dateInput.value, periodInput.value)

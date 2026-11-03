@@ -59,7 +59,9 @@ auditAction.addEventListener('change', filterAudit)
 auditReset.addEventListener('click', () => {
   auditKeyword.value = ''
   auditDate.value = ''
+  auditDate.dispatchEvent(new Event('change', { bubbles: true }))
   auditAction.value = ''
+  auditAction.dispatchEvent(new Event('change', { bubbles: true }))
   filterAudit()
 })
 

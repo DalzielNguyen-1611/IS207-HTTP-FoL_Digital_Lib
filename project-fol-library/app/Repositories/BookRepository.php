@@ -102,6 +102,7 @@ class BookRepository
             'oldest' => 'ds.`nam_xuat_ban` ASC, ds.`id_dau_sach` ASC',
             'title_asc' => 'ds.`tieu_de` ASC',
             'title_desc' => 'ds.`tieu_de` DESC',
+            'popular' => 'ds.`luot_tim_kiem` DESC, ds.`id_dau_sach` ASC',
             default => 'ds.`id_dau_sach` ASC',
         };
 
@@ -181,6 +182,16 @@ class BookRepository
         $dataStmt->execute();
 
         $rows = $dataStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Ghi nhận các đầu sách xuất hiện trong kết quả khi người dùng tìm kiếm.
+        if ($keyword !== null && trim($keyword) !== '' && $rows !== []) {
+            $bookIds = array_values(array_unique(array_column($rows, 'id_dau_sach')));
+            $placeholders = implode(', ', array_fill(0, count($bookIds), '?'));
+            $trackStmt = $this->db->prepare(
+                "UPDATE `dau_sach` SET `luot_tim_kiem` = `luot_tim_kiem` + 1 WHERE `id_dau_sach` IN ({$placeholders})"
+            );
+            $trackStmt->execute($bookIds);
+        }
 
         return [
             'items' => $rows ?: [],

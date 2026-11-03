@@ -23,14 +23,15 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
     <title>Tổng quan cán bộ · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -38,7 +39,7 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
         <a class="brand" href="/" title="Về trang chủ Thư viện">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -48,7 +49,7 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -100,6 +101,9 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -118,7 +122,6 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
     <main class="staff-layout">
         <!-- Điều hướng nghiệp vụ cán bộ thư viện -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
-            <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian" aria-current="page"><span>Tổng quan</span></a>
             <a href="/librarian/students">
                 <span>Duyệt thẻ sinh viên</span>
@@ -140,7 +143,6 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
                 <div class="staff-content">
             <!-- Tiêu đề Dashboard -->
             <section class="staff-intro">
-                <span class="staff-eyebrow">KHÔNG GIAN LÀM VIỆC</span>
                 <h1>Tổng quan thư viện</h1>
                 <p>
                     Ngày <?= htmlspecialchars(
@@ -295,5 +297,6 @@ if (!isset($statistics) || !isset($readingShifts) || !isset($attentionLoans) || 
             </p>
         </div>
     </main>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

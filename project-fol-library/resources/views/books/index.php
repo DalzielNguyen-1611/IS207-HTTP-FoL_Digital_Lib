@@ -25,6 +25,7 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
     ], fn($v) => $v !== null && $v !== '');
     return '/books?' . http_build_query($params);
 };
+$returnToSearch = $buildPageUrl($currentPage);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -38,6 +39,7 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/books.css?v=<?= file_exists(__DIR__ . '/../../../public/assets/css/books.css') ? filemtime(__DIR__ . '/../../../public/assets/css/books.css') : time() ?>">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -45,7 +47,7 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
         <a class="brand" href="/">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
             <span>
@@ -54,7 +56,7 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện (Active) -->
@@ -106,6 +108,9 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -316,7 +321,7 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
                             <div class="catalog-main-info">
                                 <!-- Dòng 1 (Ngang mép trên ảnh bìa): Tiêu đề sách -->
                                 <h2 class="book-title">
-                                    <a href="/book-detail?id=<?= htmlspecialchars((string)$book['id'], ENT_QUOTES, 'UTF-8') ?>" class="catalog-title-link">
+                                    <a href="/book-detail?id=<?= htmlspecialchars((string)$book['id'], ENT_QUOTES, 'UTF-8') ?>&amp;return=<?= rawurlencode($returnToSearch) ?>" class="catalog-title-link">
                                         <?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?>
                                     </a>
                                 </h2>
@@ -355,8 +360,8 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
                 <?php if ($totalPages > 1): ?>
                     <div class="catalog-pagination" id="catalog-pagination">
                         <?php if ($currentPage > 1): ?>
-                            <a href="<?= htmlspecialchars($buildPageUrl($currentPage - 1), ENT_QUOTES, 'UTF-8') ?>" class="pagination-btn pagination-prev">
-                                ← Trang trước
+                            <a href="<?= htmlspecialchars($buildPageUrl($currentPage - 1), ENT_QUOTES, 'UTF-8') ?>" class="pagination-btn pagination-prev direction-link">
+                                <svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Trang trước
                             </a>
                         <?php endif; ?>
 
@@ -365,8 +370,8 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
                         </span>
 
                         <?php if ($currentPage < $totalPages): ?>
-                            <a href="<?= htmlspecialchars($buildPageUrl($currentPage + 1), ENT_QUOTES, 'UTF-8') ?>" class="pagination-btn pagination-next">
-                                Trang sau →
+                            <a href="<?= htmlspecialchars($buildPageUrl($currentPage + 1), ENT_QUOTES, 'UTF-8') ?>" class="pagination-btn pagination-next direction-link">
+                                Trang sau <svg class="direction-arrow direction-arrow-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-7-7m7 7-7 7"></path></svg>
                             </a>
                         <?php endif; ?>
                     </div>
@@ -382,5 +387,6 @@ $buildPageUrl = function(int $targetPage) use ($filters, $perPage): string {
 
     <!-- Tương tác tìm kiếm và chuyển trang phía máy chủ -->
     <script src="/assets/js/books.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

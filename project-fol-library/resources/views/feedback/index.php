@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 $feedbackTypes = [
-    'book_request' => '📚 Đề xuất bổ sung đầu sách mới',
-    'reading_room' => '🪑 Góp ý về cơ sở vật chất & phòng đọc',
-    'service' => '🤝 Đóng góp ý kiến về dịch vụ mượn - trả',
-    'other' => '💬 Ý kiến đóng góp khác',
+    'book_request' => 'Đề xuất bổ sung đầu sách mới',
+    'reading_room' => 'Góp ý về cơ sở vật chất & phòng đọc',
+    'service' => 'Đóng góp ý kiến về dịch vụ mượn - trả',
+    'other' => 'Ý kiến đóng góp khác',
 ];
 ?>
 <!DOCTYPE html>
@@ -78,19 +78,20 @@ $feedbackTypes = [
             line-height: 1.6;
         }
     </style>
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
     <header class="header">
         <a class="brand" href="/">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -142,6 +143,9 @@ $feedbackTypes = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -160,14 +164,14 @@ $feedbackTypes = [
         <!-- Banner tiêu đề -->
         <section class="hero" style="margin-bottom: 36px; background: #eaf3f9;">
             <div class="hero-content">
-                <span class="eyebrow">LẮNG NGHE & HOÀN THIỆN DỊCH VỤ</span>
+                
                 <h1 style="margin: 16px 0;">Góp ý & <span>Đề xuất Sách mới</span></h1>
                 <p style="font-size: 15px; color: #486581; line-height: 1.8;">
                     Mọi ý kiến đóng góp của bạn đọc là cơ sở quý báu để Thư viện Khoa Văn học không ngừng nâng cao chất lượng phục vụ, bổ sung nguồn học liệu thiết thực và hoàn thiện cơ sở vật chất phòng đọc.
                 </p>
             </div>
-            <div style="text-align: right; font-size: 80px; opacity: 0.85;">
-                💡
+            <div class="page-hero-logo">
+                <img src="/assets/images/logo70.png" alt="Logo kỷ niệm 70 năm Khoa Văn học">
             </div>
         </section>
 
@@ -182,12 +186,23 @@ $feedbackTypes = [
 
                 <form id="feedback-form" onsubmit="handleFeedbackSubmit(event)">
                     <div class="form-group">
-                        <label for="fb-type" class="form-label">Chủ đề đóng góp <span style="color:#dc2626;">*</span></label>
-                        <select id="fb-type" class="form-select" required>
-                            <?php foreach ($feedbackTypes as $key => $title): ?>
-                                <option value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <label id="fb-type-label" class="form-label">Chủ đề đóng góp <span style="color:#dc2626;">*</span></label>
+                        <div class="feedback-topic-dropdown" id="feedback-topic-dropdown">
+                            <button type="button" class="feedback-topic-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="fb-type-label">
+                                <span class="feedback-topic-value"><?= htmlspecialchars(reset($feedbackTypes), ENT_QUOTES, 'UTF-8') ?></span>
+                                <svg class="feedback-topic-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                            </button>
+                            <div class="feedback-topic-menu" role="listbox" aria-label="Chủ đề đóng góp">
+                                <?php foreach ($feedbackTypes as $key => $title): ?>
+                                    <button type="button" class="feedback-topic-option<?= $key === array_key_first($feedbackTypes) ? ' is-selected' : '' ?>" role="option" aria-selected="<?= $key === array_key_first($feedbackTypes) ? 'true' : 'false' ?>" data-value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></button>
+                                <?php endforeach; ?>
+                            </div>
+                            <select id="fb-type" class="feedback-topic-native" tabindex="-1" aria-hidden="true">
+                                <?php foreach ($feedbackTypes as $key => $title): ?>
+                                    <option value="<?= htmlspecialchars($key, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars($title, ENT_QUOTES, 'UTF-8') ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
@@ -212,16 +227,16 @@ $feedbackTypes = [
                     </div>
 
                     <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-                        <button type="submit" class="submit-btn">Gửi ý kiến đóng góp</button>
+                        <button type="submit" class="submit-btn page-support-action">Gửi ý kiến đóng góp</button>
                     </div>
                 </form>
             </div>
 
             <!-- Cột phải: Thông tin tiếp nhận & Quy trình phản hồi -->
             <div style="display: flex; flex-direction: column; gap: 24px;">
-                <div style="background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 28px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04);">
+                <div class="page-support-card" style="border-radius: 18px; padding: 28px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04);">
                     <h3 style="font-size: 16px; color: #24445c; margin-top: 0; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                        <span>📋</span> Quy trình tiếp nhận & xử lý
+                        Quy trình tiếp nhận & xử lý
                     </h3>
                     <ul style="margin: 0; padding-left: 20px; color: #486581; font-size: 13.5px; line-height: 1.8; display: flex; flex-direction: column; gap: 8px;">
                         <li><strong>Bước 1:</strong> Bạn đọc điền thông tin và gửi phiếu góp ý/đề xuất sách trực tuyến.</li>
@@ -230,15 +245,15 @@ $feedbackTypes = [
                     </ul>
                 </div>
 
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 18px; padding: 24px;">
-                    <h3 style="font-size: 15px; color: #24445c; margin-top: 0; margin-bottom: 10px;">📞 Kênh liên hệ trực tiếp</h3>
+                <div class="page-support-card" style="border-radius: 18px; padding: 24px;">
+                    <h3 style="font-size: 15px; color: #24445c; margin-top: 0; margin-bottom: 10px;">Kênh liên hệ trực tiếp</h3>
                     <p style="font-size: 13.5px; color: #6a8090; line-height: 1.7; margin: 0 0 12px 0;">
                         Nếu cần phản ánh các sự cố khẩn cấp tại phòng đọc, bạn đọc có thể liên hệ trực tiếp:
                     </p>
                     <div style="font-size: 13.5px; color: #24445c; line-height: 1.8;">
                         • <strong>Địa chỉ:</strong> Tầng 2, Nhà B, 336 Nguyễn Trãi, Thanh Xuân, Hà Nội<br>
                         • <strong>Hotline:</strong> (024) 3858 3799<br>
-                        • <strong>Email:</strong> khoavan@ussh.edu.vn
+                        • <strong>Email:</strong> <a class="contact-email-link" href="mailto:khoavan@ussh.edu.vn">khoavan@ussh.edu.vn</a>
                     </div>
                 </div>
             </div>
@@ -246,6 +261,40 @@ $feedbackTypes = [
     </main>
 
     <script>
+        (function () {
+            var dropdown = document.getElementById('feedback-topic-dropdown');
+            if (!dropdown) return;
+            var trigger = dropdown.querySelector('.feedback-topic-trigger');
+            var value = dropdown.querySelector('.feedback-topic-value');
+            var select = dropdown.querySelector('#fb-type');
+            var options = dropdown.querySelectorAll('.feedback-topic-option');
+            function setOpen(open) {
+                dropdown.classList.toggle('is-open', open);
+                trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+            trigger.addEventListener('click', function () {
+                setOpen(!dropdown.classList.contains('is-open'));
+            });
+            options.forEach(function (option) {
+                option.addEventListener('click', function () {
+                    select.value = option.dataset.value;
+                    value.textContent = option.textContent;
+                    options.forEach(function (item) {
+                        var selected = item === option;
+                        item.classList.toggle('is-selected', selected);
+                        item.setAttribute('aria-selected', selected ? 'true' : 'false');
+                    });
+                    setOpen(false);
+                    option.blur();
+                });
+            });
+            document.addEventListener('click', function (event) {
+                if (!dropdown.contains(event.target)) setOpen(false);
+                });
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') setOpen(false);
+                });
+        })();
         function handleFeedbackSubmit(e) {
             e.preventDefault();
             var alertBox = document.getElementById('feedback-alert');
@@ -257,5 +306,6 @@ $feedbackTypes = [
             }
         }
     </script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

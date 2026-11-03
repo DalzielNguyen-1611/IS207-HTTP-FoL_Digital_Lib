@@ -129,7 +129,7 @@ body::before {
 /* Bộ nhận diện */
 .faculty-brand {
     width: min(100%, 560px);
-    margin-bottom: 20px;
+    margin-bottom: 0;
 }
 
 .faculty-brand img {
@@ -174,16 +174,45 @@ body {
   background: #fffdf6;
 }
 
+/* Căn giữa banner trong màn hình đầu; nội dung phía dưới vẫn cuộn được */
+#home.page {
+    box-sizing: border-box;
+    display: block;
+}
+
+#home > .hero {
+    min-height: calc(100dvh - 172px);
+    align-content: center;
+}
 /* Giữ banner gọn trong chiều rộng màn hình */
 .hero {
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
     grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    row-gap: clamp(24px, 3vw, 38px);
     gap: clamp(16px, 3vw, 40px);
     padding: clamp(20px, 4vw, 48px);
 }
 
+.hero-headline {
+    margin-top: 20px;
+}
+
+#home > .featured {
+    margin-top: clamp(96px, 12vh, 140px);
+}
+.home-search {
+    width: 100%;
+    margin: -14px 0 0;
+}
+
+.search-hint em {
+    font-style: italic !important;
+}
+.search-hint {
+    text-align: left;
+}
 .hero-content,
 .hero-art {
     min-width: 0;
@@ -205,6 +234,12 @@ body {
 
 /* Xếp nội dung gọn hơn khi màn hình hẹp */
 @media (max-width: 900px) {
+    #home > .featured {
+        margin-top: 96px;
+    }
+    #home > .hero {
+        min-height: calc(100dvh - 190px);
+    }
     .hero {
         grid-template-columns: minmax(0, 1fr);
     }
@@ -222,10 +257,235 @@ body {
     }
 
     .faculty-brand {
-        margin-bottom: 16px;
+        margin-bottom: 0;
     }
 
     .hero-content h1 {
         font-size: clamp(32px, 3.5vw, 46px);
     }
+}
+
+/* Menu hamburger partagé sur les écrans étroits */
+.mobile-nav-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
+    box-sizing: border-box;
+    padding: 0;
+    border: 1px solid #d6cbb1;
+    border-radius: 7px;
+    background: #fffdf6;
+    color: #245d88;
+    cursor: pointer;
+}
+@media (max-width: 900px) {
+    .header {
+        position: sticky;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+    }
+
+    .header > .brand {
+        order: 1;
+        margin-right: auto;
+    }
+
+    .header > .user-nav-group,
+    .header > .login-button {
+        order: 2;
+        margin-left: 0;
+    }
+
+    .header > .mobile-nav-toggle {
+        display: inline-flex;
+        order: 3;
+        flex: 0 0 auto;
+    }
+
+    .header > .navigation {
+        display: none;
+        position: absolute;
+        top: calc(100% + 8px);
+        right: 16px;
+        z-index: 1200;
+        box-sizing: border-box;
+        width: min(360px, calc(100vw - 32px));
+        max-height: calc(100dvh - 120px);
+        overflow-y: auto;
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 0;
+        padding: 8px;
+        border: 1px solid #e5dcbf;
+        border-radius: 10px;
+        background: #fffdf6;
+        box-shadow: 0 12px 28px rgba(36, 68, 92, 0.16);
+    }
+
+    .header > .navigation.is-open {
+        display: flex;
+    }
+
+    .navigation > a,
+    .navigation .nav-dropdown-trigger {
+        width: 100%;
+        box-sizing: border-box;
+        justify-content: flex-start;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .navigation .nav-dropdown {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .navigation .nav-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        z-index: 1300;
+        width: min(300px, calc(100vw - 80px));
+        min-width: 0;
+        max-height: calc(100dvh - 150px);
+        overflow-y: auto;
+        margin: 0;
+        padding: 6px;
+        transform: none;
+        box-shadow: 0 10px 24px rgba(36, 68, 92, 0.14);
+        pointer-events: auto;
+    }
+
+    .navigation .nav-dropdown-menu::before {
+        display: none;
+    }
+
+    .navigation .nav-dropdown:focus-within .nav-dropdown-menu,
+    .navigation .nav-dropdown:hover .nav-dropdown-menu,
+    .navigation .nav-dropdown.is-active .nav-dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+}
+/* Căn giữa nội dung banner khi kệ sách được ẩn trên màn hình hẹp */
+@media (max-width: 900px) {
+    #home > .hero .hero-content {
+        align-items: center;
+        width: 100%;
+        text-align: center;
+    }
+
+    #home > .hero .faculty-brand {
+        left: 0;
+        top: 0;
+        width: min(100%, 560px);
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    #home > .hero .home-search {
+        width: min(100%, 560px);
+        margin: 0 auto;
+    }
+
+    #home > .hero .search-hint {
+        text-align: left;
+    }
+
+    #home > .hero .hero-headline {
+        width: 100%;
+        margin: 20px auto 0;
+        text-align: center;
+    }
+}
+/* Dịch vụ: danh sách văn bản gọn, giữ cả tiêu đề và mô tả */
+.nav-dropdown-icon {
+    display: none !important;
+}
+
+.navigation .nav-dropdown-item {
+    display: block !important;
+    padding: 10px 12px !important;
+    border-radius: 5px;
+}
+
+.navigation .nav-dropdown-item + .nav-dropdown-item {
+    margin-top: 2px;
+    border-top: 1px solid #ece6d7;
+}
+
+.navigation .nav-dropdown-text {
+    gap: 3px;
+    text-align: left;
+}
+
+.navigation .nav-dropdown-title {
+    display: block;
+}
+
+.navigation .nav-dropdown-desc {
+    display: block;
+    max-width: 240px;
+}
+/* Nổi bật mục điều hướng hiện tại và mục đang rê chuột */
+.navigation > a,
+.navigation > .nav-dropdown > .nav-dropdown-trigger {
+    box-sizing: border-box;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    padding: 7px 12px;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.navigation > a:hover,
+.navigation > a:focus-visible,
+.navigation > a.active,
+.navigation > a[aria-current="page"],
+.navigation > .nav-dropdown:hover > .nav-dropdown-trigger,
+.navigation > .nav-dropdown:focus-within > .nav-dropdown-trigger,
+.navigation > .nav-dropdown.is-active > .nav-dropdown-trigger {
+    color: #245d88 !important;
+    border-color: #245d88;
+    background: #f2f7fb;
+    font-weight: 600;
+}
+
+.navigation .nav-dropdown-item:hover,
+.navigation .nav-dropdown-item:focus-visible,
+.navigation .nav-dropdown-item.active {
+    color: #245d88 !important;
+    background: #f2f7fb !important;
+}
+@media (max-width: 900px) {
+    .header > .navigation > a,
+    .header > .navigation > .nav-dropdown > .nav-dropdown-trigger {
+        min-height: 44px;
+        padding: 12px;
+        border-radius: 8px;
+    }
+}
+/* Nút đăng nhập đồng bộ kiểu bo viên thuốc với menu */
+.header .login-button {
+    border-radius: 999px;
+}
+.about-hero-actions .login-button {
+    background: #fffdf6;
+    color: #245d88;
+    border-color: #d6cbb1;
+    font-weight: 600;
+}
+
+.about-hero-actions .login-button:hover,
+.about-hero-actions .login-button:focus-visible {
+    background: #1e5c8c;
+    color: #ffffff;
+    border-color: #1e5c8c;
 }

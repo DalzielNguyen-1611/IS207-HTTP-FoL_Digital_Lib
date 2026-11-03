@@ -44,6 +44,7 @@ $canBook = \App\Core\Session::isAuthenticated()
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/reading-room.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header & điều hướng -->
@@ -51,7 +52,7 @@ $canBook = \App\Core\Session::isAuthenticated()
         <a class="brand" href="/">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
             <span>
@@ -60,7 +61,7 @@ $canBook = \App\Core\Session::isAuthenticated()
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện (Active) -->
@@ -112,6 +113,9 @@ $canBook = \App\Core\Session::isAuthenticated()
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -135,7 +139,6 @@ $canBook = \App\Core\Session::isAuthenticated()
     >
         <!-- Giới thiệu & hướng dẫn đặt chỗ -->
         <section class="room-intro">
-            <span class="eyebrow">KHÔNG GIAN DÀNH CHO SỰ TẬP TRUNG</span>
             <h1>Đặt chỗ phòng đọc</h1>
             <p>Chọn ngày và ca phù hợp với lịch học của bạn.</p>
         </section>
@@ -153,8 +156,8 @@ $canBook = \App\Core\Session::isAuthenticated()
             </div>
 
             <nav class="room-week-navigation" aria-label="Chuyển tuần lịch phòng đọc">
-                <a href="/reading-room?week=<?= htmlspecialchars($previousWeek, ENT_QUOTES, 'UTF-8') ?>">
-                    ← Tuần trước
+                <a class="direction-link" href="/reading-room?week=<?= htmlspecialchars($previousWeek, ENT_QUOTES, 'UTF-8') ?>">
+                    <svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Tuần trước
                 </a>
                 <strong>
                     <?= htmlspecialchars($days[0]['display'], ENT_QUOTES, 'UTF-8') ?>
@@ -162,8 +165,8 @@ $canBook = \App\Core\Session::isAuthenticated()
                     <?= htmlspecialchars($days[array_key_last($days)]['display'], ENT_QUOTES, 'UTF-8') ?>
                     <?= htmlspecialchars($selectedWeek->format('Y'), ENT_QUOTES, 'UTF-8') ?>
                 </strong>
-                <a href="/reading-room?week=<?= htmlspecialchars($nextWeek, ENT_QUOTES, 'UTF-8') ?>">
-                    Tuần sau →
+                <a class="direction-link" href="/reading-room?week=<?= htmlspecialchars($nextWeek, ENT_QUOTES, 'UTF-8') ?>">
+                    Tuần sau <svg class="direction-arrow direction-arrow-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-7-7m7 7-7 7"></path></svg>
                 </a>
             </nav>
 
@@ -300,5 +303,6 @@ $canBook = \App\Core\Session::isAuthenticated()
 
     <!-- Tương tác đặt chỗ -->
     <script src="/assets/js/reading-room.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

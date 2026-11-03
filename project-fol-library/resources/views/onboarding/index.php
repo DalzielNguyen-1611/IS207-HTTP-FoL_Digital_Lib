@@ -79,9 +79,9 @@ if (!isset($majors) || empty($majors)) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Đăng ký hồ sơ & Thẻ sinh viên · Thư viện Khoa Văn học</title>
 
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
@@ -609,23 +609,27 @@ if (!isset($majors) || empty($majors)) {
             }
         }
     </style>
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <a class="brand" href="/" title="Về trang chủ Thư viện">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
             <a href="/books">Tra cứu sách</a>
             <a href="/rules">Nội quy</a>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <div class="user-nav-group" style="display:inline-flex;align-items:center;gap:10px;">
             <span style="font-size:13px;font-weight:600;color:#334155;"><?= $userEmail ?></span>
@@ -648,7 +652,6 @@ if (!isset($majors) || empty($majors)) {
                 <!-- Thông báo trạng thái -->
                 <?php if ($status === 'HoatDong'): ?>
                     <div class="status-banner approved">
-                        <div class="status-banner-icon">✅</div>
                         <div class="status-banner-content">
                             <h4>Thẻ sinh viên đã được phê duyệt!</h4>
                             <p>Tài khoản của bạn đã ở trạng thái <strong>Hoạt động</strong>. Bạn có toàn quyền tra cứu, mượn sách tại quầy và đăng ký ca phòng đọc.</p>
@@ -660,7 +663,6 @@ if (!isset($majors) || empty($majors)) {
                 <?php elseif ($status === 'ChoDuyet'): ?>
                     <?php if (!empty($rejectionNote)): ?>
                         <div class="status-banner rejected">
-                            <div class="status-banner-icon">⚠️</div>
                             <div class="status-banner-content">
                                 <h4>Yêu cầu chụp lại ảnh thẻ sinh viên</h4>
                                 <p><strong>Lý do từ cán bộ thư viện:</strong> <?= htmlspecialchars($rejectionNote, ENT_QUOTES, 'UTF-8') ?></p>
@@ -690,7 +692,6 @@ if (!isset($majors) || empty($majors)) {
 
                 <?php if (!empty($error)): ?>
                     <div class="status-banner error">
-                        <div class="status-banner-icon">❌</div>
                         <div class="status-banner-content">
                             <h4>Đã xảy ra lỗi</h4>
                             <p><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></p>
@@ -806,8 +807,7 @@ if (!isset($majors) || empty($majors)) {
 
                             <div class="upload-section" id="dropzone">
                                 <input type="file" id="anh_the_sv" name="anh_the_sv" class="file-input-hidden" accept="image/jpeg,image/png,image/webp,image/jpg" <?= $hasCard ? '' : 'required' ?>>
-                                <div class="upload-icon">🪪</div>
-                                <div class="upload-title">Kéo thả hoặc bấm vào đây để tải lên ảnh thẻ sinh viên</div>
+<div class="upload-title">Kéo thả hoặc bấm vào đây để tải lên ảnh thẻ sinh viên</div>
                                 <div class="upload-subtitle">Hỗ trợ JPG, PNG, WEBP (Tối đa 10MB).</div>
                                 <div class="upload-hint text-stone-400" style="font-size:12px;color:#a8a29e;margin-top:-6px;margin-bottom:14px;">
                                     (Hệ thống sẽ tự động nén và tối ưu hóa ảnh)
@@ -1041,5 +1041,6 @@ if (!isset($majors) || empty($majors)) {
     <style>
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

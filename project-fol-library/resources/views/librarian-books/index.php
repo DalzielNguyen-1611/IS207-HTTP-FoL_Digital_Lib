@@ -49,14 +49,15 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
     <title>Quản lý sách · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -64,7 +65,7 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
         <a class="brand" href="/" title="Về trang chủ Thư viện">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -74,7 +75,7 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -126,6 +127,9 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -144,7 +148,6 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
     <main class="staff-layout">
         <!-- Điều hướng nghiệp vụ cán bộ thư viện -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
-            <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian"><span>Tổng quan</span></a>
             <a href="/librarian/students">
                 <span>Duyệt thẻ sinh viên</span>
@@ -166,7 +169,6 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
         <div class="staff-content">
             <!-- Tiêu đề trang quản lý sách -->
             <section class="staff-intro">
-                <span class="staff-eyebrow">QUẢN LÝ TÀI LIỆU</span>
                 <h1>Quản lý sách</h1>
                 <p>Tra cứu thông tin, quản lý danh mục và số lượng bản sách thời gian thực từ CSDL Thư viện FoL.</p>
             </section>
@@ -240,7 +242,7 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
 
                 <!-- Bảng sách cuộn ngang trên màn hình nhỏ -->
                 <div
-                    class="staff-table-wrap"
+                    class="staff-table-wrap" id="staff-book-table-wrap"
                     tabindex="0"
                     role="region"
                     aria-label="Danh sách thông tin sách"
@@ -248,13 +250,13 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                     <table class="staff-table" id="staff-book-table">
                         <thead>
                             <tr>
-                                <th scope="col" style="width:140px;">Mã sách</th>
-                                <th scope="col">Tên sách</th>
-                                <th scope="col" style="width:200px;">Tác giả</th>
-                                <th scope="col" style="width:90px;text-align:center;">Năm XB</th>
-                                <th scope="col" style="width:120px;text-align:center;">Khả dụng</th>
-                                <th scope="col" style="width:130px;">Vị trí</th>
-                                <th scope="col" style="width:200px;text-align:center;">Thao tác</th>
+                                <th scope="col" style="width:10%;">Mã sách</th>
+                                <th scope="col" style="width:28%;">Tên sách</th>
+                                <th scope="col" style="width:16%;">Tác giả</th>
+                                <th scope="col" style="width:9%;text-align:center;">Năm xuất bản</th>
+                                <th scope="col" style="width:11%;text-align:center;">Khả dụng</th>
+                                <th scope="col" style="width:8%;">Vị trí</th>
+                                <th scope="col" style="width:18%;text-align:center;">Thao tác</th>
                             </tr>
                         </thead>
 
@@ -278,7 +280,7 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                                         'UTF-8'
                                     ) ?>"
                                 >
-                                    <th scope="row">
+                                    <th scope="row" data-label="Mã sách">
                                         <code style="font-size:12px;color:#1e3a8a;font-weight:600;"><?= htmlspecialchars(
                                             $bookId,
                                             ENT_QUOTES,
@@ -286,30 +288,30 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                                         ) ?></code>
                                     </th>
 
-                                    <td data-field="title" style="font-weight:500;">
+                                    <td data-label="Tên sách" data-field="title" style="font-weight:500;">
                                         <?= htmlspecialchars($bookTitle, ENT_QUOTES, 'UTF-8') ?>
                                     </td>
 
-                                    <td data-field="author" style="color:#475569;">
+                                    <td data-label="Tác giả" data-field="author" style="color:#475569;">
                                         <?= htmlspecialchars($bookAuthor, ENT_QUOTES, 'UTF-8') ?>
                                     </td>
 
-                                    <td data-field="year" style="text-align:center;color:#64748b;">
+                                    <td data-label="Năm xuất bản" data-field="year" style="text-align:center;color:#64748b;">
                                         <?= htmlspecialchars((string)$publishYear, ENT_QUOTES, 'UTF-8') ?>
                                     </td>
 
-                                    <td data-field="available" style="text-align:center;">
+                                    <td data-label="Khả dụng" data-field="available" style="text-align:center;">
                                         <span class="badge-count <?= $availQty > 0 ? 'badge-available' : 'badge-empty' ?>">
                                             <?= $availQty ?> / <?= $totalQty ?> bản
                                         </span>
                                     </td>
 
-                                    <td data-field="location" style="color:#64748b;font-size:11px;">
+                                    <td data-label="Vị trí" data-field="location" style="color:#64748b;font-size:11px;">
                                         <?= htmlspecialchars($location, ENT_QUOTES, 'UTF-8') ?>
                                     </td>
 
                                     <!-- Thao tác: Xem chi tiết bản sách, sửa và xóa -->
-                                    <td>
+                                    <td data-label="Thao tác">
                                         <div class="staff-book-actions" style="justify-content:center;">
                                             <button
                                                 class="staff-action-button"
@@ -360,9 +362,9 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                                 $prevUrl = "/librarian/books?page={$prevPage}&prefix=" . urlencode($currentPrefix) . ($currentKeyword !== '' ? '&keyword=' . urlencode($currentKeyword) : '');
                             ?>
                             <a href="<?= $prevUrl ?>" 
-                               class="staff-page-btn <?= $currentPage <= 1 ? 'disabled' : '' ?>" 
+                               class="staff-page-btn direction-link <?= $currentPage <= 1 ? 'disabled' : '' ?>" 
                                <?= $currentPage <= 1 ? 'aria-disabled="true" style="pointer-events:none;opacity:0.4;"' : '' ?>>
-                                ← Trước
+                                <svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Trước
                             </a>
 
                             <!-- Các số trang tiêu biểu -->
@@ -399,9 +401,9 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
                                 $nextUrl = "/librarian/books?page={$nextPage}&prefix=" . urlencode($currentPrefix) . ($currentKeyword !== '' ? '&keyword=' . urlencode($currentKeyword) : '');
                             ?>
                             <a href="<?= $nextUrl ?>" 
-                               class="staff-page-btn <?= $currentPage >= $totalPages ? 'disabled' : '' ?>" 
+                               class="staff-page-btn direction-link <?= $currentPage >= $totalPages ? 'disabled' : '' ?>" 
                                <?= $currentPage >= $totalPages ? 'aria-disabled="true" style="pointer-events:none;opacity:0.4;"' : '' ?>>
-                                Sau →
+                                Sau <svg class="direction-arrow direction-arrow-right" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14m0 0-7-7m7 7-7 7"></path></svg>
                             </a>
                         </div>
                     </nav>
@@ -540,5 +542,6 @@ $pendingCount = (new \App\Repositories\UserRepository())->countPendingStudents()
 
     <!-- Script tương tác thời gian thực với CSDL qua AJAX -->
     <script src="/assets/js/librarian-books.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

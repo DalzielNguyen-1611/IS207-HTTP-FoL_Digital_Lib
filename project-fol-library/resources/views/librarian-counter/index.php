@@ -40,15 +40,16 @@ $today = new DateTimeImmutable(
     <title>Mượn / trả tại quầy · Thư viện Khoa Văn học</title>
 
     <!-- Favicon biểu trưng Khoa Văn học -->
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/librarian.css">
     <link rel="stylesheet" href="/assets/css/counter.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -56,7 +57,7 @@ $today = new DateTimeImmutable(
         <a class="brand" href="/" title="Về trang chủ Thư viện">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -66,7 +67,7 @@ $today = new DateTimeImmutable(
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -118,6 +119,9 @@ $today = new DateTimeImmutable(
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -136,7 +140,6 @@ $today = new DateTimeImmutable(
     <main class="staff-layout">
         <!-- Điều hướng nghiệp vụ cán bộ thư viện -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
-            <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian"><span>Tổng quan</span></a>
             <a href="/librarian/students">
                 <span>Duyệt thẻ sinh viên</span>
@@ -158,7 +161,6 @@ $today = new DateTimeImmutable(
         <div class="staff-content">
             <!-- Tiêu đề màn hình -->
             <section class="staff-intro">
-                <span class="staff-eyebrow">NGHIỆP VỤ TẠI QUẦY</span>
                 <h1>Mượn / trả sách</h1>
                 <p>Tiếp nhận sinh viên và xử lý phiếu mượn trả thời gian thực.</p>
             </section>
@@ -167,11 +169,11 @@ $today = new DateTimeImmutable(
             <section class="staff-panel" aria-labelledby="borrow-title">
                 <h2 id="borrow-title">Tạo phiếu mượn</h2>
 
-                <p class="staff-note">
+                <p class="staff-note counter-hint">
                     <?php if (!empty($students)): ?>
                         Gợi ý mã bạn đọc: <strong><?= htmlspecialchars(implode(', ', array_slice(array_keys($students), 0, 4)), ENT_QUOTES, 'UTF-8') ?></strong>.
                     <?php else: ?>
-                        Nhập mã sinh viên đã kích hoạt tài khoản.
+                        Nhập mã số sinh viên đã kích hoạt tài khoản.
                     <?php endif; ?>
                     Hạn trả do cán bộ chỉ định (mặc định 14 ngày).
                 </p>
@@ -180,12 +182,12 @@ $today = new DateTimeImmutable(
                     <div class="counter-fields">
                         <!-- Nhập mã hoặc nhận dữ liệu từ máy quét dạng bàn phím -->
                         <div class="counter-field">
-                            <label for="counter-student">Mã sinh viên</label>
+                            <label for="counter-student">Mã số sinh viên</label>
                             <input
                                 id="counter-student"
                                 type="text"
                                 list="counter-students"
-                                placeholder="Nhập mã sinh viên"
+                                placeholder="Nhập mã số sinh viên"
                                 autocomplete="off"
                                 required
                             >
@@ -272,7 +274,7 @@ $today = new DateTimeImmutable(
                 <h2 id="counter-loans-title">Phiếu mượn trong phiên thử</h2>
 
                 <p class="staff-note" id="counter-empty">
-                    Chưa có phiếu mượn.
+                    Chưa có phiếu mượn
                 </p>
 
                 <div
@@ -281,7 +283,7 @@ $today = new DateTimeImmutable(
                     role="region"
                     aria-label="Danh sách phiếu mượn mẫu"
                 >
-                    <table class="staff-table">
+                    <table class="staff-table" id="counter-loans-table">
                         <thead>
                             <tr>
                                 <th scope="col">Mã phiếu</th>
@@ -362,5 +364,6 @@ $today = new DateTimeImmutable(
     <!-- Tương tác tạo phiếu mẫu -->
     <script>window.__INITIAL_COUNTER_LOANS__ = <?= json_encode($counterLoans, JSON_UNESCAPED_UNICODE) ?>;</script>
     <script src="/assets/js/counter.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

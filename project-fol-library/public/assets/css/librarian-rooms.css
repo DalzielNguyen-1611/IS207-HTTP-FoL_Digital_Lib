@@ -59,3 +59,140 @@
     grid-template-columns: 1fr;
   }
 }
+/* Bộ lọc Phòng đọc đồng bộ lịch và menu với giao diện thư viện */
+.staff-room-filters label,
+.staff-room-filters input,
+.staff-room-filters select,
+.staff-room-filters .filter-dropdown-trigger,
+.staff-room-filters .counter-date-picker,
+.staff-room-filters .counter-date-trigger,
+.staff-room-filters .counter-date-picker > span,
+.staff-content .staff-note,
+.staff-content .staff-intro p {
+  font-size: 13px !important;
+}
+.staff-room-filters label { margin-bottom: 8px; }
+.staff-room-filters .filter-group { position: relative; z-index: 1; }
+.staff-room-filters .filter-group.filter-dropdown-active { z-index: 50; }
+.staff-room-filters .filter-dropdown { width: 100%; }
+.staff-room-filters .staff-room-shift-dropdown .filter-dropdown-trigger {
+  min-height: 48px;
+  padding: 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 10px;
+  background: #fffdf6;
+}
+.staff-room-filters .staff-room-shift-dropdown .filter-dropdown-trigger:hover,
+.staff-room-filters .staff-room-shift-dropdown .filter-dropdown-trigger:focus-visible,
+.staff-room-filters .staff-room-shift-dropdown.is-open .filter-dropdown-trigger {
+  border-color: #245d88;
+  color: #245d88;
+  background: #fffdf6;
+  outline: 2px solid #dcebf5;
+  outline-offset: 1px;
+}
+.staff-room-filters .staff-room-date-picker {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  box-sizing: border-box;
+  padding: 4px 8px 4px 12px;
+  border: 1px solid #d4e2ec;
+  border-radius: 10px;
+  color: #24445c;
+  background: #fffdf6;
+}
+.staff-room-filters .staff-room-date-picker.is-open { z-index: 40; }
+.staff-room-filters .staff-room-date-picker > span { flex: 1; }
+.staff-room-filters .counter-date-trigger {
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  width: 34px;
+  min-height: 34px;
+  padding: 7px;
+  border: 0;
+  border-radius: 7px;
+  color: #245d88;
+  background: transparent;
+  cursor: pointer;
+}
+.staff-room-filters .counter-date-trigger:hover,
+.staff-room-filters .counter-date-trigger:focus-visible,
+.staff-room-filters .staff-room-date-picker.is-open .counter-date-trigger {
+  border: 0;
+  color: #1e527a;
+  background: #e8f2f8;
+  outline: none;
+}
+.staff-room-filters .counter-date-trigger:focus-visible { box-shadow: 0 0 0 2px #b8d4e7; }
+.staff-room-filters .counter-date-trigger svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.staff-room-filters .counter-calendar {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 0;
+  z-index: 41;
+  display: none;
+  width: min(270px, calc(100vw - 48px));
+  padding: 10px;
+  border: 1px solid #e3d5b6;
+  border-radius: 10px;
+  color: #24445c;
+  background: #fffdf6;
+  box-shadow: 0 10px 24px rgba(36, 68, 92, .16);
+}
+.staff-room-date-picker.is-open .counter-calendar { display: block; }
+.staff-room-filters .counter-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  text-transform: capitalize;
+}
+.staff-room-filters .counter-calendar-header strong { font-size: 13px; }
+.staff-room-filters .counter-calendar-nav {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid #e3d5b6;
+  border-radius: 7px;
+  color: #245d88;
+  background: #fffefa;
+  font-size: 20px;
+}
+.staff-room-filters .counter-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 2px;
+  text-align: center;
+}
+.staff-room-filters .counter-calendar-weekdays { margin-bottom: 5px; color: #718695; font-size: 13px; font-weight: 600; }
+.staff-room-filters .counter-calendar-weekdays span { padding: 5px 0; }
+.staff-room-filters .counter-calendar-day {
+  height: 30px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #24445c;
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+}
+.staff-room-filters .counter-calendar-day:hover,
+.staff-room-filters .counter-calendar-day:focus-visible { border-color: #d9bd70; background: #f7e8b8; }
+.staff-room-filters .counter-calendar-day.is-selected { border-color: #245d88; color: #fff; background: #245d88; font-weight: 600; }
+#staff-room-bookings-table thead th { text-align: center; }

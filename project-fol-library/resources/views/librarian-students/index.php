@@ -18,9 +18,9 @@ $pendingCount = count($pendingStudents);
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Duyệt thẻ sinh viên · Thư viện Khoa Văn học</title>
 
-    <link rel="icon" type="image/png" href="/assets/images/logo.png">
+    <link rel="icon" type="image/png" href="/assets/images/logo70.png">
     <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico">
-    <link rel="apple-touch-icon" href="/assets/images/logo.png">
+    <link rel="apple-touch-icon" href="/assets/images/logo70.png">
 
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
@@ -330,19 +330,20 @@ $pendingCount = count($pendingStudents);
             border: 1px solid #fecaca;
         }
     </style>
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header -->
     <header class="header">
         <a class="brand" href="/" title="Về trang chủ Thư viện">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -394,6 +395,9 @@ $pendingCount = count($pendingStudents);
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng xuất -->
         <?php if ($isAuthenticated): ?>
@@ -412,7 +416,6 @@ $pendingCount = count($pendingStudents);
     <main class="staff-layout">
         <!-- Sidebar cán bộ -->
         <nav class="staff-sidebar" aria-label="Điều hướng cán bộ">
-            <span class="staff-menu-label">NGHIỆP VỤ THƯ VIỆN</span>
             <a href="/librarian"><span>Tổng quan</span></a>
             <a href="/librarian/students" aria-current="page">
                 <span>Duyệt thẻ sinh viên</span>
@@ -435,7 +438,6 @@ $pendingCount = count($pendingStudents);
         <!-- Nội dung chính -->
         <div class="staff-content">
             <section class="staff-intro">
-                <span class="staff-eyebrow">XÉT DUYỆT THẺ SINH VIÊN</span>
                 <h1>Duyệt thẻ sinh viên</h1>
                 <p>Kiểm tra và đối chiếu ảnh chụp thẻ sinh viên gửi trực tuyến để kích hoạt tài khoản.</p>
             </section>
@@ -443,15 +445,13 @@ $pendingCount = count($pendingStudents);
             <!-- Thông báo flash -->
             <?php if (!empty($message)): ?>
                 <div class="alert-toast success">
-                    <span>✅</span>
-                    <span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
+<span><?= htmlspecialchars($message, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             <?php endif; ?>
 
             <?php if (!empty($error)): ?>
                 <div class="alert-toast error">
-                    <span>❌</span>
-                    <span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
+<span><?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?></span>
                 </div>
             <?php endif; ?>
 
@@ -465,8 +465,7 @@ $pendingCount = count($pendingStudents);
 
                 <?php if ($pendingCount === 0): ?>
                     <div class="empty-state" style="border:none;background:transparent;box-shadow:none;padding:80px 20px;">
-                        <div class="empty-icon">🎉</div>
-                        <h3 class="empty-title">Không có thẻ sinh viên nào đang chờ duyệt</h3>
+<h3 class="empty-title">Không có thẻ sinh viên nào đang chờ duyệt</h3>
                         <p class="empty-desc">Toàn bộ hồ sơ sinh viên đã được cán bộ xử lý hoặc chưa có lượt đăng ký mới nào.</p>
                     </div>
                 <?php else: ?>
@@ -649,5 +648,6 @@ $pendingCount = count($pendingStudents);
             }
         });
     </script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

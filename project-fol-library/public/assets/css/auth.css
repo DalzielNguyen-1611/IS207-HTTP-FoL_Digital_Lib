@@ -23,18 +23,25 @@
 
 /* Khối giới thiệu */
 .auth-intro {
+    align-self: stretch;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     padding: 40px;
     border-radius: 24px;
     background: #e8f2f8;
 }
 
-/* Logo hình tròn */
+/* Giữ nguyên toàn bộ chi tiết logo 70 năm */
 .auth-logo {
-    width: 76px;
-    height: 76px;
-    object-fit: cover;
-    border-radius: 50%;
     display: block;
+    width: 96px;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    object-position: left center;
+    border-radius: 0;
 }
 
 .auth-eyebrow {

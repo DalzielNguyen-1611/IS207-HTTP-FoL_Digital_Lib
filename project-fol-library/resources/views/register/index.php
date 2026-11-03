@@ -20,11 +20,12 @@ $majors = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/auth.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Điều hướng về trang chủ -->
     <header class="auth-header">
-        <a href="/">← Về trang chủ</a>
+        <a href="/" class="direction-link"><svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Về trang chủ</a>
         <span>Thư viện Khoa Văn học</span>
     </header>
 
@@ -33,7 +34,7 @@ $majors = [
         <section class="auth-intro" aria-labelledby="intro-title">
             <img
                 class="auth-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
 
@@ -48,9 +49,7 @@ $majors = [
                 Tạo hồ sơ sinh viên để bắt đầu khám phá tài liệu
                 và các tiện ích của thư viện.
             </p>
-
-            <span class="auth-decoration" aria-hidden="true">❧</span>
-        </section>
+</section>
 
         <!-- Biểu mẫu đăng ký dành riêng cho sinh viên -->
         <section class="auth-card" aria-labelledby="register-title">
@@ -180,5 +179,6 @@ $majors = [
 
     <!-- Tương tác đăng ký mẫu -->
     <script src="/assets/js/register.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

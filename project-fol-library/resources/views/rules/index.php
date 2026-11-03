@@ -5,7 +5,6 @@ declare(strict_types=1);
 // Dữ liệu nội quy thư viện
 $ruleCategories = [
     [
-        'icon' => '🪪',
         'title' => 'I. Đối tượng & Điều kiện sử dụng',
         'items' => [
             'Cán bộ, giảng viên, sinh viên và học viên cao học thuộc Trường ĐHKHXH&NV và ĐHQG có nhu cầu học tập, nghiên cứu.',
@@ -14,7 +13,6 @@ $ruleCategories = [
         ]
     ],
     [
-        'icon' => '📖',
         'title' => 'II. Quy chế Mượn - Trả tài liệu',
         'items' => [
             'Số lượng mượn về: Mỗi bạn đọc được mượn tối đa 03 đầu sách cùng một thời điểm.',
@@ -24,7 +22,6 @@ $ruleCategories = [
         ]
     ],
     [
-        'icon' => '🪑',
         'title' => 'III. Quy định Phòng đọc & Đặt chỗ ngồi',
         'items' => [
             'Thời gian hoạt động phòng đọc: Phục vụ 3 ca mỗi ngày (Ca sáng: 07:30 - 11:30 | Ca chiều: 13:00 - 17:00 | Ca tối: 17:30 - 21:00).',
@@ -33,7 +30,6 @@ $ruleCategories = [
         ]
     ],
     [
-        'icon' => '⚖️',
         'title' => 'IV. Xử lý vi phạm & Bồi thường tài liệu',
         'items' => [
             'Trả sách trễ hạn: Phạt phí quá hạn 1.000 VNĐ / cuốn / ngày trễ hạn theo quy chế quản lý thư viện.',
@@ -55,19 +51,20 @@ $ruleCategories = [
     <link rel="stylesheet" href="/assets/css/base.css">
     <link rel="stylesheet" href="/assets/css/home.css">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
     <header class="header">
         <a class="brand" href="/">
-            <img class="brand-logo" src="/assets/images/logo.jpg" alt="Logo Khoa Văn học">
+            <img class="brand-logo" src="/assets/images/logo70.png" alt="Logo Khoa Văn học">
             <span>
                 <span class="brand-label">USSH · VNU-HANOI</span>
                 <strong>Thư viện Khoa Văn học</strong>
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện -->
@@ -119,6 +116,9 @@ $ruleCategories = [
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -137,14 +137,13 @@ $ruleCategories = [
         <!-- Banner tiêu đề -->
         <section class="hero" style="margin-bottom: 36px; background: #eaf3f9;">
             <div class="hero-content">
-                <span class="eyebrow">QUY CHẾ HOẠT ĐỘNG VÀ KHÔNG GIAN HỌC TẬP</span>
                 <h1 style="margin: 16px 0;">Nội quy & <span>Quy định Thư viện</span></h1>
                 <p style="font-size: 15px; color: #486581; line-height: 1.8;">
                     Để xây dựng môi trường học thuật văn minh, bình đẳng và bảo tồn tốt nhất nguồn tài liệu tri thức quý giá, kính đề nghị toàn thể bạn đọc nắm vững và nghiêm túc thực hiện các nội quy dưới đây.
                 </p>
             </div>
-            <div style="text-align: right; font-size: 80px; opacity: 0.85;">
-                📜
+            <div class="page-hero-logo">
+                <img src="/assets/images/logo70.png" alt="Logo kỷ niệm 70 năm Khoa Văn học">
             </div>
         </section>
 
@@ -153,8 +152,7 @@ $ruleCategories = [
             <?php foreach ($ruleCategories as $cat): ?>
                 <section style="background: white; border: 1px solid #e2e8f0; border-radius: 18px; padding: 28px 32px; box-shadow: 0 4px 12px rgba(36, 68, 92, 0.04);">
                     <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 18px;">
-                        <span style="font-size: 26px;"><?= $cat['icon'] ?></span>
-                        <h2 style="font-family: 'Literata', serif; font-size: 20px; color: #24445c; margin: 0;"><?= htmlspecialchars($cat['title'], ENT_QUOTES, 'UTF-8') ?></h2>
+<h2 style="font-family: 'Literata', serif; font-size: 20px; color: #24445c; margin: 0;"><?= htmlspecialchars($cat['title'], ENT_QUOTES, 'UTF-8') ?></h2>
                     </div>
                     <ul style="margin: 0; padding-left: 24px; display: flex; flex-direction: column; gap: 10px;">
                         <?php foreach ($cat['items'] as $item): ?>
@@ -168,14 +166,15 @@ $ruleCategories = [
         </div>
 
         <!-- Khung hỗ trợ & giải đáp thắc mắc -->
-        <section style="background: white; border: 1px dashed #3476aa; border-radius: 18px; padding: 28px; text-align: center;">
+        <section class="page-support-panel" style="border-radius: 18px; padding: 28px; text-align: center;">
             <h3 style="font-size: 17px; color: #24445c; margin: 0 0 8px 0;">Bạn có thắc mắc hoặc cần khiếu nại về các quy định trên?</h3>
             <p style="font-size: 14px; color: #718695; margin: 0 0 16px 0;">Cán bộ thư viện luôn tôn trọng và lắng nghe mọi ý kiến đóng góp của bạn đọc để hoàn thiện dịch vụ.</p>
             <div style="display: inline-flex; gap: 12px;">
-                <a href="/feedback" class="login-button" style="background: #1e5c8c; color: white; border-color: #1e5c8c; font-weight: 600;">Gửi ý kiến đóng góp</a>
-                <a href="/reading-room" class="login-button" style="font-weight: 600;">Đặt chỗ phòng đọc ngay</a>
+                <a href="/feedback" class="login-button support-button-primary" style="font-weight: 600;">Gửi ý kiến đóng góp</a>
+                <a href="/reading-room" class="login-button support-button-secondary" style="font-weight: 600;">Đặt chỗ phòng đọc ngay</a>
             </div>
         </section>
     </main>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

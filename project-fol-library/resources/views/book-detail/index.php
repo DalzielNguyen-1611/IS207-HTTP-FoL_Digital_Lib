@@ -3,6 +3,11 @@
 declare(strict_types=1);
 
 // Đọc dữ liệu sách từ cơ sở dữ liệu thật hoặc dữ liệu mẫu dự phòng
+$returnUrl = '/books';
+$returnCandidate = $_GET['return'] ?? null;
+if (is_string($returnCandidate) && str_starts_with($returnCandidate, '/books') && !str_starts_with($returnCandidate, '//') && parse_url($returnCandidate, PHP_URL_PATH) === '/books') {
+    $returnUrl = $returnCandidate;
+}
 $rawId = $_GET['id'] ?? 'KV-ANT-0001';
 $book = null;
 
@@ -81,14 +86,16 @@ if ($book === null) {
         <link rel="stylesheet" href="/assets/css/base.css">
         <link rel="stylesheet" href="/assets/css/home.css">
         <link rel="stylesheet" href="/assets/css/70years.css">
-    </head>
+        <link rel="stylesheet" href="/assets/css/footer.css">
+</head>
     <body>
         <main class="page" style="padding-top: 60px; text-align: center;">
             <h1 style="font-family: 'Literata', serif; font-size: 32px; color: #24445c;">Không tìm thấy tài liệu</h1>
             <p style="color: #64748b; margin: 16px 0 24px;">Tài liệu bạn yêu cầu không tồn tại hoặc đã được chuyển khỏi danh mục phục vụ.</p>
-            <a href="/books" style="color: #1a5699; font-weight: 600; text-decoration: underline;">← Trở về tra cứu sách</a> 
+            <a href="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>" class="direction-link" style="color: #1a5699; font-weight: 600;"><svg class="direction-arrow direction-arrow-left" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5m0 0 7-7m-7 7 7 7"></path></svg> Trở về tra cứu sách</a> 
         </main>
-    </body>
+    <?php require __DIR__ . '/../partials/footer.php'; ?>
+</body>
     </html>
     <?php
     return;
@@ -110,6 +117,7 @@ $cells = range(1, 4);
     <link rel="stylesheet" href="/assets/css/books.css?v=<?= file_exists(__DIR__ . '/../../../public/assets/css/books.css') ? filemtime(__DIR__ . '/../../../public/assets/css/books.css') : time() ?>">
     <link rel="stylesheet" href="/assets/css/book-detail.css?v=<?= file_exists(__DIR__ . '/../../../public/assets/css/book-detail.css') ? filemtime(__DIR__ . '/../../../public/assets/css/book-detail.css') : time() ?>">
     <link rel="stylesheet" href="/assets/css/70years.css">
+    <link rel="stylesheet" href="/assets/css/footer.css">
 </head>
 <body>
     <!-- Header: Nhận diện thư viện & điều hướng -->
@@ -117,7 +125,7 @@ $cells = range(1, 4);
         <a class="brand" href="/">
             <img
                 class="brand-logo"
-                src="/assets/images/logo.jpg"
+                src="/assets/images/logo70.png"
                 alt="Logo Khoa Văn học"
             >
             <span>
@@ -126,7 +134,7 @@ $cells = range(1, 4);
             </span>
         </a>
 
-        <nav class="navigation" aria-label="Điều hướng chính">
+        <nav id="primary-navigation" class="navigation" aria-label="Điều hướng chính">
             <a href="/">Trang chủ</a>
 
             <!-- Menu thả xuống: Dịch vụ thư viện (Active) -->
@@ -178,6 +186,9 @@ $cells = range(1, 4);
                 <?php endif; ?>
             <?php endif; ?>
         </nav>
+        <button class="mobile-nav-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation" aria-label="Mở menu" onclick="const nav=this.closest('header').querySelector('.navigation'); const expanded=this.getAttribute('aria-expanded')==='true'; this.setAttribute('aria-expanded',String(!expanded)); this.setAttribute('aria-label',expanded?'Mở menu':'Đóng menu'); nav.classList.toggle('is-open',!expanded);">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
 
         <!-- Trạng thái xác thực người dùng / Đăng nhập -->
         <?php if ($isAuthenticated): ?>
@@ -196,7 +207,7 @@ $cells = range(1, 4);
     <main class="page">
         <!-- Đường dẫn Breadcrumbs / Quay lại -->
         <nav class="detail-breadcrumb" aria-label="Đường dẫn điều hướng">
-            <a class="detail-back-link" href="/books">
+            <a class="detail-back-link" href="<?= htmlspecialchars($returnUrl, ENT_QUOTES, 'UTF-8') ?>">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
@@ -283,6 +294,9 @@ $cells = range(1, 4);
                         type="button"
                         aria-pressed="false"
                         data-book-id="<?= htmlspecialchars((string)$book['id'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-book-title="<?= htmlspecialchars($book['title'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-book-author="<?= htmlspecialchars($book['author'], ENT_QUOTES, 'UTF-8') ?>"
+                        data-book-cover="<?= htmlspecialchars($book['cover_url'], ENT_QUOTES, 'UTF-8') ?>"
                     >
                         Thêm vào yêu thích
                     </button>
@@ -345,5 +359,6 @@ $cells = range(1, 4);
 
     <!-- Tương tác mẫu của trang chi tiết -->
     <script src="/assets/js/book-detail.js" defer></script>
+<?php require __DIR__ . '/../partials/footer.php'; ?>
 </body>
 </html>

@@ -58,7 +58,9 @@ userStatusFilter.addEventListener('change', filterUsers)
 resetUserFilters.addEventListener('click', () => {
   userKeyword.value = ''
   userRoleFilter.value = ''
+  userRoleFilter.dispatchEvent(new Event('change', { bubbles: true }))
   userStatusFilter.value = ''
+  userStatusFilter.dispatchEvent(new Event('change', { bubbles: true }))
   filterUsers()
 })
 
@@ -102,6 +104,7 @@ document.querySelectorAll('[data-edit-user]').forEach((button) => {
       .querySelector('[data-user-field="email"]').textContent.trim()
 
     userRoleInput.value = editingUserRow.dataset.role
+    userRoleInput.dispatchEvent(new Event('change', { bubbles: true }))
     userRoleInput.disabled =
       editingUserRow.dataset.status === 'suspended'
 

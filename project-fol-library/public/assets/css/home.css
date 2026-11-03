@@ -235,7 +235,7 @@
   left: -20px;
   top: -15px;
   width: min(100%, 540px);
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .faculty-brand img {
@@ -318,11 +318,27 @@
   transform: scale(0.98);
 }
 
+.home-search {
+  width: min(100%, 680px);
+  margin: 18px auto 0;
+}
+
+.search-box {
+  box-sizing: border-box;
+  width: 100%;
+}
+
 .search-hint {
-  margin-top: 14px;
+  max-width: none;
+  margin: 10px 0 0;
   color: #556c7d;
-  font-size: 11.5px;
+  font-size: 14px;
   line-height: 1.5;
+  text-align: left;
+}
+
+.search-hint em {
+  font-style: italic;
 }
 
 /* Minh họa kệ sách (Hero Art) */
@@ -446,6 +462,8 @@
 }
 
 .book-card {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   border: 1px solid #e5dcbf;
   border-radius: 8px;
@@ -481,7 +499,7 @@
   border-radius: 3px;
   background: #345e76;
   color: #ffffff;
-  text-align: center;
+  text-align: left;
   box-shadow: 2px 4px 10px rgba(36, 68, 92, 0.16), 0 1px 3px rgba(36, 68, 92, 0.08);
 }
 
@@ -506,21 +524,22 @@
   line-height: 1;
 }
 
-/* Biến thể màu bìa sách */
-.book-card:nth-child(2) .book-cover {
-  background: #8b5745;
-}
-
-.book-card:nth-child(3) .book-cover {
-  background: #4c6858;
-}
-
-.book-card:nth-child(4) .book-cover {
-  background: #394d75;
+.featured-book-cover {
+  display: block;
+  width: 138px;
+  height: 194px;
+  object-fit: cover;
+  object-position: center;
+  border: 1px solid #e2dac0;
+  border-radius: 4px;
+  box-shadow: 0 3px 8px rgba(36, 68, 92, 0.08);
 }
 
 /* Thông tin sách */
 .book-information {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   padding: 18px 20px 20px;
 }
 
@@ -556,6 +575,8 @@
 
 .book-status {
   display: inline-block;
+  align-self: flex-start;
+  margin-top: auto;
   padding: 4px 9px;
   border-radius: 4px;
   background: #edf6f0;
